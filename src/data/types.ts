@@ -72,18 +72,29 @@ export type Property = {
   reviewCount: number;
   nearby: string[];
   features: PropertyFeatures;
-  /** % position on the map placeholder; replace with coords once a map is wired. */
+  /** % position on the search page's map placeholder. */
   mapPos: { x: number; y: number };
+  /**
+   * Center of the "Where you'll be" map, drawn as an approximate-area circle.
+   * Never the exact address: these values are public in the page.
+   * null = map placeholder.
+   */
   coords: { lat: number | null; lng: number | null };
+  /** One line under the map, e.g. drive times. The exact-address note is added after it. */
+  neighborhood?: string;
   /**
    * Photos in display order: filenames in /public/photos/[slug]/, optionally
-   * with alt text, e.g. ['pool.jpg', { file: 'kitchen.jpg', alt: 'Chef’s kitchen' }].
+   * with alt text and a room, e.g.
+   * ['pool.jpg', { file: 'kitchen.jpg', room: 'Full kitchen', alt: 'Chef’s kitchen' }].
    * The first is the cover; the first five are the stay page's photo grid.
+   * Rooms group the photo tour, in order of each room's first photo.
    * Empty = placeholders.
    */
   photos: PhotoEntry[];
-  highlights: { title: string; text: string }[];
+  /** "About this home": opening paragraphs, always shown. */
   description: string[];
+  /** Titled sections ("Sun room", "Pool"…) behind "Show more" under the description. */
+  details?: { title: string; text: string }[];
   sleeping: { room: string; beds: string }[];
   amenities: string[];
   rules: {
@@ -93,6 +104,7 @@ export type Property = {
     safety: string[];
     cancellation: string;
   };
+  /** Guest first name, "Month YYYY", and the public review text. */
   reviews: { name: string; date: string; text: string }[];
   faqs: { q: string; a: string }[];
   hospitable: {

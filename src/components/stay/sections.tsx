@@ -1,6 +1,9 @@
+import Image from 'next/image';
 import type { Property } from '@/data/types';
 import { plural, specs } from '@/lib/format';
+import type { PropertyPhoto } from '@/lib/photos';
 import { Ph } from '@/components/ui/Ph';
+import { AreaMap } from './AreaMap';
 
 /** Static content sections of a stay page, in page order. */
 
@@ -30,24 +33,6 @@ export function Summary({ property: p }: { property: Property }) {
   );
 }
 
-export function Highlights({ property: p }: { property: Property }) {
-  return (
-    <section className="section">
-      <div className="highlights">
-        {p.highlights.map((h) => (
-          <div className="highlight" key={h.title}>
-            <Ph />
-            <div>
-              <h3>{h.title}</h3>
-              <p>{h.text}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export function Description({ property: p }: { property: Property }) {
   return (
     <section className="section desc">
@@ -55,36 +40,71 @@ export function Description({ property: p }: { property: Property }) {
       {p.description.map((d, i) => (
         <p key={i}>{d}</p>
       ))}
+      {p.details?.length ? (
+        <details className="desc-more">
+          <summary>
+            <span className="when-closed">Show more</span>
+            <span className="when-open">Show less</span>
+          </summary>
+          {p.details.map((d) => (
+            <div className="desc-detail" key={d.title}>
+              <h3>{d.title}</h3>
+              <p>{d.text}</p>
+            </div>
+          ))}
+        </details>
+      ) : null}
     </section>
   );
 }
 
-export function SleepingArrangements({ property: p }: { property: Property }) {
+/** Each room shows its first photo from the photo tour (photos with the same `room` name). */
+export function SleepingArrangements({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   return (
     <section className="section">
       <h2>Where you&apos;ll sleep</h2>
       <div className="rooms">
-        {p.sleeping.map((r) => (
-          <div className="room" key={r.room}>
-            <Ph />
-            <h3>{r.room}</h3>
-            <p className="muted">{r.beds}</p>
-          </div>
-        ))}
+        {p.sleeping.map((r) => {
+          const photo = photos.find((ph) => ph.room === r.room);
+          return (
+            <div className="room" key={r.room}>
+              {photo ? (
+                <div className="room-photo">
+                  <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 760px) 50vw, 240px" />
+                </div>
+              ) : (
+                <Ph />
+              )}
+              <h3>{r.room}</h3>
+              <p className="muted">{r.beds}</p>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
 }
 
 export function LocationMap({ property: p }: { property: Property }) {
+  const { lat, lng } = p.coords;
+  const hasMap = lat !== null && lng !== null;
   return (
     <section className="section" id="location">
       <h2>Where you&apos;ll be</h2>
-      <Ph label="Map placeholder: approximate location" className="loc-map" />
+      {hasMap ? <AreaMap lat={lat} lng={lng} label={p.location} /> : <Ph label="Map coming soon" className="loc-map" />}
       <p>
         <strong>{p.location}</strong>
       </p>
-      <p className="muted">Exact address is shared after booking. Placeholder neighborhood notes and drive times.</p>
+      <p className="muted">
+        {p.neighborhood ? `${p.neighborhood} ` : ''}The map shows the general area; the exact address is shared after booking.
+      </p>
+      {hasMap ? (
+        <p>
+          <a href={`https://www.google.com/maps/@${lat},${lng},13z`} target="_blank" rel="noopener noreferrer">
+            Open the area in Google Maps
+          </a>
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -134,7 +154,9 @@ export function Reviews({ property: p }: { property: Property }) {
         {p.reviews.map((r) => (
           <article key={r.name}>
             <div className="review-head">
-              <Ph className="avatar" />
+              <span className="avatar" aria-hidden="true">
+                {r.name.charAt(0)}
+              </span>
               <div>
                 <strong>{r.name}</strong>
                 <div className="muted" style={{ fontSize: 13 }}>

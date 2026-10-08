@@ -10,7 +10,6 @@ import { BookingPanel } from '@/components/stay/BookingPanel';
 import {
   Description,
   FAQ,
-  Highlights,
   HouseRules,
   LocationMap,
   PropertyHeader,
@@ -52,9 +51,8 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
         <div className="p-body">
           <div className="p-content">
             <Summary property={property} />
-            <Highlights property={property} />
             <Description property={property} />
-            <SleepingArrangements property={property} />
+            <SleepingArrangements property={property} photos={photos} />
             <Amenities property={property} />
             <LocationMap property={property} />
             <HouseRules property={property} />
