@@ -76,6 +76,57 @@ describe('POST /api/quote', () => {
     });
   });
 
+  it('sends the guest breakdown and guest_details so checkout opens pre-filled', async () => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    const res = await POST(
+      quoteRequest({
+        slug: 'property-2',
+        checkin,
+        checkout,
+        adults: 4,
+        children: 3,
+        infants: 1,
+        pets: 2,
+        guest: { firstName: ' Kelsey ', lastName: 'Yu', email: ' kelsey@example.com ', phone: '(570) 555-0123' },
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.bookingUrl).toMatch(/^https:\/\/booking\.hospitable\.com\//);
+    // Contact details are never echoed back.
+    expect(JSON.stringify(body)).not.toMatch(/kelsey|555/i);
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({
+      checkin_date: checkin,
+      checkout_date: checkout,
+      guests: { adults: 4, children: 3, infants: 1, pets: 2 },
+      custom_site_id: SITE_ID,
+      guest_details: { first_name: 'Kelsey', last_name: 'Yu', email: 'kelsey@example.com', phone: '+15705550123' },
+    });
+  });
+
+  it.each([
+    [{ firstName: 'Kelsey', lastName: 'Yu', email: 'not-an-email', phone: '570 555 0123' }, /valid email/],
+    [{ firstName: 'Kelsey', lastName: 'Yu', email: 'k@example.com', phone: '555-0123' }, /valid phone/],
+    [{ firstName: '', lastName: 'Yu', email: 'k@example.com', phone: '570 555 0123' }, /first name/],
+    [{ firstName: 'Kelsey', email: 'k@example.com', phone: '570 555 0123' }, /./],
+  ])('rejects incomplete or invalid guest details before calling Hospitable (%#)', async (guest, message) => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    const res = await POST(quoteRequest({ slug: 'property-2', checkin, checkout, adults: 2, guest }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(message);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('counts children but not infants toward occupancy', async () => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    // property-2 sleeps 12
+    expect((await POST(quoteRequest({ slug: 'property-2', checkin, checkout, adults: 8, children: 4, infants: 3 }))).status).toBe(200);
+    expect((await POST(quoteRequest({ slug: 'property-2', checkin, checkout, adults: 8, children: 5 }))).status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('never sends the token back to the browser', async () => {
     mockHospitable(200, cloverQuote);
     const res = await POST(quoteRequest({ slug: 'property-2', checkin, checkout, adults: 2 }));

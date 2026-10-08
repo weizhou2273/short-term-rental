@@ -25,14 +25,26 @@ npm run check                # typecheck + lint + tests
 
 ## Booking flow
 
-1. The guest picks dates and guests in our booking card on `/stays/[slug]`.
-   Booked nights come from Hospitable's calendar (`/api/calendar`) and are
-   disabled, as are check-outs that cross a booked night or break the minimum stay.
+1. The guest picks dates and adults / children / infants / pets (pets only on
+   pet-friendly properties) in our booking card on `/stays/[slug]`. Booked
+   nights come from Hospitable's calendar (`/api/calendar`) and are disabled,
+   as are check-outs that cross a booked night or break the minimum stay.
 2. The card calls `POST /api/quote`. The server calls Hospitable
    `POST /v2/properties/{uuid}/quote` with `custom_site_id`
-   (`SITE.hospitable.siteUuid`) and returns nights, fees, taxes and total.
-3. **Reserve** redirects to the quote's `booking_url` on
-   `booking.hospitable.com`. Hospitable takes payment and creates the reservation.
+   (`SITE.hospitable.siteUuid`) and the `guests` breakdown, and returns
+   nights, fees, taxes and total. This repeats as the stay changes.
+3. With a price showing, the guest enters first name, last name, email and
+   phone. Reserve stays disabled until all four are valid (`src/lib/booking/guest.ts`;
+   phones are normalised to E.164, numbers without `+` are read as US).
+4. **Reserve** creates one more quote, this time with `guest_details`, so
+   availability is re-checked and Hospitable's checkout opens pre-filled. If
+   that quote's total differs from the one shown, the card shows the new
+   total and waits for a second click; otherwise it redirects to the quote's
+   `booking_url` on `booking.hospitable.com`, where Hospitable takes payment
+   and creates the reservation.
+
+Contact details are only ever sent in that final request: never in the URL,
+browser storage, logs or any response.
 
 `SITE.bookingMode` in `src/data/site.ts` switches every property page between:
 

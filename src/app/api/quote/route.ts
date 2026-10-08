@@ -6,8 +6,13 @@ import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { errorResponse, json, upstreamErrorResponse } from '@/lib/api';
 
 /**
- * POST /api/quote  { slug, checkin, checkout, adults, children?, infants?, pets? }
+ * POST /api/quote  { slug, checkin, checkout, adults, children?, infants?, pets?,
+ *                    guest?: { firstName, lastName, email, phone } }
  *   → 200 Quote  (price breakdown + bookingUrl to Hospitable's hosted checkout)
+ *
+ * The booking card prices stays without `guest`, then sends it once with the
+ * final quote at Reserve so Hospitable's checkout opens pre-filled. Guest
+ * details are never logged or echoed back.
  *
  * Every call creates a quote in Hospitable with a write-scoped token, so it is
  * rate limited per client and only accepts properties listed in PROPERTIES.
@@ -34,7 +39,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const result = validateQuoteRequest(body);
   if (!result.ok) return errorResponse(result.error, result.status);
-  const { property, checkin, checkout, adults, children, infants, pets } = result.value;
+  const { property, checkin, checkout, adults, children, infants, pets, guest } = result.value;
 
   try {
     const quote = await createQuote({
@@ -43,6 +48,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       checkout,
       guests: { adults, children, infants, pets },
       customSiteId: SITE.hospitable.siteUuid,
+      guestDetails: guest,
     });
     return json(quote, { headers: { 'X-RateLimit-Remaining': String(rate.remaining) } });
   } catch (err) {

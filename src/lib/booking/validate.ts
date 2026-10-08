@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { getPropertyBySlug } from '@/data/properties';
 import type { Property } from '@/data/types';
 import { isIsoDate, nightsBetween, todayIso } from '@/lib/dates';
+import { isValidEmail, MAX_INFANTS, MAX_PETS, NAME_MAX, normalizePhone, PHONE_ERROR } from './guest';
 
 /**
  * Request validation for the booking routes. The browser names a property by
@@ -15,14 +16,36 @@ export const MAX_NIGHTS = 90;
 const isoDate = z.string().refine(isIsoDate, 'Use YYYY-MM-DD dates.');
 const count = (max: number) => z.coerce.number().int().min(0).max(max);
 
+const name = (label: string) =>
+  z.string().trim().min(1, `Enter your ${label}.`).max(NAME_MAX, 'That name is too long.');
+
+/**
+ * Sent only with the final quote at Reserve, so Hospitable's checkout opens
+ * pre-filled. All four fields are required when it is present.
+ */
+const guestDetailsSchema = z.object({
+  firstName: name('first name'),
+  lastName: name('last name'),
+  email: z.string().trim().refine(isValidEmail, 'Enter a valid email address.'),
+  phone: z.string().transform((value, ctx) => {
+    const e164 = normalizePhone(value);
+    if (!e164) {
+      ctx.addIssue({ code: 'custom', message: PHONE_ERROR });
+      return z.NEVER;
+    }
+    return e164;
+  }),
+});
+
 export const quoteRequestSchema = z.object({
   slug: z.string().min(1).max(80),
   checkin: isoDate,
   checkout: isoDate,
   adults: z.coerce.number().int().min(1).max(50),
   children: count(50).optional(),
-  infants: count(20).optional(),
-  pets: count(10).optional(),
+  infants: count(MAX_INFANTS).optional(),
+  pets: count(MAX_PETS).optional(),
+  guest: guestDetailsSchema.optional(),
 });
 
 export type QuoteRequest = z.infer<typeof quoteRequestSchema>;
