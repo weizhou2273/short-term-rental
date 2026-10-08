@@ -75,7 +75,7 @@ const ALL_PROPERTIES: Property[] = [
     type: 'Entire cabin',
     guests: 12,
     bedrooms: 4,
-    beds: 13,
+    beds: 7,
     baths: 2.5,
     priceFrom: 380,
     // Hospitable, Oct 2026: average of 432 rated reviews (Airbnb and Booking.com), 433 in all.
@@ -133,7 +133,7 @@ const ALL_PROPERTIES: Property[] = [
       { file: '14-exterior-02.jpg', room: 'Exterior', alt: 'Front of the house at dusk' },
     ],
     // From the Hospitable listing, edited: outdated notes removed, the hot tub
-    // placed outdoors as in the photos, and the late check-out fee per the owner.
+    // placed on the patio, parking and fees as confirmed by the owner.
     description: [
       'Head for the slopes or the water park and stay at Clover Lodge, a welcoming 4-bedroom, 2.5-bath vacation home near Camelback Mountain and Kalahari Resort.',
       'Sitting 10 minutes from the state’s #1 ski resort, its highest-rated water park and dozens of year-round outdoor activities, this home gives you the reins to an outdoor paradise. Ski, mountain bike, golf at Mount Airy or visit Barley Creek Brewing, then come home to cook a meal in the fully equipped kitchen.',
@@ -189,13 +189,11 @@ const ALL_PROPERTIES: Property[] = [
       'Wifi',
       'Free parking on premises',
       'Game console',
-      'Ping pong table',
       'Sound system',
       'TV',
       'Patio',
       'Outdoor dining area',
       'Outdoor seating',
-      'Outdoor fireplace',
       'Hammock',
       'Garden',
       'Kitchen',
@@ -255,7 +253,7 @@ const ALL_PROPERTIES: Property[] = [
       checkOut: 'Before 11:00 AM',
       house: ['No parties or events', 'No smoking', 'Quiet hours 10 PM – 8 AM', 'Pets welcome (tell us before booking)', 'Minimum age to book: 25'],
       safety: ['Smoke alarm', 'Carbon monoxide alarm', 'Exterior security cameras at the front door and backyard (none inside)'],
-      cancellation: 'Placeholder cancellation policy summary.',
+      cancellation: 'Full refund if you cancel within 24 hours of booking. 50% refund if you cancel at least 30 days before check-in. No refund within 7 days of check-in.',
     },
     // Recent 5-star reviews from Hospitable (Airbnb), first names only.
     reviews: [
@@ -270,7 +268,7 @@ const ALL_PROPERTIES: Property[] = [
       { q: 'How many cars can we park?', a: 'There’s free parking on the property for 5 to 6 cars.' },
       {
         q: 'Can we check out late?',
-        a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through. Checking out after 11 AM without arranging it with us incurs a $200 fee.',
+        a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through. Checking out after 11 AM without arranging it with us incurs a $100 fee.',
       },
       {
         q: 'Can we bring pets?',
@@ -279,6 +277,10 @@ const ALL_PROPERTIES: Property[] = [
       { q: 'When is the pool open?', a: 'In summer, usually May to mid-September depending on the weather. It isn’t heated, and everyone using it signs a liability waiver first.' },
       { q: 'How long does the hot tub take to heat up?', a: '10–15 hours, about 2°F an hour, so turn it up well before you want to use it. It fits up to 4 people.' },
       { q: 'Is there a minimum age to book?', a: 'Yes, the guest making the booking must be at least 25.' },
+      {
+        q: 'What’s the cancellation policy?',
+        a: 'Full refund if you cancel within 24 hours of booking. 50% refund if you cancel at least 30 days before check-in. No refund within 7 days of check-in.',
+      },
     ],
     hospitable: { propertyId: '411552', uuid: 'd37d9860-e7e2-4fa4-a582-633d918acddb' },
   },
