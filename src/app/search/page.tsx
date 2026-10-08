@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { PROPERTIES } from '@/data/properties';
 import { SITE } from '@/data/site';
+import { getCoverPhotos } from '@/lib/hospitable/images';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SearchBar } from '@/components/search/SearchBar';
@@ -17,6 +19,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const state = parseSearchState(await searchParams);
   const place = attractionById(state.where);
   const results = filterProperties(state);
+  const covers = await getCoverPhotos(PROPERTIES);
 
   return (
     <>
@@ -28,6 +31,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         </div>
         <SearchResults
           slugs={results.map((p) => p.slug)}
+          covers={covers}
           state={state}
           nearName={place?.name}
           heading={

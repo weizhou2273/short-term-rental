@@ -61,7 +61,25 @@ All copy and listing data is in two typed files:
 - `src/data/properties.ts` — `PROPERTIES`: one entry per estate.
   `hospitable.uuid` is the Public API id used for quotes, search and calendar.
 
-Photos and maps are still placeholders (`<Ph>`), as in the mockup.
+### Photos
+
+Property photos come from Hospitable (`GET /v2/properties/{uuid}/images`), the
+same gallery as the listings, in Hospitable's order. Pages refresh them at most
+hourly, so editing or reordering photos in Hospitable reaches the site without
+a deploy. The first photo is the cover (cards, the big photo on the stay page,
+link previews); the first five fill the photo grid; "Show all photos" opens the
+full gallery. Images are resized by `next/image` and only allowed from
+`assets.hospitable.com` (see `next.config.ts`).
+
+Website-only tweaks go in a property's `photoOverrides` in
+`src/data/properties.ts`, using the photo's id (its filename without `.jpg`):
+
+```ts
+photoOverrides: { cover: 'SRzz9AhLUSYud5wlcyDDbVhIUUh9wSQf3ZxB7VIz', hide: ['lUXeYlwROTO8uRztLFT0WYCKKW32EY1FbaguuAUk'] },
+```
+
+If Hospitable can't be reached (or `HOSPITABLE_PAT` isn't set), pages show the
+labelled placeholders from `photos` instead of failing. Maps are still placeholders.
 
 ## Security
 

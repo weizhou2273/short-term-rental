@@ -1,3 +1,5 @@
+import type { PhotoOverrides } from '@/lib/photos';
+
 /**
  * Content types for the site. SITE and PROPERTIES (in ./site.ts and
  * ./properties.ts) are the only places brand and listing copy live; every
@@ -66,7 +68,16 @@ export type Property = {
   /** % position on the map placeholder; replace with coords once a map is wired. */
   mapPos: { x: number; y: number };
   coords: { lat: number | null; lng: number | null };
+  /**
+   * Placeholder labels, shown only when Hospitable's photos can't be loaded.
+   * Real photos come from Hospitable (src/lib/hospitable/images.ts).
+   */
   photos: string[];
+  /**
+   * Optional website-only tweaks to Hospitable's gallery, by photo id (the
+   * image filename without extension, e.g. "YlgaGTY9XgwOf5jYfY2juH9m9UGfTXh6KwB1dFbJ").
+   */
+  photoOverrides?: PhotoOverrides;
   highlights: { title: string; text: string }[];
   description: string[];
   sleeping: { room: string; beds: string }[];

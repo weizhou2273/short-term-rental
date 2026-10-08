@@ -259,7 +259,7 @@ p{margin:0}
 .modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px}
 .modal[hidden]{display:none}
 .modal-box{background:var(--bg);border-radius:var(--radius-lg);width:min(820px,100%);max-height:calc(100% - 48px);overflow:auto;padding:24px;position:relative}
-.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:-24px;background:var(--bg);padding:12px 0}
+.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:-24px;background:var(--bg);padding:12px 0;z-index:2}
 .modal-close{border:1px solid var(--line);background:transparent;border-radius:50%;width:36px;height:36px}
 .gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .gallery .ph{aspect-ratio:4/3;border-radius:6px}
@@ -331,3 +331,17 @@ p{margin:0}
 /* The card is sticky; once it grows taller than the window (details form open),
    it scrolls on its own so Reserve is always reachable. */
 @media (min-width:901px){.booking-card{max-height:calc(100vh - 120px);overflow-y:auto;overscroll-behavior:contain}}
+
+/* Property photos (from Hospitable) */
+.card-photo{position:relative;aspect-ratio:20/19;border-radius:var(--radius);overflow:hidden;margin-bottom:12px;background:var(--fill)}
+.card-photo img{object-fit:cover;transition:transform .3s}
+.card:hover .card-photo img{transform:scale(1.015)}
+.photo-grid .pg-item{position:relative;display:block;padding:0;border:0;margin:0;background:var(--fill);overflow:hidden;cursor:zoom-in}
+.photo-grid .pg-item:first-of-type{grid-row:span 2}
+.photo-grid .pg-item img{object-fit:cover;transition:transform .4s}
+.photo-grid .pg-item:hover img{transform:scale(1.02)}
+.photo-grid .pg-item:focus-visible{outline-offset:-4px}
+@media (max-width:760px){.photo-grid .pg-item:not(:first-of-type){display:none}}
+.gallery .g-item{position:relative;margin:0;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--fill);scroll-margin-top:72px}
+.gallery .g-item:nth-child(3n+1){grid-column:1/-1;aspect-ratio:16/9}
+.gallery .g-item img{object-fit:cover}

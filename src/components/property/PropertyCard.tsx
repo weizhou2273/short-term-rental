@@ -1,11 +1,15 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import type { Property } from '@/data/types';
 import type { SearchResult } from '@/lib/booking/types';
 import { specs, wholeDollars } from '@/lib/format';
+import type { PropertyPhoto } from '@/lib/photos';
 import { Ph } from '@/components/ui/Ph';
 
 type Props = {
   property: Property;
+  /** First Hospitable photo; a placeholder is shown when there is none. */
+  cover?: PropertyPhoto | null;
   /** Carried to the stay page so dates and guests are prefilled. */
   query?: string;
   nearName?: string;
@@ -14,7 +18,10 @@ type Props = {
   onHover?: (id: string | null) => void;
 };
 
-export function PropertyCard({ property: p, query = '', nearName, result, onHover }: Props) {
+/** Cards are 300–400px wide in a 1–3 column grid. */
+const CARD_SIZES = '(max-width: 760px) 100vw, (max-width: 1240px) 50vw, 400px';
+
+export function PropertyCard({ property: p, cover, query = '', nearName, result, onHover }: Props) {
   const unavailable = result && !result.available;
   return (
     <Link
@@ -23,7 +30,14 @@ export function PropertyCard({ property: p, query = '', nearName, result, onHove
       onMouseEnter={onHover ? () => onHover(p.id) : undefined}
       onMouseLeave={onHover ? () => onHover(null) : undefined}
     >
-      <Ph label="Photo" />
+      {cover ? (
+        <div className="card-photo">
+          {/* The link is already named by the title below, so the photo is decorative here. */}
+          <Image src={cover.src} alt="" fill sizes={CARD_SIZES} />
+        </div>
+      ) : (
+        <Ph label="Photo" />
+      )}
       <div className="card-row">
         <span className="card-title">{p.name}</span>
         <span>★ {p.rating}</span>
