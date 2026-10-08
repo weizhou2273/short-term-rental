@@ -381,7 +381,7 @@ const ALL_PROPERTIES: Property[] = [
       { file: '22-bathrooms-05.jpg', room: 'Full bathroom 3', alt: 'Wood-paneled bathroom with a jetted tub' },
     ],
     // From the Hospitable listing, edited: outdated notes removed. Outdoor features,
-    // the movie room's extras and the beds follow the photos, confirmed by the owner.
+    // the movie room's extras and the beds as confirmed by the owner.
     description: [
       'A 4,500 sq ft Poconos villa with 6 bedrooms and 3 baths, all on one level, with a private pond and beach, a pool, a pickleball court, a hot tub, a sauna and a movie and game room.',
       'It’s close to Camelback Mountain and Kalahari Resort, the state’s #1 ski resort and its highest-rated water park, with dozens of year-round outdoor activities nearby. Ski, mountain bike or golf at Mount Airy, then come home to cook a meal in the fully equipped kitchen.',
@@ -422,9 +422,9 @@ const ALL_PROPERTIES: Property[] = [
       },
     ],
     sleeping: [
-      { room: 'Bedroom 1', beds: '1 queen bed, 1 full bed' },
-      { room: 'Bedroom 2', beds: '1 queen bed, 2 full beds' },
-      { room: 'Bedroom 3', beds: '1 queen bed, 1 full bed' },
+      { room: 'Bedroom 1', beds: '1 king bed, 1 twin bed' },
+      { room: 'Bedroom 2', beds: '3 twin beds' },
+      { room: 'Bedroom 3', beds: '2 queen beds' },
       { room: 'Bedroom 4', beds: '2 queen beds, 1 twin bed' },
       { room: 'Bedroom 5', beds: '2 queen beds' },
       { room: 'Bedroom 6', beds: '2 bunk beds (best for kids)' },
