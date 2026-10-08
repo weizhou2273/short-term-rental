@@ -3,14 +3,15 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 /**
- * Plays once (day → night) and holds on the night frame. Muted + playsInline
- * so phones autoplay. Reduced-motion users get the night still instead.
+ * Full-bleed background video, looping continuously. Muted + playsInline so
+ * phones autoplay. A small pause/play button keeps endless motion optional
+ * (WCAG 2.2.2), and visitors who ask for reduced motion get a still instead.
  */
 
 const MEDIA = {
   video: '/media/hero.mp4',
   poster: '/media/hero-poster.jpg',
-  end: '/media/hero-end.jpg',
+  still: '/media/hero-end.jpg',
 };
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
@@ -28,15 +29,16 @@ export function HeroVideo() {
     () => false,
   );
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [ended, setEnded] = useState(false);
+  const [playing, setPlaying] = useState(true);
 
   useEffect(() => {
-    videoRef.current?.play().catch(() => {});
+    // Some browsers (iOS Low Power Mode) refuse autoplay; the button then offers Play.
+    videoRef.current?.play().catch(() => setPlaying(false));
   }, [reduced]);
 
   if (reduced) {
     // eslint-disable-next-line @next/next/no-img-element -- full-bleed decorative still, sized by CSS
-    return <img className="hero-media" src={MEDIA.end} alt="" />;
+    return <img className="hero-media" src={MEDIA.still} alt="" />;
   }
 
   return (
@@ -47,24 +49,26 @@ export function HeroVideo() {
         src={MEDIA.video}
         poster={MEDIA.poster}
         muted
+        loop
         playsInline
         autoPlay
         preload="auto"
         aria-hidden="true"
-        onEnded={() => setEnded(true)}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
       />
       <button
-        className="hero-replay"
-        hidden={!ended}
+        type="button"
+        className="hero-toggle"
+        aria-label={playing ? 'Pause background video' : 'Play background video'}
         onClick={() => {
           const v = videoRef.current;
           if (!v) return;
-          setEnded(false);
-          v.currentTime = 0;
-          v.play().catch(() => {});
+          if (v.paused) v.play().catch(() => {});
+          else v.pause();
         }}
       >
-        ↻ Replay
+        <span aria-hidden="true">{playing ? '❚❚' : '▶'}</span>
       </button>
     </>
   );

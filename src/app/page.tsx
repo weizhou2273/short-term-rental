@@ -8,10 +8,13 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main id="main" className="container">
+      <main id="main">
+        {/* Outside the container so it spans the full width */}
         <Hero />
-        <PropertyGrid />
-        <WhyBookDirect />
+        <div className="container">
+          <PropertyGrid />
+          <WhyBookDirect />
+        </div>
       </main>
       <Footer />
     </>

@@ -103,17 +103,20 @@ p{margin:0}
 /* ============================================================
    HOME
    ============================================================ */
-.hero{position:relative;margin:24px 0 0;border-radius:var(--radius-lg);min-height:440px;display:flex;flex-direction:column;justify-content:flex-end;padding:32px}
-.hero{overflow:hidden;min-height:min(78vh,640px)}
-.hero-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);background:#222}
-.hero::after{content:"";position:absolute;inset:0;border-radius:var(--radius-lg);background:linear-gradient(to top,rgba(20,22,19,.78),rgba(20,22,19,.45) 45%,rgba(20,22,19,.05) 75%);pointer-events:none;z-index:1}
+/* Full-bleed: spans the window and sits flush under the sticky header (no gap, no rounding) */
+.hero{position:relative;margin:0;overflow:hidden;min-height:min(78vh,640px);display:flex;flex-direction:column;justify-content:flex-end;padding:32px 0}
+.hero-inner{position:relative;z-index:2;width:100%}
+.hero-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#222}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,22,19,.78),rgba(20,22,19,.45) 45%,rgba(20,22,19,.05) 75%);pointer-events:none;z-index:1}
 .hero-content{position:relative;z-index:2;max-width:880px}
 .hero-content .eyebrow{color:var(--cream);text-shadow:0 1px 8px rgba(0,0,0,.5)}
 .hero-content h1{color:var(--cream);font-size:clamp(36px,5vw,60px);margin-bottom:6px;text-shadow:0 1px 12px rgba(0,0,0,.35)}
 .hero-sub{color:rgba(255,255,255,.9);margin-bottom:16px}
-.hero-replay{position:absolute;top:16px;right:16px;z-index:2;background:rgba(0,0,0,.45);color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:999px;padding:6px 12px;font-size:13px}
-.hero-replay[hidden]{display:none}
-@media (max-width:760px){.hero{min-height:420px;padding:16px}}
+/* Small pause/play control for the looping video (bottom-right, out of the way) */
+.hero-toggle{position:absolute;right:20px;bottom:20px;z-index:3;width:36px;height:36px;display:grid;place-items:center;padding:0;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.45);font-size:11px;letter-spacing:-1px;opacity:.75;transition:opacity .2s,background .2s}
+.hero-toggle:hover,.hero-toggle:focus-visible{opacity:1;background:rgba(0,0,0,.55)}
+.hero-toggle:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (max-width:760px){.hero{min-height:420px;padding:16px 0}.hero-toggle{top:12px;right:12px;bottom:auto}}
 
 .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px 24px}
 .card{text-decoration:none;display:block}

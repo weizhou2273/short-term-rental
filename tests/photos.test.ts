@@ -14,9 +14,9 @@ describe('propertyPhotos', () => {
   it('serves files from /photos/<slug>/ in the listed order', () => {
     const photos = propertyPhotos(withPhotos(['pool.jpg', { file: 'kitchen.jpg', alt: ' Chef’s kitchen ' }, 'deck.jpg']));
     expect(photos).toEqual([
-      { src: '/photos/property-2/pool.jpg', alt: 'Property 2, photo 1' },
+      { src: '/photos/property-2/pool.jpg', alt: 'Clover Pond House, photo 1' },
       { src: '/photos/property-2/kitchen.jpg', alt: 'Chef’s kitchen' },
-      { src: '/photos/property-2/deck.jpg', alt: 'Property 2, photo 3' },
+      { src: '/photos/property-2/deck.jpg', alt: 'Clover Pond House, photo 3' },
     ]);
   });
 

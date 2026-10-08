@@ -52,7 +52,11 @@ export type Property = {
   slug: string;
   /** true = kept in the data file but removed from the site everywhere. */
   hidden?: boolean;
-  /** Must match the property name in Hospitable — the widget's health check looks for it. */
+  /**
+   * Name shown on the site. Only matters to Hospitable in bookingMode "widget":
+   * the mockup noted the widget's health check looks for the Hospitable
+   * property name in the page text, so test the widget if you switch to it.
+   */
   name: string;
   location: string;
   area: string;

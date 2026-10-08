@@ -13,7 +13,7 @@ const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-1',
     slug: 'property-1', // Hospitable: 148 Frutchey Dr
-    name: 'Property 1',
+    name: 'The Frutchey Estate',
     location: 'East Stroudsburg, PA',
     area: 'East Stroudsburg',
     type: 'Entire villa',
@@ -72,7 +72,7 @@ const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-2',
     slug: 'property-2', // Hospitable: 1680 Clover Rd
-    name: 'Property 2',
+    name: 'Clover Pond House',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire cabin',
@@ -122,7 +122,7 @@ const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-3',
     slug: 'property-3', // Hospitable: 539 Minsi Trl W
-    name: 'Property 3',
+    name: 'Minsi Pond Villa',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire villa',
@@ -170,7 +170,7 @@ const ALL_PROPERTIES: Property[] = [
     // Hospitable: 60 Turkey Ridge Rd. Two Hospitable listings exist for this house; this is
     // the one with the reservations (c62be835…, widget 1396650), not c010e823… / 2517111.
     slug: 'property-4',
-    name: 'Property 4',
+    name: 'Turkey Ridge Estate',
     location: 'East Stroudsburg, PA',
     area: 'East Stroudsburg',
     type: 'Entire villa',
@@ -217,7 +217,7 @@ const ALL_PROPERTIES: Property[] = [
     slug: 'property-5', // Hospitable: 5136 Goose Pond Rd (no widget code yet)
     // Off the site for now. Remove this line to list it again.
     hidden: true,
-    name: 'Property 5',
+    name: 'Goose Pond Lodge',
     location: 'Coolbaugh Township, PA',
     area: 'Coolbaugh Township',
     type: 'Entire cabin',
@@ -269,7 +269,7 @@ const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-6',
     slug: 'property-6', // Hospitable: 731 Clearview Dr
-    name: 'Property 6',
+    name: 'Clearview House',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire home',
