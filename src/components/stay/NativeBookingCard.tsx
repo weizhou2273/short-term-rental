@@ -99,11 +99,11 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
       <div className="bk-fields">
         <button type="button" className="bk-f-btn" aria-expanded={pickerOpen} onClick={() => setPickerOpen((o) => !o)}>
           <span>Check-in</span>
-          <strong className={checkin ? '' : 'empty'}>{checkin ? formatShortDate(checkin) : 'Add date'}</strong>
+          <strong className={checkin ? '' : 'placeholder'}>{checkin ? formatShortDate(checkin) : 'Add date'}</strong>
         </button>
         <button type="button" className="bk-f-btn" aria-expanded={pickerOpen} onClick={() => setPickerOpen((o) => !o)}>
           <span>Check-out</span>
-          <strong className={checkout ? '' : 'empty'}>{checkout ? formatShortDate(checkout) : 'Add date'}</strong>
+          <strong className={checkout ? '' : 'placeholder'}>{checkout ? formatShortDate(checkout) : 'Add date'}</strong>
         </button>
         <label className="bk-f bk-wide">
           <span>Guests</span>
