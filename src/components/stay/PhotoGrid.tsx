@@ -3,15 +3,15 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Property } from '@/data/types';
-import type { PropertyPhoto } from '@/lib/photos';
+import { HERO_GRID_COUNT as GRID_COUNT, type PropertyPhoto } from '@/lib/photos';
 import { Modal } from '@/components/ui/Modal';
 import { Ph } from '@/components/ui/Ph';
 
-const GRID_COUNT = 5;
+const PLACEHOLDER_LABELS = ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Bathroom'];
 
 /**
- * Hero grid (one large photo + four small) and the full gallery. Photos come
- * from Hospitable; with none available it falls back to labelled placeholders.
+ * Hero grid (one large photo + four small) and the full gallery, from the
+ * property's ordered `photos`. With none listed it shows placeholders.
  */
 export function PhotoGrid({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   // null = closed; otherwise the photo to scroll to when the gallery opens.
@@ -25,31 +25,22 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
 
   if (!photos.length) {
     return (
-      <>
-        <section className="photo-grid" aria-label="Photos">
-          {p.photos.slice(0, GRID_COUNT).map((label) => (
-            <Ph key={label} label={label} />
-          ))}
-          <button className="btn show-all" onClick={() => setOpenAt(0)}>
-            Show all {p.photos.length} photos
-          </button>
-        </section>
-        <Modal title={`${p.name} · all photos`} open={openAt !== null} onClose={() => setOpenAt(null)}>
-          <div className="gallery">
-            {p.photos.map((label) => (
-              <Ph key={label} label={label} />
-            ))}
-          </div>
-        </Modal>
-      </>
+      <section className="photo-grid" aria-label="Photos coming soon">
+        {PLACEHOLDER_LABELS.map((label) => (
+          <Ph key={label} label={label} />
+        ))}
+      </section>
     );
   }
 
+  // Full grid needs five photos; with fewer, use a layout with no empty cells.
+  const shown = photos.length >= GRID_COUNT ? GRID_COUNT : photos.length >= 3 ? 3 : photos.length;
+
   return (
     <>
-      <section className="photo-grid" aria-label="Photos">
-        {photos.slice(0, GRID_COUNT).map((photo, i) => (
-          <button key={photo.id} type="button" className="pg-item" onClick={() => setOpenAt(i)} aria-label={`Open photo ${i + 1} of ${photos.length}`}>
+      <section className={`photo-grid${shown < GRID_COUNT ? ` count-${shown}` : ''}`} aria-label="Photos">
+        {photos.slice(0, shown).map((photo, i) => (
+          <button key={photo.src} type="button" className="pg-item" onClick={() => setOpenAt(i)} aria-label={`Open photo ${i + 1} of ${photos.length}`}>
             <Image
               src={photo.src}
               alt={photo.alt}
@@ -68,7 +59,7 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
       <Modal title={`${p.name} · all photos`} open={openAt !== null} onClose={() => setOpenAt(null)}>
         <div className="gallery">
           {photos.map((photo, i) => (
-            <figure className="g-item" key={photo.id} id={`gallery-photo-${i}`}>
+            <figure className="g-item" key={photo.src} id={`gallery-photo-${i}`}>
               <Image src={photo.src} alt={photo.alt} fill sizes={i % 3 === 0 ? '(max-width: 820px) 100vw, 780px' : '(max-width: 820px) 50vw, 390px'} />
             </figure>
           ))}

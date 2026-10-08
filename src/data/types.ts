@@ -1,4 +1,4 @@
-import type { PhotoOverrides } from '@/lib/photos';
+import type { PhotoEntry } from '@/lib/photos';
 
 /**
  * Content types for the site. SITE and PROPERTIES (in ./site.ts and
@@ -69,15 +69,12 @@ export type Property = {
   mapPos: { x: number; y: number };
   coords: { lat: number | null; lng: number | null };
   /**
-   * Placeholder labels, shown only when Hospitable's photos can't be loaded.
-   * Real photos come from Hospitable (src/lib/hospitable/images.ts).
+   * Photos in display order: filenames in /public/photos/[slug]/, optionally
+   * with alt text, e.g. ['pool.jpg', { file: 'kitchen.jpg', alt: 'Chef’s kitchen' }].
+   * The first is the cover; the first five are the stay page's photo grid.
+   * Empty = placeholders.
    */
-  photos: string[];
-  /**
-   * Optional website-only tweaks to Hospitable's gallery, by photo id (the
-   * image filename without extension, e.g. "YlgaGTY9XgwOf5jYfY2juH9m9UGfTXh6KwB1dFbJ").
-   */
-  photoOverrides?: PhotoOverrides;
+  photos: PhotoEntry[];
   highlights: { title: string; text: string }[];
   description: string[];
   sleeping: { room: string; beds: string }[];

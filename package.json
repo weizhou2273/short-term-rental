@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "photos": "node scripts/prepare-photos.mjs"
   },
   "dependencies": {
     "next": "^16.3.5",
@@ -26,6 +27,7 @@
     "@types/react-dom": "^19.3.0",
     "eslint": "^9.18.0",
     "eslint-config-next": "^16.3.5",
+    "sharp": "^0.35.5",
     "typescript": "^5.7.3",
     "vitest": "^3.0.4"
   },

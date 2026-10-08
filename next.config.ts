@@ -8,12 +8,12 @@ const nextConfig: NextConfig = {
   // ~/package-lock.json on a dev machine) is never picked up instead of this one.
   turbopack: { root: path.join(__dirname) },
   images: {
-    // Property photos come only from Hospitable's asset host.
-    remotePatterns: [new URL('https://assets.hospitable.com/property_images/**')],
-    // Each photo has a unique filename, so a resized copy never goes stale:
-    // cache it for 31 days, and keep the size list short so each photo is
-    // only resized a few ways (Vercel counts every resize).
-    minimumCacheTTL: 2_678_400,
+    // Only property photos in /public/photos are resized, and only without a
+    // query string, so the optimizer can't be pointed at anything else.
+    localPatterns: [{ pathname: '/photos/**', search: '' }],
+    // A short size list means each photo is only resized a few ways (Vercel
+    // counts every resize). Cache lifetime stays at the default (4 hours) so a
+    // photo replaced under the same filename updates the same day.
     deviceSizes: [640, 828, 1080, 1440, 1920],
     imageSizes: [256, 384],
     qualities: [75],

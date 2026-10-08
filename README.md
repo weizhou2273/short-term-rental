@@ -63,23 +63,41 @@ All copy and listing data is in two typed files:
 
 ### Photos
 
-Property photos come from Hospitable (`GET /v2/properties/{uuid}/images`), the
-same gallery as the listings, in Hospitable's order. Pages refresh them at most
-hourly, so editing or reordering photos in Hospitable reaches the site without
-a deploy. The first photo is the cover (cards, the big photo on the stay page,
-link previews); the first five fill the photo grid; "Show all photos" opens the
-full gallery. Images are resized by `next/image` and only allowed from
-`assets.hospitable.com` (see `next.config.ts`).
-
-Website-only tweaks go in a property's `photoOverrides` in
-`src/data/properties.ts`, using the photo's id (its filename without `.jpg`):
+Each property's photos live in `public/photos/<slug>/` and are listed, in
+display order, in that property's `photos` in `src/data/properties.ts`:
 
 ```ts
-photoOverrides: { cover: 'SRzz9AhLUSYud5wlcyDDbVhIUUh9wSQf3ZxB7VIz', hide: ['lUXeYlwROTO8uRztLFT0WYCKKW32EY1FbaguuAUk'] },
+photos: [
+  'exterior-dusk.jpg',                                   // 1st: cover (cards, link previews) + big grid photo
+  { file: 'great-room.jpg', alt: 'Great room with fireplace' },
+  'pool.jpg',
+  'kitchen.jpg',
+  'hot-tub.jpg',                                         // 1st–5th: the stay page photo grid
+  'primary-bedroom.jpg',                                 // 6th onward: gallery only
+],
 ```
 
-If Hospitable can't be reached (or `HOSPITABLE_PAT` isn't set), pages show the
-labelled placeholders from `photos` instead of failing. Maps are still placeholders.
+Alt text is optional; without it a photo is described as "<name>, photo N".
+With fewer than five photos the grid switches to a layout with no empty cells;
+with none it shows placeholders.
+
+**Adding a folder of photos**
+
+```bash
+npm run photos -- property-2 ~/Downloads/clover-rd-photos
+```
+
+This writes `public/photos/property-2/*.jpg`, rotated upright, at most 2560px
+on the long edge, compressed, and with **all metadata stripped**, including
+GPS coordinates that would otherwise reveal each property's location to anyone
+downloading a photo. It then prints a `photos: [...]` list to paste in and
+reorder. Export iPhone HEIC photos as JPEG first.
+
+`next/image` resizes photos for each screen and serves WebP; only paths under
+`/photos/` are accepted (`next.config.ts`). `npm run check` fails if a listed
+photo is missing from its folder, so a typo can't ship a broken image.
+
+Maps are still placeholders.
 
 ## Security
 

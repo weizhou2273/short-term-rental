@@ -6,7 +6,6 @@ import { getPropertyBySlug } from '@/data/properties';
 import type { Property } from '@/data/types';
 import type { SearchResult } from '@/lib/booking/types';
 import { wholeDollars } from '@/lib/format';
-import type { PropertyPhoto } from '@/lib/photos';
 import { stayQuery, type SearchState } from '@/lib/search-params';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { Ph } from '@/components/ui/Ph';
@@ -14,8 +13,6 @@ import { Ph } from '@/components/ui/Ph';
 type Props = {
   /** Slugs that pass the where / guests / amenity filters (computed on the server). */
   slugs: string[];
-  /** Cover photo per slug, from Hospitable. */
-  covers: Record<string, PropertyPhoto | null>;
   state: SearchState;
   nearName?: string;
   heading: React.ReactNode;
@@ -33,7 +30,7 @@ type Live =
  * Results list + map. With dates and guests in the URL, asks /api/search for
  * live availability and pre-tax totals; available stays sort first.
  */
-export function SearchResults({ slugs, covers, state, nearName, heading, filters, everyEstate }: Props) {
+export function SearchResults({ slugs, state, nearName, heading, filters, everyEstate }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const hasStay = Boolean(state.checkin && state.checkout && state.adults);
   const [live, setLive] = useState<Live>({ status: 'idle' });
@@ -87,7 +84,7 @@ export function SearchResults({ slugs, covers, state, nearName, heading, filters
         {properties.length ? (
           <div className="grid-cards">
             {properties.map((p) => (
-              <PropertyCard key={p.id} property={p} cover={covers[p.slug]} query={query} nearName={nearName} result={bySlug?.get(p.slug)} onHover={setHovered} />
+              <PropertyCard key={p.id} property={p} query={query} nearName={nearName} result={bySlug?.get(p.slug)} onHover={setHovered} />
             ))}
           </div>
         ) : (

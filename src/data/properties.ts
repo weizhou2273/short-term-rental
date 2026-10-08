@@ -24,7 +24,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: true, sportCourt: true, waterfront: true, petFriendly: false },
     mapPos: { x: 32, y: 40 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Living room', 'Kitchen', 'Primary bedroom', 'Hot tub', 'Game room', 'Bathroom', 'Deck view'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
@@ -82,7 +83,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: true, sportCourt: false, waterfront: false, petFriendly: true },
     mapPos: { x: 58, y: 28 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Deck', 'Bathroom', 'Dining'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
@@ -131,7 +133,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: true, sportCourt: false, waterfront: true, petFriendly: true },
     mapPos: { x: 42, y: 62 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Hot tub', 'Bathroom'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
@@ -177,7 +180,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: true, sportCourt: true, waterfront: false, petFriendly: true },
     mapPos: { x: 22, y: 72 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Fire pit', 'Bathroom'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
@@ -221,7 +225,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: false, sportCourt: false, waterfront: false, petFriendly: true },
     mapPos: { x: 72, y: 55 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Great room', 'Kitchen', 'Primary bedroom', 'Hot tub', 'Theater room', 'Bathroom', 'Lake'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
@@ -272,7 +277,8 @@ export const PROPERTIES: Property[] = [
     features: { privatePool: true, sportCourt: false, waterfront: false, petFriendly: true },
     mapPos: { x: 82, y: 30 },
     coords: { lat: null, lng: null },
-    photos: ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Deck', 'Bathroom'],
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
+    photos: [],
     highlights: [
       { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
       { title: 'Highlight two', text: 'Short supporting line about this highlight.' },

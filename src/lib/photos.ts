@@ -1,47 +1,30 @@
+import type { Property } from '@/data/types';
+
 /**
- * Property photos as the site uses them. They come from Hospitable (the same
- * gallery as the listings) via src/lib/hospitable/images.ts; this module only
- * holds the shape and the pure helpers, so client components can import it.
+ * Property photos are files in /public/photos/[slug]/, listed in order in each
+ * property's `photos` (src/data/properties.ts). The first is the cover (cards,
+ * link previews), the first HERO_GRID_COUNT fill the stay page's photo grid,
+ * and all of them appear in the gallery. next/image resizes them on request.
  */
 
-export type PropertyPhoto = {
-  /** Hospitable's file id (the filename without extension) — stable across reorders. */
-  id: string;
-  src: string;
-  alt: string;
-};
+/** A filename in the property's folder, optionally with alt text. */
+export type PhotoEntry = string | { file: string; alt?: string };
 
-/** Images are only ever loaded from Hospitable's asset host (also allowed in next.config.ts). */
-export const PHOTO_HOST = 'assets.hospitable.com';
-export const PHOTO_PATH_PREFIX = '/property_images/';
+export type PropertyPhoto = { src: string; alt: string };
 
-export function isTrustedPhotoUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' && url.hostname === PHOTO_HOST && url.pathname.startsWith(PHOTO_PATH_PREFIX);
-  } catch {
-    return false;
-  }
+export const PHOTO_ROOT = '/photos';
+export const HERO_GRID_COUNT = 5;
+
+export const entryFile = (entry: PhotoEntry) => (typeof entry === 'string' ? entry : entry.file);
+
+export function propertyPhotos(property: Property): PropertyPhoto[] {
+  return property.photos.map((entry, i) => {
+    const alt = typeof entry === 'string' ? undefined : entry.alt?.trim();
+    return {
+      src: `${PHOTO_ROOT}/${property.slug}/${encodeURIComponent(entryFile(entry))}`,
+      alt: alt || `${property.name}, photo ${i + 1}`,
+    };
+  });
 }
 
-export function photoId(src: string): string {
-  const file = new URL(src).pathname.split('/').pop() ?? src;
-  return file.replace(/\.[a-z0-9]+$/i, '');
-}
-
-export type PhotoOverrides = {
-  /** Photo id to show first (cards, photo grid, social previews). */
-  cover?: string;
-  /** Photo ids to leave off the website (they stay on the listings). */
-  hide?: string[];
-};
-
-export function applyPhotoOverrides(photos: PropertyPhoto[], overrides?: PhotoOverrides): PropertyPhoto[] {
-  if (!overrides) return photos;
-  const hidden = new Set(overrides.hide ?? []);
-  const visible = photos.filter((p) => !hidden.has(p.id));
-  const coverIndex = overrides.cover ? visible.findIndex((p) => p.id === overrides.cover) : -1;
-  if (coverIndex <= 0) return visible;
-  const cover = visible[coverIndex]!;
-  return [cover, ...visible.slice(0, coverIndex), ...visible.slice(coverIndex + 1)];
-}
+export const coverPhoto = (property: Property): PropertyPhoto | undefined => propertyPhotos(property)[0];

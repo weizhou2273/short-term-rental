@@ -3,13 +3,11 @@ import Link from 'next/link';
 import type { Property } from '@/data/types';
 import type { SearchResult } from '@/lib/booking/types';
 import { specs, wholeDollars } from '@/lib/format';
-import type { PropertyPhoto } from '@/lib/photos';
+import { coverPhoto } from '@/lib/photos';
 import { Ph } from '@/components/ui/Ph';
 
 type Props = {
   property: Property;
-  /** First Hospitable photo; a placeholder is shown when there is none. */
-  cover?: PropertyPhoto | null;
   /** Carried to the stay page so dates and guests are prefilled. */
   query?: string;
   nearName?: string;
@@ -21,8 +19,9 @@ type Props = {
 /** Cards are 300–400px wide in a 1–3 column grid. */
 const CARD_SIZES = '(max-width: 760px) 100vw, (max-width: 1240px) 50vw, 400px';
 
-export function PropertyCard({ property: p, cover, query = '', nearName, result, onHover }: Props) {
+export function PropertyCard({ property: p, query = '', nearName, result, onHover }: Props) {
   const unavailable = result && !result.available;
+  const cover = coverPhoto(p);
   return (
     <Link
       className={`card${unavailable ? ' unavailable' : ''}`}

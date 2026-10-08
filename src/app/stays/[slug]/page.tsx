@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPropertyBySlug, PROPERTIES } from '@/data/properties';
-import { getPropertyPhotos } from '@/lib/hospitable/images';
+import { coverPhoto, propertyPhotos } from '@/lib/photos';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PhotoGrid } from '@/components/stay/PhotoGrid';
@@ -21,8 +21,6 @@ import {
 
 // Every stay is prerendered; unknown slugs 404 instead of rendering on demand.
 export const dynamicParams = false;
-// Rebuilt at most hourly so photo changes in Hospitable show up without a deploy.
-export const revalidate = 3600;
 
 export function generateStaticParams() {
   return PROPERTIES.map((p) => ({ slug: p.slug }));
@@ -31,7 +29,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const property = getPropertyBySlug((await params).slug);
   if (!property) return {};
-  const cover = (await getPropertyPhotos(property))[0];
+  const cover = coverPhoto(property);
   return {
     title: property.name,
     description: `${property.type} in ${property.area} for up to ${property.guests} guests. Book direct.`,
@@ -43,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function StayPage({ params }: { params: Promise<{ slug: string }> }) {
   const property = getPropertyBySlug((await params).slug);
   if (!property) notFound();
-  const photos = await getPropertyPhotos(property);
+  const photos = propertyPhotos(property);
 
   return (
     <>

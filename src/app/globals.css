@@ -345,3 +345,9 @@ p{margin:0}
 .gallery .g-item{position:relative;margin:0;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--fill);scroll-margin-top:72px}
 .gallery .g-item:nth-child(3n+1){grid-column:1/-1;aspect-ratio:16/9}
 .gallery .g-item img{object-fit:cover}
+/* Fewer than five photos: no empty cells */
+.photo-grid.count-1{grid-template-columns:1fr;grid-template-rows:408px}
+.photo-grid.count-2{grid-template-columns:1fr 1fr;grid-template-rows:408px}
+.photo-grid.count-2 .pg-item:first-of-type{grid-row:auto}
+.photo-grid.count-3{grid-template-columns:2fr 1fr}
+@media (max-width:760px){.photo-grid.count-1,.photo-grid.count-2,.photo-grid.count-3{grid-template-columns:1fr;grid-template-rows:260px}}
