@@ -68,18 +68,24 @@ display order, in that property's `photos` in `src/data/properties.ts`:
 
 ```ts
 photos: [
-  'exterior-dusk.jpg',                                   // 1st: cover (cards, link previews) + big grid photo
-  { file: 'great-room.jpg', alt: 'Great room with fireplace' },
-  'pool.jpg',
-  'kitchen.jpg',
-  'hot-tub.jpg',                                         // 1st–5th: the stay page photo grid
-  'primary-bedroom.jpg',                                 // 6th onward: gallery only
+  { file: 'exterior-dusk.jpg', room: 'Exterior' },       // 1st: cover (cards, link previews) + big grid photo
+  { file: 'great-room.jpg', room: 'Living room', alt: 'Great room with fireplace' },
+  { file: 'pool.jpg', room: 'Pool' },
+  { file: 'kitchen.jpg', room: 'Full kitchen' },
+  { file: 'hot-tub.jpg', room: 'Hot tub' },              // 1st–5th: the stay page photo grid
+  { file: 'primary-bedroom.jpg', room: 'Bedroom 1' },    // 6th onward: photo tour only
 ],
 ```
 
-Alt text is optional; without it a photo is described as "<name>, photo N".
-With fewer than five photos the grid switches to a layout with no empty cells;
-with none it shows placeholders.
+"Show all photos" opens a photo tour like Airbnb's: the rooms are listed at
+the top (each with its first photo), and picking one scrolls to that room's
+photos. Rooms appear in the order of their first photo in the list. A bedroom
+whose `room` matches a name in `sleeping` (e.g. "Bedroom 1") also shows its
+photo under "Where you'll sleep". Without rooms the tour is a plain gallery.
+
+Alt text and room are optional; without alt text a photo is described as
+"<name>, photo N". With fewer than five photos the grid switches to a layout
+with no empty cells; with none it shows placeholders.
 
 **Adding a folder of photos**
 

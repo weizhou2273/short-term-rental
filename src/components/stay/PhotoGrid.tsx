@@ -1,25 +1,32 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Property } from '@/data/types';
-import { HERO_GRID_COUNT as GRID_COUNT, type PropertyPhoto } from '@/lib/photos';
+import { HERO_GRID_COUNT as GRID_COUNT, photoTour, type PropertyPhoto } from '@/lib/photos';
 import { Modal } from '@/components/ui/Modal';
 import { Ph } from '@/components/ui/Ph';
 
 const PLACEHOLDER_LABELS = ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Bathroom'];
+const UNASSIGNED = 'More photos';
+
+/** Where the photo tour opens: the room list at the top, or a photo (by index). */
+type OpenAt = 'top' | number;
 
 /**
- * Hero grid (one large photo + four small) and the full gallery, from the
- * property's ordered `photos`. With none listed it shows placeholders.
+ * Hero grid (one large photo + four small) and the photo tour, from the
+ * property's ordered `photos`. The tour lists the rooms at the top; picking
+ * one scrolls to that room's photos. With no rooms assigned it is a plain
+ * gallery. With no photos at all, the grid shows placeholders.
  */
 export function PhotoGrid({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
-  // null = closed; otherwise the photo to scroll to when the gallery opens.
-  const [openAt, setOpenAt] = useState<number | null>(null);
+  const [openAt, setOpenAt] = useState<OpenAt | null>(null);
+  const tour = useMemo(() => photoTour(photos), [photos]);
+  const hasRooms = tour.some((r) => r.room !== null);
 
   useEffect(() => {
-    if (openAt === null) return;
-    const frame = requestAnimationFrame(() => document.getElementById(`gallery-photo-${openAt}`)?.scrollIntoView({ block: 'start' }));
+    if (typeof openAt !== 'number') return;
+    const frame = requestAnimationFrame(() => document.getElementById(`tour-photo-${openAt}`)?.scrollIntoView({ block: 'start' }));
     return () => cancelAnimationFrame(frame);
   }, [openAt]);
 
@@ -32,6 +39,13 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
       </section>
     );
   }
+
+  const goToRoom = (i: number) => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById(`tour-room-${i}`)?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    // Move keyboard and screen reader users to the room they picked.
+    document.getElementById(`tour-room-${i}-title`)?.focus({ preventScroll: true });
+  };
 
   // Full grid needs five photos; with fewer, use a layout with no empty cells.
   const shown = photos.length >= GRID_COUNT ? GRID_COUNT : photos.length >= 3 ? 3 : photos.length;
@@ -52,18 +66,49 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
             />
           </button>
         ))}
-        <button className="btn show-all" onClick={() => setOpenAt(0)}>
+        <button className="btn show-all" onClick={() => setOpenAt('top')}>
           Show all {photos.length} photos
         </button>
       </section>
-      <Modal title={`${p.name} · all photos`} open={openAt !== null} onClose={() => setOpenAt(null)}>
-        <div className="gallery">
-          {photos.map((photo, i) => (
-            <figure className="g-item" key={photo.src} id={`gallery-photo-${i}`}>
-              <Image src={photo.src} alt={photo.alt} fill sizes={i % 3 === 0 ? '(max-width: 820px) 100vw, 780px' : '(max-width: 820px) 50vw, 390px'} />
-            </figure>
-          ))}
-        </div>
+      <Modal title={hasRooms ? 'Photo tour' : `${p.name} · all photos`} wide open={openAt !== null} onClose={() => setOpenAt(null)}>
+        {hasRooms ? (
+          <nav className="tour-index" aria-label="Rooms">
+            {tour.map((r, i) => (
+              <button key={r.room ?? UNASSIGNED} type="button" className="tour-index-item" onClick={() => goToRoom(i)}>
+                <span className="tour-thumb">
+                  {/* Named by the label below, so the thumbnail is decorative. */}
+                  <Image src={r.photos[0]!.photo.src} alt="" fill sizes="(max-width: 760px) 33vw, 220px" />
+                </span>
+                {r.room ?? UNASSIGNED}
+              </button>
+            ))}
+          </nav>
+        ) : null}
+        {tour.map((r, i) => (
+          <section
+            key={r.room ?? UNASSIGNED}
+            id={`tour-room-${i}`}
+            className={`tour-room${hasRooms ? ' titled' : ''}`}
+            aria-labelledby={hasRooms ? `tour-room-${i}-title` : undefined}
+          >
+            {hasRooms ? (
+              <h3 id={`tour-room-${i}-title`} tabIndex={-1}>
+                {r.room ?? UNASSIGNED}
+              </h3>
+            ) : null}
+            <div className="tour-photos">
+              {r.photos.map(({ photo, index }, j) => {
+                // One wide photo, then two side by side; a photo left alone in a row goes wide too.
+                const wide = j % 3 === 0 || (j % 3 === 1 && j === r.photos.length - 1);
+                return (
+                  <figure key={photo.src} id={`tour-photo-${index}`} className={`tour-photo${wide ? ' wide' : ''}`}>
+                    <Image src={photo.src} alt={photo.alt} fill sizes={wide ? '(max-width: 760px) 100vw, 920px' : '(max-width: 760px) 50vw, 460px'} />
+                  </figure>
+                );
+              })}
+            </div>
+          </section>
+        ))}
       </Modal>
     </>
   );

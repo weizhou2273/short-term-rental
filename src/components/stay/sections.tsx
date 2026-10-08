@@ -1,5 +1,7 @@
+import Image from 'next/image';
 import type { Property } from '@/data/types';
 import { plural, specs } from '@/lib/format';
+import type { PropertyPhoto } from '@/lib/photos';
 import { Ph } from '@/components/ui/Ph';
 
 /** Static content sections of a stay page, in page order. */
@@ -59,18 +61,28 @@ export function Description({ property: p }: { property: Property }) {
   );
 }
 
-export function SleepingArrangements({ property: p }: { property: Property }) {
+/** Each room shows its first photo from the photo tour (photos with the same `room` name). */
+export function SleepingArrangements({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   return (
     <section className="section">
       <h2>Where you&apos;ll sleep</h2>
       <div className="rooms">
-        {p.sleeping.map((r) => (
-          <div className="room" key={r.room}>
-            <Ph />
-            <h3>{r.room}</h3>
-            <p className="muted">{r.beds}</p>
-          </div>
-        ))}
+        {p.sleeping.map((r) => {
+          const photo = photos.find((ph) => ph.room === r.room);
+          return (
+            <div className="room" key={r.room}>
+              {photo ? (
+                <div className="room-photo">
+                  <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 760px) 50vw, 240px" />
+                </div>
+              ) : (
+                <Ph />
+              )}
+              <h3>{r.room}</h3>
+              <p className="muted">{r.beds}</p>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

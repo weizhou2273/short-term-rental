@@ -188,6 +188,8 @@ p{margin:0}
 .rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 .room{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
 .room .ph{width:40px;height:28px;border-radius:4px;margin-bottom:10px}
+.room-photo{position:relative;aspect-ratio:3/2;border-radius:4px;overflow:hidden;margin-bottom:12px;background:var(--fill)}
+.room-photo img{object-fit:cover}
 .amenities{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:20px}
 .amenity{display:flex;align-items:center;gap:12px}
 .amenity i{width:22px;height:22px;border:1px solid var(--brass);border-radius:4px;flex:none}
@@ -258,9 +260,7 @@ p{margin:0}
 .modal-box{background:var(--bg);border-radius:var(--radius-lg);width:min(820px,100%);max-height:calc(100% - 48px);overflow:auto;padding:24px;position:relative}
 .modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;position:sticky;top:-24px;background:var(--bg);padding:12px 0;z-index:2}
 .modal-close{border:1px solid var(--line);background:transparent;border-radius:50%;width:36px;height:36px}
-.gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.gallery .ph{aspect-ratio:4/3;border-radius:6px}
-.gallery .ph:nth-child(3n+1){grid-column:1/-1;aspect-ratio:16/9}
+.modal-box.modal-wide{width:min(1240px,100%)}
 @media (max-width:760px){
   .modal{padding:0;align-items:flex-end}
   .modal-box{border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:92%;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
@@ -339,9 +339,29 @@ p{margin:0}
 .photo-grid .pg-item:hover img{transform:scale(1.02)}
 .photo-grid .pg-item:focus-visible{outline-offset:-4px}
 @media (max-width:760px){.photo-grid .pg-item:not(:first-of-type){display:none}}
-.gallery .g-item{position:relative;margin:0;aspect-ratio:4/3;border-radius:6px;overflow:hidden;background:var(--fill);scroll-margin-top:72px}
-.gallery .g-item:nth-child(3n+1){grid-column:1/-1;aspect-ratio:16/9}
-.gallery .g-item img{object-fit:cover}
+/* Photo tour: room list on top, then each room's photos */
+.tour-index{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 16px;margin-bottom:24px}
+.tour-index-item{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;text-align:left;font-size:15px;line-height:1.3}
+.tour-thumb{position:relative;display:block;aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;background:var(--fill)}
+.tour-thumb img{object-fit:cover;transition:transform .3s}
+.tour-index-item:hover .tour-thumb img{transform:scale(1.03)}
+.tour-room{padding:32px 0;border-top:1px solid var(--line);scroll-margin-top:48px}
+.tour-room:not(.titled){padding:0;border:0}
+.tour-room.titled{display:grid;grid-template-columns:220px minmax(0,1fr);gap:32px;align-items:start}
+/* The room name stays in view while its photos scroll past */
+.tour-room h3{font-family:var(--display);font-size:28px;font-weight:500;position:sticky;top:48px}
+.tour-room h3:focus{outline:none}
+.tour-photos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tour-photo{position:relative;margin:0;aspect-ratio:3/2;border-radius:6px;overflow:hidden;background:var(--fill);scroll-margin-top:72px}
+.tour-photo.wide{grid-column:1/-1}
+.tour-photo img{object-fit:cover}
+@media (max-width:760px){
+  .tour-index{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px}
+  .tour-index-item{font-size:13px}
+  .tour-room{padding:24px 0}
+  .tour-room.titled{grid-template-columns:1fr;gap:12px}
+  .tour-room h3{position:static;font-size:24px}
+}
 /* Fewer than five photos: no empty cells */
 .photo-grid.count-1{grid-template-columns:1fr;grid-template-rows:408px}
 .photo-grid.count-2{grid-template-columns:1fr 1fr;grid-template-rows:408px}

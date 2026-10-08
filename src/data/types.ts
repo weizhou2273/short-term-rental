@@ -77,8 +77,10 @@ export type Property = {
   coords: { lat: number | null; lng: number | null };
   /**
    * Photos in display order: filenames in /public/photos/[slug]/, optionally
-   * with alt text, e.g. ['pool.jpg', { file: 'kitchen.jpg', alt: 'Chef’s kitchen' }].
+   * with alt text and a room, e.g.
+   * ['pool.jpg', { file: 'kitchen.jpg', room: 'Full kitchen', alt: 'Chef’s kitchen' }].
    * The first is the cover; the first five are the stay page's photo grid.
+   * Rooms group the photo tour, in order of each room's first photo.
    * Empty = placeholders.
    */
   photos: PhotoEntry[];

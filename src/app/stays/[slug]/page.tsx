@@ -54,7 +54,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
             <Summary property={property} />
             <Highlights property={property} />
             <Description property={property} />
-            <SleepingArrangements property={property} />
+            <SleepingArrangements property={property} photos={photos} />
             <Amenities property={property} />
             <LocationMap property={property} />
             <HouseRules property={property} />
