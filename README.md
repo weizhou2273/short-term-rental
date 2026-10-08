@@ -1,5 +1,9 @@
 # Aerie — direct booking site
 
+> **Superseded.** The live W&K Reserve site is the Hospitable-based app in
+> [`wk-reserve/`](wk-reserve/README.md). The OwnerRez / WordPress / Stripe app
+> below is kept for reference and can be removed.
+
 A high-end direct-booking website for a small short-term rental portfolio.
 **OwnerRez** is the property-management system of record (properties, calendars,
 rates, quotes, reservations). **WordPress** runs headless as the CMS for
