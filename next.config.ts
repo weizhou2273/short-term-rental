@@ -4,8 +4,8 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // This app lives in a subfolder of the repo; pin the root so a lockfile or
-  // config in a parent directory is never picked up instead of this one.
+  // Pin the root so a lockfile or config in a parent directory (e.g. a stray
+  // ~/package-lock.json on a dev machine) is never picked up instead of this one.
   turbopack: { root: path.join(__dirname) },
   async headers() {
     return [
