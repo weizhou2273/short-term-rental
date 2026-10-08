@@ -253,7 +253,8 @@ const ALL_PROPERTIES: Property[] = [
       checkOut: 'Before 11:00 AM',
       house: ['No parties or events', 'No smoking', 'Quiet hours 10 PM – 8 AM', 'Pets welcome (tell us before booking)', 'Minimum age to book: 25'],
       safety: ['Smoke alarm', 'Carbon monoxide alarm', 'Exterior security cameras at the front door and backyard (none inside)'],
-      cancellation: 'Full refund if you cancel within 24 hours of booking. 50% refund if you cancel 8 or more days before check-in. No refund within 7 days of check-in.',
+      // Hospitable Direct's "Balanced" policy; keep the two in step.
+      cancellation: 'Full refund if you cancel within 24 hours of booking or at least 30 days before check-in. 50% refund if you cancel at least 7 days before check-in. No refund after that.',
     },
     // Recent 5-star reviews from Hospitable (Airbnb), first names only.
     reviews: [
@@ -279,7 +280,7 @@ const ALL_PROPERTIES: Property[] = [
       { q: 'Is there a minimum age to book?', a: 'Yes, the guest making the booking must be at least 25.' },
       {
         q: 'What’s the cancellation policy?',
-        a: 'Full refund if you cancel within 24 hours of booking. 50% refund if you cancel 8 or more days before check-in. No refund within 7 days of check-in.',
+        a: 'Full refund if you cancel within 24 hours of booking or at least 30 days before check-in. 50% refund if you cancel at least 7 days before check-in. No refund after that.',
       },
     ],
     hospitable: { propertyId: '411552', uuid: 'd37d9860-e7e2-4fa4-a582-633d918acddb' },
