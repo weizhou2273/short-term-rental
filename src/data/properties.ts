@@ -4,8 +4,12 @@ import type { Property } from './types';
  * One entry per property. Swap placeholder values for real content; the
  * layout never changes. `hospitable.uuid` is the Public API id used for
  * quotes, search and the availability calendar.
+ *
+ * `hidden: true` keeps an entry's data here but takes it off the site
+ * entirely (pages, cards, search, map, footer, and the quote/calendar APIs).
+ * Delete the flag to bring it back.
  */
-export const PROPERTIES: Property[] = [
+const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-1',
     slug: 'property-1', // Hospitable: 148 Frutchey Dr
@@ -163,7 +167,8 @@ export const PROPERTIES: Property[] = [
   },
   {
     id: 'property-4',
-    // Hospitable: 60 Turkey Ridge Rd (widget IDs 2517111 and 1396650 are both this house; using 2517111)
+    // Hospitable: 60 Turkey Ridge Rd. Two Hospitable listings exist for this house; this is
+    // the one with the reservations (c62be835…, widget 1396650), not c010e823… / 2517111.
     slug: 'property-4',
     name: 'Property 4',
     location: 'East Stroudsburg, PA',
@@ -205,11 +210,13 @@ export const PROPERTIES: Property[] = [
       { name: 'Guest B', date: 'Month 2026', text: 'Placeholder review text.' },
     ],
     faqs: [{ q: 'Placeholder question one?', a: 'Placeholder answer.' }],
-    hospitable: { propertyId: '2517111', uuid: 'c010e823-9020-446b-99ed-46c485e41b83' },
+    hospitable: { propertyId: '1396650', uuid: 'c62be835-a698-4e96-90ec-1630519f3ced' },
   },
   {
     id: 'property-5',
     slug: 'property-5', // Hospitable: 5136 Goose Pond Rd (no widget code yet)
+    // Off the site for now. Remove this line to list it again.
+    hidden: true,
     name: 'Property 5',
     location: 'Coolbaugh Township, PA',
     area: 'Coolbaugh Township',
@@ -305,6 +312,12 @@ export const PROPERTIES: Property[] = [
     hospitable: { propertyId: '635012', uuid: '056aa587-1c2f-43aa-9438-3e8eab46c25a' },
   },
 ];
+
+/** Properties shown on the site. Everything reads from this list. */
+export const PROPERTIES: Property[] = ALL_PROPERTIES.filter((p) => !p.hidden);
+
+/** Every entry, including hidden ones — only for data checks. */
+export const ALL_PROPERTY_ENTRIES: readonly Property[] = ALL_PROPERTIES;
 
 export function getPropertyBySlug(slug: string): Property | undefined {
   return PROPERTIES.find((p) => p.slug === slug);

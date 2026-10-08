@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import cloverQuote from './fixtures/quote-1680-clover-rd.json';
+import turkeyQuote from './fixtures/quote-60-turkey-ridge.json';
 import { POST } from '@/app/api/quote/route';
 import { addDays, todayIso } from '@/lib/dates';
 
@@ -132,6 +133,24 @@ describe('POST /api/quote', () => {
     const res = await POST(quoteRequest({ slug: 'property-2', checkin, checkout, adults: 2 }));
     expect(await res.text()).not.toContain(TOKEN);
     expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('quotes Turkey Ridge (property-4) on the listing with the reservations', async () => {
+    // Real response for c62be835… (Nov 10–12 2026, 2 adults): checkout is widget 1396650.
+    const fetchMock = mockHospitable(200, turkeyQuote);
+    const res = await POST(quoteRequest({ slug: 'property-4', checkin, checkout, adults: 2 }));
+    const [url] = fetchMock.mock.calls[0] as unknown as [string];
+    expect(url).toBe('https://public.api.hospitable.com/v2/properties/c62be835-a698-4e96-90ec-1630519f3ced/quote');
+    const body = await res.json();
+    expect(body.bookingUrl).toBe('https://booking.hospitable.com/book/external/1396650/ed21fde7-78b8-4679-8bb7-310662ef754f');
+    expect(body).toMatchObject({ accommodation: 172600, fees: [{ label: 'Cleaning fee', amount: 39800 }], total: 231516 });
+  });
+
+  it('refuses hidden properties (Goose Pond, property-5) without calling Hospitable', async () => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    const res = await POST(quoteRequest({ slug: 'property-5', checkin, checkout, adults: 2 }));
+    expect(res.status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('rejects properties that are not in PROPERTIES without calling Hospitable', async () => {

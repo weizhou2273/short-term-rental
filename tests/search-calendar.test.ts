@@ -31,9 +31,20 @@ describe('normalizeSearch', () => {
   const results = normalizeSearch(searchFixture);
 
   it('keeps only properties listed on the site, keyed by slug', () => {
-    // The account returns 7 properties; "60 turkey ridge road" (c62be835…) is not in PROPERTIES.
-    expect(results.map((r) => r.slug).sort()).toEqual(['property-1', 'property-2', 'property-3', 'property-4', 'property-5', 'property-6']);
-    expect(JSON.stringify(results)).not.toContain('c62be835');
+    // The account returns 7 properties. Not on the site: the unused Turkey Ridge
+    // listing (c010e823…) and Goose Pond (ec6850bc…, hidden as property-5).
+    expect(results.map((r) => r.slug).sort()).toEqual(['property-1', 'property-2', 'property-3', 'property-4', 'property-6']);
+    expect(JSON.stringify(results)).not.toMatch(/c010e823|ec6850bc|property-5/);
+  });
+
+  it('maps Turkey Ridge (property-4) to the listing with the reservations', () => {
+    expect(results.find((r) => r.slug === 'property-4')).toEqual({
+      slug: 'property-4',
+      available: true,
+      totalWithoutTaxes: 212400, // c62be835…: $867 + $859 + fees, before taxes
+      nightlyAverage: Math.round((86700 + 85900) / 2),
+      currency: 'USD',
+    });
   });
 
   it('reads string-of-cents totals and decimal daily prices correctly', () => {
@@ -48,7 +59,11 @@ describe('normalizeSearch', () => {
   });
 
   it('marks unavailable properties', () => {
-    expect(results.find((r) => r.slug === 'property-5')?.available).toBe(false);
+    // In the captured response only the (now hidden) Goose Pond was booked, so flip Clover Rd.
+    const fixture = structuredClone(searchFixture);
+    const clover = fixture.data.find((row) => row.property.id === 'd37d9860-e7e2-4fa4-a582-633d918acddb')!;
+    clover.availability = { available: false, details: null };
+    expect(normalizeSearch(fixture).find((r) => r.slug === 'property-2')?.available).toBe(false);
   });
 });
 
@@ -60,7 +75,7 @@ describe('GET /api/search', () => {
     const fetchMock = mockHospitable(200, searchFixture);
     const res = await searchGET(get(`/api/search?checkin=${checkin}&checkout=${checkout}&adults=4`));
     expect(res.status).toBe(200);
-    expect((await res.json()).results).toHaveLength(6);
+    expect((await res.json()).results).toHaveLength(5);
     const url = new URL((fetchMock.mock.calls[0] as unknown as [string])[0]);
     expect(url.pathname).toBe('/v2/properties/search');
     expect(Object.fromEntries(url.searchParams)).toEqual({ start_date: checkin, end_date: checkout, adults: '4' });
@@ -96,6 +111,7 @@ describe('calendar', () => {
     const fetchMock = mockHospitable(200, calendarFixture);
     const start = todayIso();
     expect((await calendarGET(get(`/api/calendar?slug=nope&start=${start}&end=${addDays(start, 10)}`))).status).toBe(404);
+    expect((await calendarGET(get(`/api/calendar?slug=property-5&start=${start}&end=${addDays(start, 10)}`))).status).toBe(404);
     expect((await calendarGET(get(`/api/calendar?slug=property-2&start=${start}&end=${addDays(start, 365)}`))).status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();
   });

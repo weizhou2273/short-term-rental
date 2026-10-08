@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { getPropertyBySlug, PROPERTIES } from '@/data/properties';
+import { ALL_PROPERTY_ENTRIES, getPropertyBySlug } from '@/data/properties';
 import type { Property } from '@/data/types';
 import { coverPhoto, entryFile, propertyPhotos } from '@/lib/photos';
 
@@ -32,7 +32,7 @@ describe('propertyPhotos', () => {
 
 // Runs against the real data: a typo or a missing upload fails the build's
 // checks instead of shipping a broken image.
-describe.each(PROPERTIES.map((p) => [p.slug, p] as const))('photos listed for %s', (slug, property) => {
+describe.each(ALL_PROPERTY_ENTRIES.map((p) => [p.slug, p] as const))('photos listed for %s', (slug, property) => {
   const files = property.photos.map(entryFile);
 
   it('are plain image filenames, each listed once', () => {

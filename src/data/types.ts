@@ -50,6 +50,8 @@ export type Property = {
   id: string;
   /** URL segment: /stays/[slug]. */
   slug: string;
+  /** true = kept in the data file but removed from the site everywhere. */
+  hidden?: boolean;
   /** Must match the property name in Hospitable — the widget's health check looks for it. */
   name: string;
   location: string;
