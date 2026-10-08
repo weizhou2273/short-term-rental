@@ -302,7 +302,7 @@ const ALL_PROPERTIES: Property[] = [
     rating: 4.94,
     reviewCount: 355,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
-    features: { privatePool: true, sportCourt: false, waterfront: true, petFriendly: true },
+    features: { privatePool: true, sportCourt: true, waterfront: true, petFriendly: true },
     mapPos: { x: 42, y: 62 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.142, lng: -75.352 },
@@ -380,9 +380,10 @@ const ALL_PROPERTIES: Property[] = [
       { file: '22-bathrooms-04.jpg', room: 'Full bathroom 2', alt: 'Walk-in shower' },
       { file: '22-bathrooms-05.jpg', room: 'Full bathroom 3', alt: 'Wood-paneled bathroom with a jetted tub' },
     ],
-    // From the Hospitable listing, edited: outdated notes removed.
+    // From the Hospitable listing, edited: outdated notes removed. Outdoor features,
+    // the movie room's extras and the beds follow the photos, confirmed by the owner.
     description: [
-      'A 4,500 sq ft Poconos villa with 6 bedrooms and 3 baths, all on one level, with a private pond, a pool, a hot tub, a sauna and a movie and game room.',
+      'A 4,500 sq ft Poconos villa with 6 bedrooms and 3 baths, all on one level, with a private pond and beach, a pool, a pickleball court, a hot tub, a sauna and a movie and game room.',
       'It’s close to Camelback Mountain and Kalahari Resort, the state’s #1 ski resort and its highest-rated water park, with dozens of year-round outdoor activities nearby. Ski, mountain bike or golf at Mount Airy, then come home to cook a meal in the fully equipped kitchen.',
     ],
     details: [
@@ -392,7 +393,7 @@ const ALL_PROPERTIES: Property[] = [
       },
       {
         title: 'Movie & game room',
-        text: 'A converted garage with air conditioning: a wall-size movie screen, an air hockey table, a poker table, a fireplace and a big lounge sofa.',
+        text: 'A converted garage with air conditioning: a wall-size movie screen, a putting green, arcade machines, a foosball table, an air hockey table, a poker table, a fireplace and a big lounge sofa.',
       },
       { title: 'Sunroom & sauna', text: 'A bright sunroom with seating, and an indoor sauna for 3.' },
       {
@@ -401,7 +402,7 @@ const ALL_PROPERTIES: Property[] = [
       },
       {
         title: 'Deck & backyard',
-        text: 'The hot tub (up to 4 people) is on the deck, with a gas grill, a fire pit and forest views. We provide one full propane tank for the grill; refills are $20 a tank. The private pond is about 5 feet deep and not for swimming, so please keep an eye on children by the water.',
+        text: 'The hot tub (up to 4 people) is on the deck, with a bar and TV, a gas grill and forest views. Out back there’s a fire pit, a pickleball court with a ping pong table, a playground, and the private pond with a sandy beach and a dock. The pond is about 5 feet deep and not for swimming, so please keep an eye on children by the water. We provide one full propane tank for the grill; refills are $20 a tank.',
       },
       {
         title: 'Pool',
@@ -421,26 +422,34 @@ const ALL_PROPERTIES: Property[] = [
       },
     ],
     sleeping: [
-      { room: 'Bedroom 1', beds: '2 queen beds' },
-      { room: 'Bedroom 2', beds: '2 queen beds' },
-      { room: 'Bedroom 3', beds: '1 king bed' },
-      { room: 'Bedroom 4', beds: '2 queen beds' },
-      { room: 'Bedroom 5', beds: '3 twin beds' },
+      { room: 'Bedroom 1', beds: '1 queen bed, 1 full bed' },
+      { room: 'Bedroom 2', beds: '1 queen bed, 2 full beds' },
+      { room: 'Bedroom 3', beds: '1 queen bed, 1 full bed' },
+      { room: 'Bedroom 4', beds: '2 queen beds, 1 twin bed' },
+      { room: 'Bedroom 5', beds: '2 queen beds' },
       { room: 'Bedroom 6', beds: '2 bunk beds (best for kids)' },
     ],
-    // From the Hospitable listing. The first 10 show on the page; the rest under "Show all".
+    // From the Hospitable listing plus the features in the photos, confirmed by the owner.
+    // The first 10 show on the page; the rest under "Show all".
     amenities: [
       'Private pool (summer)',
       'Hot tub',
       'Sauna',
-      'Private pond',
+      'Private pond with a beach and dock',
+      'Pickleball court',
       'Home theater',
+      'Putting green',
       'Pool table',
       'Fire pit',
-      'Indoor fireplace',
       'Single-level home',
       'Wifi',
       'Free parking on premises',
+      'Playground',
+      'Arcade machines',
+      'Foosball table',
+      'Ping pong table',
+      'Outdoor bar',
+      'Indoor fireplace',
       'Community pool, beaches and lakes (seasonal)',
       'Game console',
       'Air hockey table',
@@ -523,7 +532,7 @@ const ALL_PROPERTIES: Property[] = [
       },
       {
         q: 'Can we bring pets?',
-        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $50 pet fee for up to 2 pets, plus $25 for each additional pet, charged separately after booking.',
+        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $50 fee per pet, charged separately after booking.',
       },
       { q: 'When is the pool open?', a: 'From June to mid-September. It isn’t heated, and everyone using it signs a liability waiver first.' },
       { q: 'Can we swim in the pond?', a: 'No, the pond isn’t for swimming. It’s about 5 feet deep, so please keep an eye on children by the water.' },
