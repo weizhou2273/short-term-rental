@@ -340,9 +340,9 @@ const ALL_PROPERTIES: Property[] = [
     type: 'Entire villa',
     guests: 20,
     bedrooms: 7,
-    beds: 10,
+    beds: 11,
     baths: 4.5,
-    priceFrom: 245,
+    priceFrom: 300,
     // Hospitable, Oct 2026: average of 133 rated Airbnb reviews, 136 in all.
     rating: 4.89,
     reviewCount: 136,
@@ -445,7 +445,7 @@ const ALL_PROPERTIES: Property[] = [
       { file: '24-bathrooms-12.jpg', room: 'Half bathroom', alt: 'Half bathroom with jungle wallpaper' },
       { file: '24-bathrooms-13.jpg', room: 'Half bathroom', alt: 'Half bathroom' },
     ],
-    // From the Hospitable listing, edited; outdoor features as in the photos.
+    // From the Hospitable listing, edited; outdoor features, fees and parking confirmed by the owner.
     description: [
       'A huge 5,000 sq ft home with 7 bedrooms and 4.5 baths that sleeps 20, right in the heart of the Poconos.',
       'Enjoy the big, flat backyard with a private in-ground pool, a pickleball court and a hot tub. Inside, it’s tastefully decorated and has everything you need, whether you want to relax, play poker or billiards, or cook a family meal for a big group in the oversized kitchen.',
@@ -598,13 +598,14 @@ const ALL_PROPERTIES: Property[] = [
       { name: 'Wai', date: 'April 2025', text: 'We were a family of 13 and we all enjoyed our stay. The house has many amenities to do that you won\'t be bored during bad weather days. Having elevator in the house was great for our seniors especially with transferring their belongings. Supermarkets and quick eats was within 10 minutes from the house. We would love to return during the summer to use the pool and sauna. Thank you for creating a memorable and happy stay for us!' },
     ],
     faqs: [
+      { q: 'How many cars can we park?', a: 'There’s free parking on the property for 10 or more cars.' },
       {
         q: 'Can we check out late?',
         a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through. Checking out after 11 AM without arranging it with us incurs a $200 fee.',
       },
       {
         q: 'Can we bring pets?',
-        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $100 pet fee for up to 2 pets, plus $50 for each additional pet, charged separately after booking.',
+        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $50 fee per pet, charged separately after booking.',
       },
       { q: 'When is the pool open?', a: 'From late May to late September, depending on the weather. It isn’t heated.' },
       { q: 'How many people fit in the hot tub and sauna?', a: 'The hot tub seats 6 and the sauna fits up to 7.' },
