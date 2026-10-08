@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Property } from '@/data/types';
 import type { Quote } from '@/lib/booking/types';
 import { MAX_INFANTS, MAX_PETS, validateGuestDetails, type GuestDetails } from '@/lib/booking/guest';
@@ -66,6 +66,11 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
   const [pets, setPets] = useState(() => (p.features.petFriendly ? countParam(searchParams, 'pets', MAX_PETS) : 0));
   const [pickerOpen, setPickerOpen] = useState(false);
   const [quote, setQuote] = useState<QuoteState>({ status: 'idle' });
+  // Bumped by "Try again" to re-run the price check for the same stay.
+  const [attempt, setAttempt] = useState(0);
+  // Shown when "Check availability" is pressed with something still missing.
+  const [nudge, setNudge] = useState<string | null>(null);
+  const adultsRef = useRef<HTMLSelectElement>(null);
 
   // Contact details stay in memory only — never in the URL or storage.
   const [details, setDetails] = useState<GuestDetails>(EMPTY_DETAILS);
@@ -102,6 +107,7 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPriceChanged(false);
     setReserveError(null);
+    setNudge(null);
     if (!ready) {
       setQuote({ status: 'idle' });
       return;
@@ -119,18 +125,34 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [ready, p.slug, checkin, checkout, adults, children, infants, pets]);
+  }, [ready, p.slug, checkin, checkout, adults, children, infants, pets, attempt]);
 
   const q = quote.status === 'ready' ? quote.quote : null;
   const errors = validateGuestDetails(details);
   const detailsValid = Object.keys(errors).length === 0;
-  const canReserve = Boolean(q) && detailsValid && !reserving;
+  const busy = quote.status === 'loading' || reserving;
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!q) return;
+    if (busy) return;
+    if (!q) {
+      // The price is fetched automatically; the button just says what's still needed.
+      if (!checkin || !checkout) {
+        setPickerOpen(true);
+        setNudge('Choose your check-in and check-out dates.');
+      } else if (!adults) {
+        adultsRef.current?.focus();
+        setNudge('Add the number of adults.');
+      } else if (quote.status === 'error') {
+        setAttempt((n) => n + 1);
+      }
+      return;
+    }
     if (!detailsValid) {
       setTouched({ firstName: true, lastName: true, email: true, phone: true });
+      const firstInvalid = (['firstName', 'lastName', 'email', 'phone'] as const).find((k) => errors[k]);
+      const input = firstInvalid ? e.currentTarget.elements.namedItem(firstInvalid) : null;
+      if (input instanceof HTMLInputElement) input.focus();
       return;
     }
     setReserving(true);
@@ -181,7 +203,7 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
         </button>
         <label className="bk-f">
           <span>Adults</span>
-          <select value={adults || ''} onChange={(e) => setAdults(Number(e.target.value) || 0)}>
+          <select ref={adultsRef} value={adults || ''} onChange={(e) => setAdults(Number(e.target.value) || 0)}>
             <option value="">Add adults</option>
             {range(1, p.guests - children).map((n) => (
               <option key={n} value={n}>
@@ -241,7 +263,9 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
       ) : null}
 
       <div aria-live="polite">
-        {quote.status === 'loading' ? <p className="bk-loading">Checking price with live availability…</p> : null}
+        {/* The button shows the loading state; this tells screen readers. */}
+        {quote.status === 'loading' ? <p className="sr-only">Checking availability and price…</p> : null}
+        {nudge ? <p className="bk-notice">{nudge}</p> : null}
         {quote.status === 'error' ? <p className="bk-error">{quote.message}</p> : null}
         {q ? (
           <div className="bk-quote">
@@ -311,8 +335,18 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
         </fieldset>
       ) : null}
 
-      <button className="btn btn-solid bk-go" type="submit" disabled={!canReserve}>
-        {reserving ? 'Opening secure checkout…' : q ? 'Reserve' : 'Check availability'}
+      {/* Never disabled: it opens what's missing, retries, or shows a spinner while busy. */}
+      <button className={`btn btn-solid bk-go${busy ? ' is-busy' : ''}`} type="submit" aria-disabled={busy || undefined}>
+        {busy ? <span className="spinner" aria-hidden="true" /> : null}
+        {reserving
+          ? 'Opening secure checkout…'
+          : quote.status === 'loading'
+            ? 'Checking availability…'
+            : q
+              ? 'Reserve'
+              : quote.status === 'error'
+                ? 'Try again'
+                : 'Check availability'}
       </button>
       {q && !detailsValid ? <p className="booking-foot">Add your name, email and phone to reserve.</p> : null}
       <p className="booking-foot">You won&apos;t be charged yet. Secure payment on the next step.</p>

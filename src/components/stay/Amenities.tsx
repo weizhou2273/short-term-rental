@@ -11,7 +11,9 @@ function AmenityList({ items }: { items: string[] }) {
     <div className="amenities">
       {items.map((a) => (
         <div className="amenity" key={a}>
-          <i aria-hidden="true" />
+          <svg className="amenity-check" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 12.5l4 4L18 8" />
+          </svg>
           {a}
         </div>
       ))}

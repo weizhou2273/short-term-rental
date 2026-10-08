@@ -179,12 +179,18 @@ p{margin:0}
 }
 .p-body{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:64px;margin-top:8px}
 .summary-line{font-size:17px}
-.highlights{display:grid;gap:18px}
-.highlight{display:flex;gap:16px}
-.highlight .ph{flex:none;width:32px;height:32px;border-radius:6px}
-.highlight p{color:var(--muted)}
 .desc{max-width:68ch}
 .desc p+p{margin-top:12px}
+/* "Show more" under the description */
+.desc-more{margin-top:16px}
+.desc-more summary{display:inline-block;cursor:pointer;list-style:none;font-weight:400;text-decoration:underline;text-underline-offset:3px}
+.desc-more summary::-webkit-details-marker{display:none}
+.desc-more:not([open]) summary::after{content:" ›"}
+.desc-more .when-open,.desc-more[open] .when-closed{display:none}
+.desc-more[open] .when-open{display:inline}
+.desc-detail{margin-top:18px}
+.desc-detail h3{font-size:16px}
+.desc-detail p{margin-top:4px;color:var(--muted)}
 .rooms{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
 .room{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
 .room .ph{width:40px;height:28px;border-radius:4px;margin-bottom:10px}
@@ -192,15 +198,17 @@ p{margin:0}
 .room-photo img{object-fit:cover}
 .amenities{display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;margin-bottom:20px}
 .amenity{display:flex;align-items:center;gap:12px}
-.amenity i{width:22px;height:22px;border:1px solid var(--brass);border-radius:4px;flex:none}
+.amenity-check{width:22px;height:22px;flex:none;border:1px solid var(--brass);border-radius:4px;fill:none;stroke:var(--primary);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .loc-map{height:320px;border-radius:var(--radius-lg);margin:12px 0}
+/* Leaflet's panes use z-index 400+; keep them under the sticky header and dialogs */
+.area-map{isolation:isolate;overflow:hidden;background:var(--fill);font:inherit}
 .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .rules ul{padding-left:18px;margin:8px 0 0;color:var(--muted)}
 @media (max-width:760px){.rules{grid-template-columns:1fr}.amenities{grid-template-columns:1fr}}
 .rating-big{font-family:var(--display);font-size:30px;font-weight:500;margin-bottom:16px}
 .reviews{display:grid;grid-template-columns:1fr 1fr;gap:28px}
 .review-head{display:flex;gap:12px;align-items:center;margin-bottom:8px}
-.avatar{width:40px;height:40px;border-radius:50%;flex:none}
+.avatar{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--fill-2);color:var(--text);font-family:var(--display);font-size:20px}
 @media (max-width:760px){.reviews{grid-template-columns:1fr}}
 .faq details{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:400;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px}
@@ -230,8 +238,11 @@ p{margin:0}
 .bk-total{border-top:1px solid var(--stone);margin-top:6px;padding-top:12px;font-weight:500;font-size:17px}
 .bk-save{font-size:13px;color:var(--accent);margin-top:6px}
 .bk-msg{font-size:14px;color:var(--accent)}
-.bk-go{width:100%;padding:14px}
-.bk-go:disabled{opacity:.45;cursor:not-allowed}
+.bk-go{width:100%;padding:14px;gap:10px}
+.bk-go.is-busy{cursor:progress}
+.spinner{width:15px;height:15px;flex:none;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation-duration:2.4s}}
 .booking-foot{margin-top:12px;font-size:13px;text-align:center;color:var(--muted)}
 
 .widget-host{min-height:200px}

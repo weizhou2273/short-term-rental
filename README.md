@@ -103,7 +103,17 @@ reorder. Export iPhone HEIC photos as JPEG first.
 `/photos/` are accepted (`next.config.ts`). `npm run check` fails if a listed
 photo is missing from its folder, so a typo can't ship a broken image.
 
-Maps are still placeholders.
+### Map
+
+"Where you'll be" is an OpenStreetMap map (Leaflet, loaded only when the
+guest scrolls near it) with a circle around the property's `coords`, never a
+pin. `coords` are public in the page, so set them about 500 m from the house,
+not to the address. Without `coords` the section shows a placeholder.
+OpenStreetMap's tile servers allow light use like this with the attribution
+shown; if traffic grows a lot, switch the tile URL in
+`src/components/stay/AreaMap.tsx` to a paid provider.
+
+The search page's map is still a placeholder.
 
 ## Security
 

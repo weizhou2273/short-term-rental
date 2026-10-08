@@ -31,11 +31,6 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight three', text: 'Short supporting line about this highlight.' },
-    ],
     description: [
       "Placeholder description paragraph one. Describe the house, the setting, and who it's ideal for.",
       'Placeholder paragraph two. Describe the main living spaces, the kitchen, and outdoor areas.',
@@ -83,12 +78,15 @@ const ALL_PROPERTIES: Property[] = [
     beds: 13,
     baths: 2.5,
     priceFrom: 380,
-    rating: 4.92,
-    reviewCount: 36,
+    // Hospitable, Oct 2026: average of 432 rated reviews (Airbnb and Booking.com), 433 in all.
+    rating: 4.88,
+    reviewCount: 433,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { privatePool: true, sportCourt: false, waterfront: false, petFriendly: true },
     mapPos: { x: 58, y: 28 },
-    coords: { lat: null, lng: null },
+    // About 500 m from the house, so the map circle covers the area, not the address.
+    coords: { lat: 41.137, lng: -75.351 },
+    neighborhood: 'About 10 minutes from Camelback Mountain and Kalahari Resort, with grocery stores and restaurants a short drive away.',
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid
     // (the owner's c1–c5 picks in the Drive folder). `room` groups them in the
     // photo tour, in order of each room's first photo; bedroom names match
@@ -134,33 +132,153 @@ const ALL_PROPERTIES: Property[] = [
       { file: '14-exterior-01.jpg', room: 'Exterior', alt: 'Aerial view of the backyard, pool and fire pit' },
       { file: '14-exterior-02.jpg', room: 'Exterior', alt: 'Front of the house at dusk' },
     ],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight three', text: 'Short supporting line about this highlight.' },
+    // From the Hospitable listing, edited: outdated notes removed, the hot tub
+    // placed outdoors as in the photos, and the late check-out fee per the owner.
+    description: [
+      'Head for the slopes or the water park and stay at Clover Lodge, a welcoming 4-bedroom, 2.5-bath vacation home near Camelback Mountain and Kalahari Resort.',
+      'Sitting 10 minutes from the state’s #1 ski resort, its highest-rated water park and dozens of year-round outdoor activities, this home gives you the reins to an outdoor paradise. Ski, mountain bike, golf at Mount Airy or visit Barley Creek Brewing, then come home to cook a meal in the fully equipped kitchen.',
     ],
-    description: ['Placeholder description paragraph one.', 'Placeholder paragraph two.'],
+    details: [
+      { title: 'Sun room', text: 'A projector and big screen for movie nights, a swing chair, a coffee table and cozy cushions.' },
+      {
+        title: 'Living room',
+        text: 'A cathedral-ceiling, open-concept living area that’s perfect for entertaining, with a fieldstone wood-burning fireplace, 65-inch flat-screen TVs with cable, a pool table and a PlayStation.',
+      },
+      { title: 'Game room', text: 'A converted garage with a 2-person sauna, a poker table, a foosball table, a movie screen and a seating area.' },
+      {
+        title: 'Kitchen & dining',
+        text: 'A fully equipped kitchen with a stainless steel refrigerator, glass-top stove, oven, dishwasher, microwave, coffee maker, full knife set, dishware and cooking essentials, plus an extendable dining table.',
+      },
+      {
+        title: 'Patio & backyard',
+        text: 'Outdoor dining with covered lounge seating, a gas grill, a fire pit, a hammock and the hot tub, all with forest views. We provide one full propane tank for the grill; refills are $20 a tank.',
+      },
+      {
+        title: 'Pool',
+        text: '15 feet across and 48 inches deep, not heated. Open in summer, usually May to mid-September depending on the weather. Everyone using the pool signs a liability waiver first.',
+      },
+      {
+        title: 'Hot tub & sauna',
+        text: 'The hot tub fits up to 4 people. It takes 10–15 hours to heat (about 2°F an hour) and reaches 104°F when it’s above 50°F outside, so plan ahead. The indoor sauna fits 2.',
+      },
+      {
+        title: 'Community amenities',
+        text: 'In season, the community’s outdoor pool, beaches and lakes are open to guests with passes from the community office (up to 10 adult passes, from $20 per person a day). Let us know ahead of time if you’d like them.',
+      },
+      {
+        title: 'Good to know',
+        text: 'Complimentary toiletries, linens and towels, central air and heat, and free Wi-Fi. You have the whole house except two small storage rooms and the backyard shed. Bears live in the area, so please don’t leave food outside. Minimum age to book is 25. Township registration #007512.',
+      },
+    ],
     sleeping: [
       { room: 'Bedroom 1', beds: '2 queen beds, 1 twin bed · private bathroom' },
       { room: 'Bedroom 2', beds: '1 queen bed' },
       { room: 'Bedroom 3', beds: '1 queen bed' },
       { room: 'Bedroom 4', beds: '2 bunk beds' },
     ],
-    amenities: ['Hot tub', 'Wifi', 'Free parking', 'Kitchen', 'Washer', 'Dryer', 'Fireplace', 'BBQ grill', 'Air conditioning', 'Smart TV', 'Fire pit', 'Board games'],
+    // From the Hospitable listing. The first 10 show on the page; the rest under "Show all".
+    amenities: [
+      'Hot tub',
+      'Sauna',
+      'Private pool (summer)',
+      'Home theater',
+      'Pool table',
+      'Fire pit',
+      'BBQ grill',
+      'Indoor fireplace',
+      'Wifi',
+      'Free parking on premises',
+      'Game console',
+      'Ping pong table',
+      'Sound system',
+      'TV',
+      'Patio',
+      'Outdoor dining area',
+      'Outdoor seating',
+      'Outdoor fireplace',
+      'Hammock',
+      'Garden',
+      'Kitchen',
+      'Refrigerator',
+      'Freezer',
+      'Stove',
+      'Oven',
+      'Microwave',
+      'Dishwasher',
+      'Coffee maker',
+      'Coffee',
+      'Toaster',
+      'Bread maker',
+      'Baking sheet',
+      'Cooking basics',
+      'Dishes and silverware',
+      'Wine glasses',
+      'Dining table',
+      'BBQ utensils',
+      'Trash compactor',
+      'Washer',
+      'Dryer',
+      'Air conditioning',
+      'Heating',
+      'Ceiling fan',
+      'Portable fans',
+      'Dedicated workspace',
+      'Private entrance',
+      'Private living room',
+      'Room-darkening shades',
+      'Hangers',
+      'Closet',
+      'Bed linens',
+      'Extra pillows and blankets',
+      'Essentials',
+      'Hair dryer',
+      'Shampoo',
+      'Conditioner',
+      'Body soap',
+      'Shower gel',
+      'Bathtub',
+      'Hot water',
+      'Cleaning products',
+      'Crib',
+      'Travel crib',
+      'High chair',
+      'Safe',
+      'Smoke alarm',
+      'Carbon monoxide alarm',
+      'Fire extinguisher',
+      'First aid kit',
+      'Fireplace guards',
+      'Laundromat nearby',
+    ],
     rules: {
       checkIn: 'After 4:00 PM',
       checkOut: 'Before 11:00 AM',
-      house: ['No parties or events', 'No smoking', 'Quiet hours 10 PM – 8 AM'],
-      safety: ['Smoke alarm', 'Carbon monoxide alarm'],
+      house: ['No parties or events', 'No smoking', 'Quiet hours 10 PM – 8 AM', 'Pets welcome (tell us before booking)', 'Minimum age to book: 25'],
+      safety: ['Smoke alarm', 'Carbon monoxide alarm', 'Exterior security cameras at the front door and backyard (none inside)'],
       cancellation: 'Placeholder cancellation policy summary.',
     },
+    // Recent 5-star reviews from Hospitable (Airbnb), first names only.
     reviews: [
-      { name: 'Guest A', date: 'Month 2026', text: 'Placeholder review text.' },
-      { name: 'Guest B', date: 'Month 2026', text: 'Placeholder review text.' },
+      { name: 'Damirjon', date: 'September 2026', text: 'We had a wonderful stay at this beautiful home in the Poconos! The house was clean, comfortable, cozy, and had everything we needed for a relaxing getaway. The atmosphere was peaceful and welcoming, and we really enjoyed spending time here with our family. Everything was exactly as described, and the home was very well maintained. We truly felt comfortable and at home during our stay. We would definitely recommend this place and would love to come back again!' },
+      { name: 'Leann', date: 'September 2026', text: 'This is a great place for a family vacation if you like a quiet, peaceful getaway away from the city. Edward was incredibly nice, accommodating, and quick to respond. The place was also spotless and fully equipped with everything we needed!' },
+      { name: 'Joel', date: 'August 2026', text: 'My girlfriend and I stayed at Edward’s place over a long weekend to celebrate my birthday. The place was super clean and the instructions for using the amenities very simple, clear, and easy to understand. The backyard, pool, and hot tub were in great condition and well taken care off. Edward was great in communicating and available if we needed anything. We loved our stay and would definitely book Edward’s place again in the future. 5 Stars all around!' },
+      { name: 'Wanizeh', date: 'June 2026', text: 'We had a wonderful stay and would definitely recommend this property to other families. We were three families traveling together, and the layout gave everyone plenty of privacy while still providing great spaces to spend time together. There were plenty of activities and amenities to enjoy at the house, making it easy for both adults and kids to have a great time. The host was extremely welcoming, responsive, and helpful throughout our stay. Overall, it was a fantastic experience, and we would gladly stay here again!' },
+      { name: 'Megan', date: 'December 2025', text: 'Wonderful location! Quick drive to Camelback! Plenty of space for 10 people. The place was clean and we felt right at home. The hot tub and the game room were a huge hit! Everything was wonderful and we would absolutely return again! The host was very helpful and a great communicator!' },
+      { name: 'Priscilla', date: 'August 2025', text: 'Beautiful home, everything was as described. They had everything we needed, kitchen utensils, pots and pans, plates, cups, you name it. We loved all the space for our big family & our dog. And every morning we had deer come right up to us. It was beautiful….i would love to come back.' },
     ],
     faqs: [
-      { q: 'Placeholder question one?', a: 'Placeholder answer.' },
-      { q: 'Placeholder question two?', a: 'Placeholder answer.' },
+      { q: 'How many cars can we park?', a: 'There’s free parking on the property for 5 to 6 cars.' },
+      {
+        q: 'Can we check out late?',
+        a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through. Checking out after 11 AM without arranging it with us incurs a $200 fee.',
+      },
+      {
+        q: 'Can we bring pets?',
+        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $50 pet cleaning fee ($100 for 4 or more dogs), charged separately after booking.',
+      },
+      { q: 'When is the pool open?', a: 'In summer, usually May to mid-September depending on the weather. It isn’t heated, and everyone using it signs a liability waiver first.' },
+      { q: 'How long does the hot tub take to heat up?', a: '10–15 hours, about 2°F an hour, so turn it up well before you want to use it. It fits up to 4 people.' },
+      { q: 'Is there a minimum age to book?', a: 'Yes, the guest making the booking must be at least 25.' },
     ],
     hospitable: { propertyId: '411552', uuid: 'd37d9860-e7e2-4fa4-a582-633d918acddb' },
   },
@@ -185,10 +303,6 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-    ],
     description: ['Placeholder description paragraph one.', 'Placeholder paragraph two.'],
     sleeping: [
       { room: 'Bedroom 1', beds: '1 king bed' },
@@ -234,10 +348,6 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-    ],
     description: ['Placeholder description paragraph one.', 'Placeholder paragraph two.'],
     sleeping: [
       { room: 'Bedroom 1', beds: '1 queen bed' },
@@ -282,11 +392,6 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight three', text: 'Short supporting line about this highlight.' },
-    ],
     description: ['Placeholder description paragraph one.', 'Placeholder paragraph two.', 'Placeholder paragraph three.'],
     sleeping: [
       { room: 'Bedroom 1', beds: '1 king bed' },
@@ -335,10 +440,6 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
-    highlights: [
-      { title: 'Highlight one', text: 'Short supporting line about this highlight.' },
-      { title: 'Highlight two', text: 'Short supporting line about this highlight.' },
-    ],
     description: ['Placeholder description paragraph one.', 'Placeholder paragraph two.'],
     sleeping: [
       { room: 'Bedroom 1', beds: '1 king bed' },
