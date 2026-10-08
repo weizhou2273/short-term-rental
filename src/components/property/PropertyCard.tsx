@@ -41,6 +41,7 @@ export function PropertyCard({ property: p, query = '', nearName, result, onHove
         <span className="card-title">{p.name}</span>
         <span>★ {p.rating}</span>
       </div>
+      <div className="card-tagline">{p.tagline}</div>
       <div className="card-meta">{p.location}</div>
       {nearName ? <div className="card-near">Near {nearName}</div> : null}
       <div className="card-meta">{specs(p)}</div>

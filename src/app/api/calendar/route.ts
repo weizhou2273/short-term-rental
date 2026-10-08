@@ -7,7 +7,7 @@ import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { errorResponse, json, upstreamErrorResponse } from '@/lib/api';
 
 /**
- * GET /api/calendar?slug=property-2&start=YYYY-MM-DD&end=YYYY-MM-DD
+ * GET /api/calendar?slug=clover-lodge&start=YYYY-MM-DD&end=YYYY-MM-DD
  *   → 200 { days: CalendarDay[] }  (feeds the booking card's date picker)
  */
 

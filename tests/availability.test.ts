@@ -80,7 +80,7 @@ describe('search params', () => {
 
   it('filters by attraction, guests and amenities', () => {
     const state = parseSearchState({ where: 'shawnee', adults: '18', amenities: 'court' });
-    expect(filterProperties(state).map((p) => p.slug)).toEqual(['property-4']);
+    expect(filterProperties(state).map((p) => p.slug)).toEqual(['the-ridge']);
   });
 
   it('round-trips amenity toggles through the query string', () => {
@@ -103,5 +103,17 @@ describe('rate limiter', () => {
   it('keys on the first forwarded address', () => {
     expect(clientIp(new Headers({ 'x-forwarded-for': '198.51.100.1, 10.0.0.1' }))).toBe('198.51.100.1');
     expect(clientIp(new Headers())).toBe('unknown');
+  });
+});
+
+describe('property data', () => {
+  it('has unique, URL-safe slugs and a tagline for every entry', async () => {
+    const { ALL_PROPERTY_ENTRIES } = await import('@/data/properties');
+    const slugs = ALL_PROPERTY_ENTRIES.map((p) => p.slug);
+    expect(new Set(slugs).size).toBe(slugs.length);
+    for (const p of ALL_PROPERTY_ENTRIES) {
+      expect(p.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(p.tagline.trim()).not.toBe('');
+    }
   });
 });

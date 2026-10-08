@@ -18,6 +18,17 @@ const nextConfig: NextConfig = {
     imageSizes: [256, 384],
     qualities: [75],
   },
+  // The stay pages launched on preview as /stays/property-N; keep any shared
+  // links working. Query strings (dates, guests) carry over.
+  async redirects() {
+    return [
+      ['property-1', 'shawnee-estate'],
+      ['property-2', 'clover-lodge'],
+      ['property-3', 'minsi-pond'],
+      ['property-4', 'the-ridge'],
+      ['property-6', 'the-clearview'],
+    ].map(([from, to]) => ({ source: `/stays/${from}`, destination: `/stays/${to}`, permanent: true }));
+  },
   async headers() {
     return [
       {

@@ -354,3 +354,7 @@ p{margin:0}
 .photo-grid.count-2 .pg-item:first-of-type{grid-row:auto}
 .photo-grid.count-3{grid-template-columns:2fr 1fr}
 @media (max-width:760px){.photo-grid.count-1,.photo-grid.count-2,.photo-grid.count-3{grid-template-columns:1fr;grid-template-rows:260px}}
+
+/* Property taglines (under the name) */
+.p-tagline{font-size:17px;color:var(--muted);margin-top:6px}
+.card-tagline{font-size:14px;color:var(--accent);margin:2px 0 4px;letter-spacing:.01em}

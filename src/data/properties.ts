@@ -12,8 +12,9 @@ import type { Property } from './types';
 const ALL_PROPERTIES: Property[] = [
   {
     id: 'property-1',
-    slug: 'property-1', // Hospitable: 148 Frutchey Dr
-    name: 'The Frutchey Estate',
+    slug: 'shawnee-estate', // Hospitable: 148 Frutchey Dr
+    name: 'The Shawnee Estate',
+    tagline: '8 bedrooms · tennis court, pool, pond & stream',
     location: 'East Stroudsburg, PA',
     area: 'East Stroudsburg',
     type: 'Entire villa',
@@ -71,8 +72,9 @@ const ALL_PROPERTIES: Property[] = [
   },
   {
     id: 'property-2',
-    slug: 'property-2', // Hospitable: 1680 Clover Rd
-    name: 'Clover Pond House',
+    slug: 'clover-lodge', // Hospitable: 1680 Clover Rd
+    name: 'Clover Lodge',
+    tagline: 'Forest cabin · pool, sauna, sun room cinema',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire cabin',
@@ -121,8 +123,9 @@ const ALL_PROPERTIES: Property[] = [
   },
   {
     id: 'property-3',
-    slug: 'property-3', // Hospitable: 539 Minsi Trl W
-    name: 'Minsi Pond Villa',
+    slug: 'minsi-pond', // Hospitable: 539 Minsi Trl W
+    name: 'Minsi Pond',
+    tagline: '6 bedrooms · private pond, sauna, single-level living',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire villa',
@@ -169,8 +172,9 @@ const ALL_PROPERTIES: Property[] = [
     id: 'property-4',
     // Hospitable: 60 Turkey Ridge Rd. Two Hospitable listings exist for this house; this is
     // the one with the reservations (c62be835…, widget 1396650), not c010e823… / 2517111.
-    slug: 'property-4',
-    name: 'Turkey Ridge Estate',
+    slug: 'the-ridge',
+    name: 'The Ridge',
+    tagline: '7 bedrooms, sleeps 20 · pool, pickleball, private theater',
     location: 'East Stroudsburg, PA',
     area: 'East Stroudsburg',
     type: 'Entire villa',
@@ -218,6 +222,7 @@ const ALL_PROPERTIES: Property[] = [
     // Off the site for now. Remove this line to list it again.
     hidden: true,
     name: 'Goose Pond Lodge',
+    tagline: '4 bedrooms · hot tub, theater room, lake access',
     location: 'Coolbaugh Township, PA',
     area: 'Coolbaugh Township',
     type: 'Entire cabin',
@@ -268,8 +273,9 @@ const ALL_PROPERTIES: Property[] = [
   },
   {
     id: 'property-6',
-    slug: 'property-6', // Hospitable: 731 Clearview Dr
-    name: 'Clearview House',
+    slug: 'the-clearview', // Hospitable: 731 Clearview Dr
+    name: 'The Clearview',
+    tagline: '4 bedrooms · private pool, movie room, hot tub & sauna',
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire home',

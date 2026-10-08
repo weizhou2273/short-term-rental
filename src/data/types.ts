@@ -58,6 +58,8 @@ export type Property = {
    * property name in the page text, so test the widget if you switch to it.
    */
   name: string;
+  /** One line under the name on cards and the stay page, e.g. "8 bedrooms · tennis court, pool". */
+  tagline: string;
   location: string;
   area: string;
   type: string;

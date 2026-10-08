@@ -9,6 +9,7 @@ export function PropertyHeader({ property: p }: { property: Property }) {
     <section className="p-head">
       <span className="eyebrow">A W&amp;K Reserve estate</span>
       <h1>{p.name}</h1>
+      <p className="p-tagline">{p.tagline}</p>
       <div className="p-head-row">
         <span>
           ★ {p.rating} · <a href="#reviews">{plural(p.reviewCount, 'review')}</a> · {p.location}

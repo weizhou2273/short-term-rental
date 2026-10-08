@@ -84,10 +84,10 @@ with none it shows placeholders.
 **Adding a folder of photos**
 
 ```bash
-npm run photos -- property-2 ~/Downloads/clover-rd-photos
+npm run photos -- clover-lodge ~/Downloads/clover-rd-photos
 ```
 
-This writes `public/photos/property-2/*.jpg`, rotated upright, at most 2560px
+This writes `public/photos/clover-lodge/*.jpg`, rotated upright, at most 2560px
 on the long edge, compressed, and with **all metadata stripped**, including
 GPS coordinates that would otherwise reveal each property's location to anyone
 downloading a photo. It then prints a `photos: [...]` list to paste in and

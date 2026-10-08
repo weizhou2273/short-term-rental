@@ -8,24 +8,24 @@ import { coverPhoto, entryFile, propertyPhotos } from '@/lib/photos';
 const PUBLIC_PHOTOS = path.join(process.cwd(), 'public', 'photos');
 const ALLOWED = /\.(jpe?g|png|webp|avif)$/i;
 
-const withPhotos = (photos: Property['photos']): Property => ({ ...getPropertyBySlug('property-2')!, photos });
+const withPhotos = (photos: Property['photos']): Property => ({ ...getPropertyBySlug('clover-lodge')!, photos });
 
 describe('propertyPhotos', () => {
   it('serves files from /photos/<slug>/ in the listed order', () => {
     const photos = propertyPhotos(withPhotos(['pool.jpg', { file: 'kitchen.jpg', alt: ' Chef’s kitchen ' }, 'deck.jpg']));
     expect(photos).toEqual([
-      { src: '/photos/property-2/pool.jpg', alt: 'Clover Pond House, photo 1' },
-      { src: '/photos/property-2/kitchen.jpg', alt: 'Chef’s kitchen' },
-      { src: '/photos/property-2/deck.jpg', alt: 'Clover Pond House, photo 3' },
+      { src: '/photos/clover-lodge/pool.jpg', alt: 'Clover Lodge, photo 1' },
+      { src: '/photos/clover-lodge/kitchen.jpg', alt: 'Chef’s kitchen' },
+      { src: '/photos/clover-lodge/deck.jpg', alt: 'Clover Lodge, photo 3' },
     ]);
   });
 
   it('URL-encodes awkward filenames', () => {
-    expect(propertyPhotos(withPhotos(['Great Room #1.jpg']))[0]!.src).toBe('/photos/property-2/Great%20Room%20%231.jpg');
+    expect(propertyPhotos(withPhotos(['Great Room #1.jpg']))[0]!.src).toBe('/photos/clover-lodge/Great%20Room%20%231.jpg');
   });
 
   it('uses the first photo as the cover, or none when the list is empty', () => {
-    expect(coverPhoto(withPhotos(['a.jpg', 'b.jpg']))?.src).toBe('/photos/property-2/a.jpg');
+    expect(coverPhoto(withPhotos(['a.jpg', 'b.jpg']))?.src).toBe('/photos/clover-lodge/a.jpg');
     expect(coverPhoto(withPhotos([]))).toBeUndefined();
   });
 });

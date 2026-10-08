@@ -33,13 +33,13 @@ describe('normalizeSearch', () => {
   it('keeps only properties listed on the site, keyed by slug', () => {
     // The account returns 7 properties. Not on the site: the unused Turkey Ridge
     // listing (c010e823…) and Goose Pond (ec6850bc…, hidden as property-5).
-    expect(results.map((r) => r.slug).sort()).toEqual(['property-1', 'property-2', 'property-3', 'property-4', 'property-6']);
+    expect(results.map((r) => r.slug).sort()).toEqual(['clover-lodge', 'minsi-pond', 'shawnee-estate', 'the-clearview', 'the-ridge']);
     expect(JSON.stringify(results)).not.toMatch(/c010e823|ec6850bc|property-5/);
   });
 
-  it('maps Turkey Ridge (property-4) to the listing with the reservations', () => {
-    expect(results.find((r) => r.slug === 'property-4')).toEqual({
-      slug: 'property-4',
+  it('maps Turkey Ridge (the-ridge) to the listing with the reservations', () => {
+    expect(results.find((r) => r.slug === 'the-ridge')).toEqual({
+      slug: 'the-ridge',
       available: true,
       totalWithoutTaxes: 212400, // c62be835…: $867 + $859 + fees, before taxes
       nightlyAverage: Math.round((86700 + 85900) / 2),
@@ -48,9 +48,9 @@ describe('normalizeSearch', () => {
   });
 
   it('reads string-of-cents totals and decimal daily prices correctly', () => {
-    const clover = results.find((r) => r.slug === 'property-2');
+    const clover = results.find((r) => r.slug === 'clover-lodge');
     expect(clover).toEqual({
-      slug: 'property-2',
+      slug: 'clover-lodge',
       available: true,
       totalWithoutTaxes: 97229, // "97229" → $972.29
       nightlyAverage: Math.round((34674 + 34555) / 2),
@@ -63,7 +63,7 @@ describe('normalizeSearch', () => {
     const fixture = structuredClone(searchFixture);
     const clover = fixture.data.find((row) => row.property.id === 'd37d9860-e7e2-4fa4-a582-633d918acddb')!;
     clover.availability = { available: false, details: null };
-    expect(normalizeSearch(fixture).find((r) => r.slug === 'property-2')?.available).toBe(false);
+    expect(normalizeSearch(fixture).find((r) => r.slug === 'clover-lodge')?.available).toBe(false);
   });
 });
 
@@ -100,7 +100,7 @@ describe('calendar', () => {
     const fetchMock = mockHospitable(200, calendarFixture);
     const start = todayIso();
     const end = addDays(start, 60);
-    const res = await calendarGET(get(`/api/calendar?slug=property-2&start=${start}&end=${end}`));
+    const res = await calendarGET(get(`/api/calendar?slug=clover-lodge&start=${start}&end=${end}`));
     expect(res.status).toBe(200);
     expect((await res.json()).days).toHaveLength(3);
     const url = new URL((fetchMock.mock.calls[0] as unknown as [string])[0]);
@@ -112,7 +112,7 @@ describe('calendar', () => {
     const start = todayIso();
     expect((await calendarGET(get(`/api/calendar?slug=nope&start=${start}&end=${addDays(start, 10)}`))).status).toBe(404);
     expect((await calendarGET(get(`/api/calendar?slug=property-5&start=${start}&end=${addDays(start, 10)}`))).status).toBe(404);
-    expect((await calendarGET(get(`/api/calendar?slug=property-2&start=${start}&end=${addDays(start, 365)}`))).status).toBe(400);
+    expect((await calendarGET(get(`/api/calendar?slug=clover-lodge&start=${start}&end=${addDays(start, 365)}`))).status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

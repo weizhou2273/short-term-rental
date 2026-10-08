@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const cover = coverPhoto(property);
   return {
     title: property.name,
-    description: `${property.type} in ${property.area} for up to ${property.guests} guests. Book direct.`,
+    description: `${property.tagline}. ${property.type} in ${property.area} for up to ${property.guests} guests. Book direct.`,
     // Link previews (iMessage, WhatsApp, social) show the property's cover photo.
     ...(cover ? { openGraph: { images: [{ url: cover.src, alt: cover.alt }] } } : {}),
   };
