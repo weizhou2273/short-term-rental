@@ -36,7 +36,6 @@ export type Site = {
   attractions: Attraction[];
   /** Shown once on the results page instead of as filters. */
   everyEstate: string[];
-  whyBookDirect: { title: string; text: string }[];
 };
 
 export type PropertyFeatures = {

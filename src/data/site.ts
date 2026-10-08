@@ -27,18 +27,4 @@ export const SITE: Site = {
     { id: 'bushkill', name: 'Bushkill Falls', kind: 'Waterfalls' },
   ],
   everyEstate: ['Hot tub', 'Sauna', 'Movie room', 'Game room', 'Fire pit'],
-  whyBookDirect: [
-    {
-      title: 'Best rate, no service fee',
-      text: 'Placeholder: direct bookings skip the platform service fee guests pay elsewhere.',
-    },
-    {
-      title: 'Talk to us directly',
-      text: 'Placeholder: one point of contact before, during, and after your stay.',
-    },
-    {
-      title: 'Direct-guest perks',
-      text: 'Placeholder: early check-in when available, return-guest discount, local guide.',
-    },
-  ],
 };

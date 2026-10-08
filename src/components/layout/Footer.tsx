@@ -29,9 +29,6 @@ export function Footer() {
                 <Link href="/search">Search stays</Link>
               </li>
               <li>
-                <a href="#">Manage my booking</a>
-              </li>
-              <li>
                 <a href="#">FAQ</a>
               </li>
             </ul>

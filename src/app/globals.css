@@ -128,12 +128,6 @@ p{margin:0}
 .card-price{margin-top:4px}
 .card-price b{font-weight:500}
 
-.why{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.why-item{border-top:1px solid var(--gold);padding:24px 4px 0}
-.why-item h3{font-family:var(--display);font-size:22px;font-weight:500}
-.why-icon{display:none}
-.why-item p{color:var(--muted);margin-top:6px}
-@media (max-width:760px){.why{grid-template-columns:1fr}}
 
 .footer{background:var(--forest);color:var(--cream);margin-top:64px;padding:56px 0 28px}
 .footer .muted{color:rgba(244,239,230,.7)}

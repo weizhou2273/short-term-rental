@@ -2,7 +2,6 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/home/Hero';
 import { PropertyGrid } from '@/components/home/PropertyGrid';
-import { WhyBookDirect } from '@/components/home/WhyBookDirect';
 
 export default function HomePage() {
   return (
@@ -13,7 +12,6 @@ export default function HomePage() {
         <Hero />
         <div className="container">
           <PropertyGrid />
-          <WhyBookDirect />
         </div>
       </main>
       <Footer />

@@ -25,7 +25,6 @@ export function Header({ showMiniSearch = false }: { showMiniSearch?: boolean })
         ) : null}
         <nav className="nav" aria-label="Main">
           <Link href="/search">All stays</Link>
-          <Link href="/#why">Why book direct</Link>
           <a href={`mailto:${SITE.contactEmail}`}>Contact</a>
           <Link className="btn btn-solid" href="/search">
             Book direct
