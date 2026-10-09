@@ -8,7 +8,7 @@ import { addDays, todayIso } from '@/lib/dates';
 // The fixture is the real create-quote response Hospitable returned for
 // 1680 Clover Rd (clover-lodge), Nov 10–12 2026, 2 adults.
 const CLOVER_UUID = 'd37d9860-e7e2-4fa4-a582-633d918acddb';
-const SITE_ID = 'e617fd89-303f-4d0c-8777-4369493463ff';
+const SITE_ID = 'a2ed54d4-814f-4f65-ac95-76f57e335dce';
 const TOKEN = 'test-pat-should-never-leak';
 
 const checkin = addDays(todayIso(), 30);
