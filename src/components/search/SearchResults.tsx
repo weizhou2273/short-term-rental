@@ -30,18 +30,21 @@ type Live =
   | { status: 'error'; message: string };
 
 /**
- * Results list + map. With dates and guests in the URL, asks /api/search for
- * live availability and pre-tax totals; available stays sort first.
+ * Results list + map. With dates in the URL (guests default to one adult),
+ * asks /api/search for live availability and pre-tax totals; available stays
+ * sort first.
  */
 export function SearchResults({ slugs, state, suggested, nearName, heading, filters, everyEstate }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
-  const hasStay = Boolean(state.checkin && state.checkout && state.adults);
+  // Like Airbnb, dates alone are enough: until guests are chosen, price for one adult.
+  const adults = state.adults || 1;
+  const hasStay = Boolean(state.checkin && state.checkout);
   const [live, setLive] = useState<Live>({ status: 'idle' });
 
   useEffect(() => {
     if (!hasStay) return;
     const controller = new AbortController();
-    const q = new URLSearchParams({ checkin: state.checkin, checkout: state.checkout, adults: String(state.adults) });
+    const q = new URLSearchParams({ checkin: state.checkin, checkout: state.checkout, adults: String(adults) });
     // Starting a new request supersedes the previous result.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLive({ status: 'loading' });
@@ -56,7 +59,7 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
         if (err.name !== 'AbortError') setLive({ status: 'error', message: err.message });
       });
     return () => controller.abort();
-  }, [hasStay, state.checkin, state.checkout, state.adults]);
+  }, [hasStay, state.checkin, state.checkout, adults]);
 
   const bySlug = hasStay && live.status === 'done' ? live.bySlug : null;
   const properties = slugs.map(getPropertyBySlug).filter((p): p is Property => Boolean(p));
@@ -71,7 +74,7 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
   // A suggested stay opens the property with those dates, keeping any guest count.
   const cardQuery = (slug: string) => {
     const s = hasStay ? undefined : suggested[slug];
-    return s ? stayQuery({ checkin: s.checkin, checkout: s.checkout, adults: state.adults || 1 }) : query;
+    return s ? stayQuery({ checkin: s.checkin, checkout: s.checkout, adults }) : query;
   };
 
   return (
@@ -84,7 +87,7 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
           {!hasStay
             ? priced
               ? 'Prices are for the dates shown and include all fees, before taxes. Add your dates for exact prices.'
-              : 'Add dates and guests to see live availability and prices.'
+              : 'Add dates to see live availability and prices.'
             : live.status === 'loading'
               ? 'Checking availability…'
               : live.status === 'error'
