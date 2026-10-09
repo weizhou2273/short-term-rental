@@ -66,8 +66,6 @@ export type Property = {
   bedrooms: number;
   beds: number;
   baths: number;
-  /** Marketing "from" price shown on cards. Real prices come from Hospitable. */
-  priceFrom: number;
   rating: number;
   reviewCount: number;
   nearby: string[];

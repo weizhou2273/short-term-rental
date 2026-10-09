@@ -6,6 +6,7 @@ import { SearchBar } from '@/components/search/SearchBar';
 import { AmenityFilters } from '@/components/search/AmenityFilters';
 import { SearchResults } from '@/components/search/SearchResults';
 import { plural } from '@/lib/format';
+import { getSuggestedStays } from '@/lib/hospitable/suggested';
 import { attractionById, filterProperties, parseSearchState } from '@/lib/search-params';
 
 export const metadata: Metadata = {
@@ -17,6 +18,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const state = parseSearchState(await searchParams);
   const place = attractionById(state.where);
   const results = filterProperties(state);
+  // Without dates, price each result's next open stay instead (as Airbnb does).
+  const suggested = state.checkin && state.checkout ? {} : await getSuggestedStays(results);
 
   return (
     <>
@@ -29,6 +32,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <SearchResults
           slugs={results.map((p) => p.slug)}
           state={state}
+          suggested={suggested}
           nearName={place?.name}
           heading={
             <h1 style={{ fontSize: 28 }}>

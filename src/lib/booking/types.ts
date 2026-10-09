@@ -17,6 +17,8 @@ export type Quote = {
   discounts: MoneyLine[];
   taxes: MoneyLine[];
   total: number;
+  /** Total with all fees, before taxes: the figure cards and the price heading show. */
+  totalBeforeTaxes: number;
 };
 
 export type SearchResult = {
@@ -35,6 +37,19 @@ export type CalendarDay = {
   minStay: number | null;
   closedForCheckin: boolean;
   closedForCheckout: boolean;
+};
+
+/**
+ * A stay picked for a guest who hasn't chosen dates (as Airbnb does): the
+ * property's first open stay, priced with all fees, before taxes.
+ */
+export type SuggestedStay = {
+  checkin: string;
+  checkout: string;
+  nights: number;
+  /** Cents. */
+  total: number;
+  currency: string;
 };
 
 export type ApiError = { error: string };

@@ -6,7 +6,7 @@ import type { Property } from '@/data/types';
 import type { Quote } from '@/lib/booking/types';
 import { MAX_INFANTS, MAX_PETS, validateGuestDetails, type GuestDetails } from '@/lib/booking/guest';
 import { formatShortDate, nightsBetween } from '@/lib/dates';
-import { money, plural } from '@/lib/format';
+import { money, plural, wholeDollars } from '@/lib/format';
 import { parseSearchState } from '@/lib/search-params';
 import { DateRangePicker } from './DateRangePicker';
 
@@ -55,12 +55,13 @@ const EMPTY_DETAILS: GuestDetails = { firstName: '', lastName: '', email: '', ph
  *   redirect to that quote's booking_url, where Hospitable's checkout opens
  *   pre-filled and takes payment.
  */
-export function NativeBookingCard({ property: p }: { property: Property }) {
+export function NativeBookingCard({ property: p, onQuote }: { property: Property; onQuote?: (quote: Quote | null) => void }) {
   const searchParams = useSearchParams();
   const initial = parseSearchState(searchParams);
   const [checkin, setCheckin] = useState(initial.checkin);
   const [checkout, setCheckout] = useState(initial.checkout);
-  const [adults, setAdults] = useState(initial.adults && initial.adults <= p.guests ? initial.adults : 0);
+  // One adult until the guest says otherwise, as on Airbnb, so dates alone get a price.
+  const [adults, setAdults] = useState(initial.adults && initial.adults <= p.guests ? initial.adults : 1);
   const [children, setChildren] = useState(() => countParam(searchParams, 'children', p.guests - 1));
   const [infants, setInfants] = useState(() => countParam(searchParams, 'infants', MAX_INFANTS));
   const [pets, setPets] = useState(() => (p.features.petFriendly ? countParam(searchParams, 'pets', MAX_PETS) : 0));
@@ -128,6 +129,10 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
   }, [ready, p.slug, checkin, checkout, adults, children, infants, pets, attempt]);
 
   const q = quote.status === 'ready' ? quote.quote : null;
+
+  useEffect(() => {
+    onQuote?.(q);
+  }, [q, onQuote]);
   const errors = validateGuestDetails(details);
   const detailsValid = Object.keys(errors).length === 0;
   const busy = quote.status === 'loading' || reserving;
@@ -192,6 +197,18 @@ export function NativeBookingCard({ property: p }: { property: Property }) {
 
   return (
     <form className="bk" onSubmit={onSubmit} noValidate>
+      {/* No "from" price: like Airbnb, the heading is the chosen stay's total with all fees, before taxes. */}
+      <div className="booking-price">
+        {q ? (
+          <>
+            <strong>{wholeDollars(q.totalBeforeTaxes, q.currency)}</strong> for {plural(q.nights, 'night')}
+          </>
+        ) : checkin && checkout ? (
+          'Your stay'
+        ) : (
+          'Add dates for prices'
+        )}
+      </div>
       <div className="bk-fields">
         <button type="button" className="bk-f-btn" aria-expanded={pickerOpen} onClick={() => setPickerOpen((o) => !o)}>
           <span>Check-in</span>

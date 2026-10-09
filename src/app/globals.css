@@ -119,14 +119,13 @@ p{margin:0}
 @media (max-width:760px){.hero{min-height:420px;padding:16px 0}.hero-toggle{top:12px;right:12px;bottom:auto}}
 
 .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px 24px}
+.grid-note{font-size:14px;margin:0 0 24px}
 .card{text-decoration:none;display:block}
 .card .ph{aspect-ratio:20/19;border-radius:var(--radius);margin-bottom:12px;transition:transform .3s}
 .card:hover .ph{transform:scale(1.015)}
 .card-row{display:flex;justify-content:space-between;gap:8px}
 .card-title{font-family:var(--display);font-size:22px;font-weight:500;line-height:1.2}
 .card-meta{color:var(--muted);font-size:14px}
-.card-price{margin-top:4px}
-.card-price b{font-weight:500}
 
 
 .footer{background:var(--forest);color:var(--cream);margin-top:64px;padding:56px 0 28px}
