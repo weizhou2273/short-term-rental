@@ -49,6 +49,39 @@ async function postQuote(payload: object, signal?: AbortSignal): Promise<Quote> 
 const EMPTY_DETAILS: GuestDetails = { firstName: '', lastName: '', email: '', phone: '' };
 
 /**
+ * Contact details are kept for this browser tab only (sessionStorage), so a
+ * guest who goes back from Hospitable's checkout to change dates doesn't have
+ * to retype them. They're gone when the tab closes — safe on a shared
+ * computer — and never put in the URL. Returning guests on their own device
+ * get the browser's autofill instead (see the autoComplete attributes).
+ */
+const DETAILS_KEY = 'wk-guest-details';
+
+function loadDetails(): GuestDetails {
+  try {
+    const saved: unknown = JSON.parse(window.sessionStorage.getItem(DETAILS_KEY) ?? 'null');
+    if (!saved || typeof saved !== 'object') return EMPTY_DETAILS;
+    const get = (k: keyof GuestDetails) => {
+      const v = (saved as Record<string, unknown>)[k];
+      return typeof v === 'string' ? v : '';
+    };
+    return { firstName: get('firstName'), lastName: get('lastName'), email: get('email'), phone: get('phone') };
+  } catch {
+    // Storage blocked (private mode, settings): start empty.
+    return EMPTY_DETAILS;
+  }
+}
+
+function saveDetails(details: GuestDetails) {
+  try {
+    if (Object.values(details).some(Boolean)) window.sessionStorage.setItem(DETAILS_KEY, JSON.stringify(details));
+    else window.sessionStorage.removeItem(DETAILS_KEY);
+  } catch {
+    // Storage blocked: the form still works, it just won't remember.
+  }
+}
+
+/**
  * Our booking card (bookingMode "native"):
  *   pick dates + guests → POST /api/quote → show Hospitable's breakdown →
  *   add contact details → Reserve → POST /api/quote again with guest details →
@@ -73,8 +106,9 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   const [nudge, setNudge] = useState<string | null>(null);
   const adultsRef = useRef<HTMLSelectElement>(null);
 
-  // Contact details stay in memory only — never in the URL or storage.
-  const [details, setDetails] = useState<GuestDetails>(EMPTY_DETAILS);
+  // This card renders only in the browser (useSearchParams under Suspense), so
+  // reading sessionStorage while initialising state is safe.
+  const [details, setDetails] = useState<GuestDetails>(loadDetails);
   const [touched, setTouched] = useState<Partial<Record<keyof GuestDetails, boolean>>>({});
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState<string | null>(null);
@@ -82,6 +116,11 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
 
   const ready = Boolean(checkin && checkout && adults && nightsBetween(checkin, checkout) >= 1);
   const stay = { slug: p.slug, checkin, checkout, adults, children, infants, pets };
+
+  // Remember what the guest typed for this tab (see DETAILS_KEY).
+  useEffect(() => {
+    saveDetails(details);
+  }, [details]);
 
   // Keep the stay (not the guest's details) in the URL so it survives refresh and sharing.
   useEffect(() => {
