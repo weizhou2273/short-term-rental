@@ -25,7 +25,9 @@ export function Header({ showMiniSearch = false }: { showMiniSearch?: boolean })
         ) : null}
         <nav className="nav" aria-label="Main">
           <Link href="/search">All stays</Link>
-          <a href={`mailto:${SITE.contactEmail}`}>Contact</a>
+          {/* Jumps to the footer's contact details: a bare mailto link does nothing
+              for guests without a default mail app (e.g. Gmail in the browser). */}
+          <a href="#contact">Contact</a>
           <Link className="btn btn-solid" href="/search">
             Book direct
           </Link>

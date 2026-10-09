@@ -24,6 +24,8 @@ export type Site = {
   tagline: string;
   subline: string;
   contactEmail: string;
+  /** Instagram handle, without the @. */
+  instagram: string;
   hospitable: {
     /** Hospitable Direct widget loader script. */
     loaderSrc: string;
