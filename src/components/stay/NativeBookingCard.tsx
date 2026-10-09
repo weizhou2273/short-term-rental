@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import type { Property } from '@/data/types';
 import type { Quote } from '@/lib/booking/types';
-import { MAX_INFANTS, MAX_PETS, validateGuestDetails, type GuestDetails } from '@/lib/booking/guest';
+import { MAX_INFANTS, MAX_PETS } from '@/lib/booking/guest';
 import { formatShortDate, nightsBetween } from '@/lib/dates';
 import { money, plural, wholeDollars } from '@/lib/format';
 import { parseSearchState } from '@/lib/search-params';
@@ -46,47 +46,11 @@ async function postQuote(payload: object, signal?: AbortSignal): Promise<Quote> 
   return body as Quote;
 }
 
-const EMPTY_DETAILS: GuestDetails = { firstName: '', lastName: '', email: '', phone: '' };
-
-/**
- * Contact details are kept for this browser tab only (sessionStorage), so a
- * guest who goes back from Hospitable's checkout to change dates doesn't have
- * to retype them. They're gone when the tab closes — safe on a shared
- * computer — and never put in the URL. Returning guests on their own device
- * get the browser's autofill instead (see the autoComplete attributes).
- */
-const DETAILS_KEY = 'wk-guest-details';
-
-function loadDetails(): GuestDetails {
-  try {
-    const saved: unknown = JSON.parse(window.sessionStorage.getItem(DETAILS_KEY) ?? 'null');
-    if (!saved || typeof saved !== 'object') return EMPTY_DETAILS;
-    const get = (k: keyof GuestDetails) => {
-      const v = (saved as Record<string, unknown>)[k];
-      return typeof v === 'string' ? v : '';
-    };
-    return { firstName: get('firstName'), lastName: get('lastName'), email: get('email'), phone: get('phone') };
-  } catch {
-    // Storage blocked (private mode, settings): start empty.
-    return EMPTY_DETAILS;
-  }
-}
-
-function saveDetails(details: GuestDetails) {
-  try {
-    if (Object.values(details).some(Boolean)) window.sessionStorage.setItem(DETAILS_KEY, JSON.stringify(details));
-    else window.sessionStorage.removeItem(DETAILS_KEY);
-  } catch {
-    // Storage blocked: the form still works, it just won't remember.
-  }
-}
-
 /**
  * Our booking card (bookingMode "native"):
  *   pick dates + guests → POST /api/quote → show Hospitable's breakdown →
- *   add contact details → Reserve → POST /api/quote again with guest details →
- *   redirect to that quote's booking_url, where Hospitable's checkout opens
- *   pre-filled and takes payment.
+ *   Reserve → POST /api/quote again → redirect to that quote's booking_url,
+ *   where Hospitable's checkout asks for the guest's details and takes payment.
  */
 export function NativeBookingCard({ property: p, onQuote }: { property: Property; onQuote?: (quote: Quote | null) => void }) {
   const searchParams = useSearchParams();
@@ -106,10 +70,6 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   const [nudge, setNudge] = useState<string | null>(null);
   const adultsRef = useRef<HTMLSelectElement>(null);
 
-  // This card renders only in the browser (useSearchParams under Suspense), so
-  // reading sessionStorage while initialising state is safe.
-  const [details, setDetails] = useState<GuestDetails>(loadDetails);
-  const [touched, setTouched] = useState<Partial<Record<keyof GuestDetails, boolean>>>({});
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState<string | null>(null);
   const [priceChanged, setPriceChanged] = useState(false);
@@ -117,12 +77,7 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   const ready = Boolean(checkin && checkout && adults && nightsBetween(checkin, checkout) >= 1);
   const stay = { slug: p.slug, checkin, checkout, adults, children, infants, pets };
 
-  // Remember what the guest typed for this tab (see DETAILS_KEY).
-  useEffect(() => {
-    saveDetails(details);
-  }, [details]);
-
-  // Keep the stay (not the guest's details) in the URL so it survives refresh and sharing.
+  // Keep the stay in the URL so it survives refresh and sharing.
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     const values = {
@@ -172,8 +127,6 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   useEffect(() => {
     onQuote?.(q);
   }, [q, onQuote]);
-  const errors = validateGuestDetails(details);
-  const detailsValid = Object.keys(errors).length === 0;
   const busy = quote.status === 'loading' || reserving;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -192,20 +145,14 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
       }
       return;
     }
-    if (!detailsValid) {
-      setTouched({ firstName: true, lastName: true, email: true, phone: true });
-      const firstInvalid = (['firstName', 'lastName', 'email', 'phone'] as const).find((k) => errors[k]);
-      const input = firstInvalid ? e.currentTarget.elements.namedItem(firstInvalid) : null;
-      if (input instanceof HTMLInputElement) input.focus();
-      return;
-    }
     setReserving(true);
     setReserveError(null);
     setPriceChanged(false);
     try {
-      // A fresh quote carrying the guest's details, so checkout opens pre-filled
-      // and availability is checked one last time.
-      const final = await postQuote({ ...stay, guest: details });
+      // A fresh quote checks availability and price one last time. It carries no
+      // guest details: with them, Hospitable skips its own details step and its
+      // checkout then can't take payment ("Unable to pay for this booking").
+      const final = await postQuote(stay);
       if (!isCheckoutUrl(final.bookingUrl)) throw new Error('Couldn’t start checkout. Please try again.');
       if (final.total !== q.total) {
         setQuote({ status: 'ready', quote: final });
@@ -219,20 +166,6 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
       setReserving(false);
     }
   }
-
-  const field = (key: keyof GuestDetails) => ({
-    value: details[key],
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => setDetails((d) => ({ ...d, [key]: e.target.value })),
-    onBlur: () => setTouched((t) => ({ ...t, [key]: true })),
-    'aria-invalid': Boolean(touched[key] && errors[key]),
-    'aria-describedby': touched[key] && errors[key] ? `bk-err-${key}` : undefined,
-  });
-  const fieldError = (key: keyof GuestDetails) =>
-    touched[key] && errors[key] ? (
-      <small className="bk-err" id={`bk-err-${key}`}>
-        {errors[key]}
-      </small>
-    ) : null;
 
   return (
     <form className="bk" onSubmit={onSubmit} noValidate>
@@ -362,35 +295,6 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
         {reserveError ? <p className="bk-error">{reserveError}</p> : null}
       </div>
 
-      {q ? (
-        <fieldset className="bk-details">
-          <legend>Your details</legend>
-          <div className="bk-fields">
-            <label className="bk-f">
-              <span>First name</span>
-              <input type="text" name="firstName" autoComplete="given-name" maxLength={80} {...field('firstName')} />
-              {fieldError('firstName')}
-            </label>
-            <label className="bk-f">
-              <span>Last name</span>
-              <input type="text" name="lastName" autoComplete="family-name" maxLength={80} {...field('lastName')} />
-              {fieldError('lastName')}
-            </label>
-            <label className="bk-f bk-wide">
-              <span>Email</span>
-              <input type="email" name="email" autoComplete="email" inputMode="email" maxLength={254} {...field('email')} />
-              {fieldError('email')}
-            </label>
-            <label className="bk-f bk-wide">
-              <span>Phone</span>
-              <input type="tel" name="phone" autoComplete="tel" inputMode="tel" maxLength={32} placeholder="(570) 555-0123" {...field('phone')} />
-              {fieldError('phone')}
-            </label>
-          </div>
-          <p className="bk-hint">Used to pre-fill secure checkout and to send your booking details.</p>
-        </fieldset>
-      ) : null}
-
       {/* Never disabled: it opens what's missing, retries, or shows a spinner while busy. */}
       <button className={`btn btn-solid bk-go${busy ? ' is-busy' : ''}`} type="submit" aria-disabled={busy || undefined}>
         {busy ? <span className="spinner" aria-hidden="true" /> : null}
@@ -404,7 +308,6 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
                 ? 'Try again'
                 : 'Check availability'}
       </button>
-      {q && !detailsValid ? <p className="booking-foot">Add your name, email and phone to reserve.</p> : null}
       <p className="booking-foot">You won&apos;t be charged yet. Secure payment on the next step.</p>
     </form>
   );
