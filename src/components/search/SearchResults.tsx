@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getPropertyBySlug } from '@/data/properties';
 import type { Property } from '@/data/types';
-import type { SearchResult } from '@/lib/booking/types';
+import type { SearchResult, SuggestedStay } from '@/lib/booking/types';
+import { nightsBetween } from '@/lib/dates';
 import { wholeDollars } from '@/lib/format';
 import { stayQuery, type SearchState } from '@/lib/search-params';
 import { PropertyCard } from '@/components/property/PropertyCard';
@@ -14,6 +15,8 @@ type Props = {
   /** Slugs that pass the where / guests / amenity filters (computed on the server). */
   slugs: string[];
   state: SearchState;
+  /** Without dates: each property's next open stay and its price. */
+  suggested: Record<string, SuggestedStay>;
   nearName?: string;
   heading: React.ReactNode;
   filters: React.ReactNode;
@@ -30,7 +33,7 @@ type Live =
  * Results list + map. With dates and guests in the URL, asks /api/search for
  * live availability and pre-tax totals; available stays sort first.
  */
-export function SearchResults({ slugs, state, nearName, heading, filters, everyEstate }: Props) {
+export function SearchResults({ slugs, state, suggested, nearName, heading, filters, everyEstate }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const hasStay = Boolean(state.checkin && state.checkout && state.adults);
   const [live, setLive] = useState<Live>({ status: 'idle' });
@@ -63,6 +66,13 @@ export function SearchResults({ slugs, state, nearName, heading, filters, everyE
   }
   const availableCount = bySlug ? properties.filter((p) => bySlug.get(p.slug)?.available).length : null;
   const query = stayQuery(state);
+  const nights = hasStay ? nightsBetween(state.checkin, state.checkout) : undefined;
+  const priced = !hasStay && Object.keys(suggested).length > 0;
+  // A suggested stay opens the property with those dates, keeping any guest count.
+  const cardQuery = (slug: string) => {
+    const s = hasStay ? undefined : suggested[slug];
+    return s ? stayQuery({ checkin: s.checkin, checkout: s.checkout, adults: state.adults || 1 }) : query;
+  };
 
   return (
     <div className="results">
@@ -72,7 +82,9 @@ export function SearchResults({ slugs, state, nearName, heading, filters, everyE
         <p className="every-estate">Every estate includes: {everyEstate}</p>
         <p className="results-status" aria-live="polite">
           {!hasStay
-            ? 'Add dates and guests to see live availability and prices.'
+            ? priced
+              ? 'Prices are for the dates shown and include all fees, before taxes. Add your dates for exact prices.'
+              : 'Add dates and guests to see live availability and prices.'
             : live.status === 'loading'
               ? 'Checking availability…'
               : live.status === 'error'
@@ -84,7 +96,16 @@ export function SearchResults({ slugs, state, nearName, heading, filters, everyE
         {properties.length ? (
           <div className="grid-cards">
             {properties.map((p) => (
-              <PropertyCard key={p.id} property={p} query={query} nearName={nearName} result={bySlug?.get(p.slug)} onHover={setHovered} />
+              <PropertyCard
+                key={p.id}
+                property={p}
+                query={cardQuery(p.slug)}
+                nearName={nearName}
+                result={bySlug?.get(p.slug)}
+                nights={nights}
+                suggested={hasStay ? undefined : suggested[p.slug]}
+                onHover={setHovered}
+              />
             ))}
           </div>
         ) : (
@@ -104,16 +125,18 @@ export function SearchResults({ slugs, state, nearName, heading, filters, everyE
         {properties.map((p) => {
           const r = bySlug?.get(p.slug);
           if (r && !r.available) return null;
-          const price = r?.nightlyAverage != null ? wholeDollars(r.nightlyAverage, r.currency) : `$${p.priceFrom}`;
+          const s = hasStay ? undefined : suggested[p.slug];
+          const total =
+            r?.totalWithoutTaxes != null ? wholeDollars(r.totalWithoutTaxes, r.currency) : s ? wholeDollars(s.total, s.currency) : null;
           return (
             <Link
               key={p.id}
               className={`pin${hovered === p.id ? ' active' : ''}`}
               style={{ left: `${p.mapPos.x}%`, top: `${p.mapPos.y}%` }}
-              href={`/stays/${p.slug}${query}`}
-              aria-label={`${p.name}, ${price} per night`}
+              href={`/stays/${p.slug}${cardQuery(p.slug)}`}
+              aria-label={total ? `${p.name}, ${total} total before taxes` : p.name}
             >
-              {price}
+              {total ?? p.name}
             </Link>
           );
         })}

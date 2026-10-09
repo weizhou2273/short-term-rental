@@ -39,6 +39,23 @@ export function canCheckOut(checkin: string, date: string, map: DayMap): boolean
   return !out?.closedForCheckout;
 }
 
+/**
+ * The first stay of `nights` nights — or the check-in day's minimum, if longer —
+ * starting on or after `from` that the loaded calendar allows. Only stays whose
+ * every night is loaded count, so an unknown day is never offered.
+ */
+export function firstOpenStay(days: CalendarDay[], from: string, nights = 2): { checkin: string; checkout: string; nights: number } | null {
+  const map = toDayMap(days);
+  for (const day of days) {
+    if (day.date < from || !canCheckIn(day.date, map, from)) continue;
+    const length = Math.max(nights, day.minStay ?? 1);
+    const checkout = addDays(day.date, length);
+    if (!map.has(addDays(checkout, -1))) break;
+    if (canCheckOut(day.date, checkout, map)) return { checkin: day.date, checkout, nights: length };
+  }
+  return null;
+}
+
 /** Minimum nights required when arriving on `checkin`, if Hospitable set one. */
 export function minStayFor(checkin: string, map: DayMap): number | null {
   const min = map.get(checkin)?.minStay;

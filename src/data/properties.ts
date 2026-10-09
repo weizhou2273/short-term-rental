@@ -22,7 +22,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 8,
     beds: 13,
     baths: 4.5,
-    priceFrom: 450,
     rating: 4.95,
     reviewCount: 48,
     nearby: ['shawnee', 'dwg', 'bushkill'],
@@ -77,7 +76,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 4,
     beds: 7,
     baths: 2.5,
-    priceFrom: 380,
     // Hospitable, Oct 2026: average of 432 rated reviews (Airbnb and Booking.com), 433 in all.
     rating: 4.88,
     reviewCount: 433,
@@ -297,7 +295,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 6,
     beds: 14,
     baths: 3,
-    priceFrom: 295,
     // Hospitable, Oct 2026: average of 354 rated reviews (Airbnb and Booking.com), 355 in all.
     rating: 4.94,
     reviewCount: 355,
@@ -555,7 +552,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 7,
     beds: 11,
     baths: 4.5,
-    priceFrom: 300,
     // Hospitable, Oct 2026: average of 133 rated Airbnb reviews, 136 in all.
     rating: 4.89,
     reviewCount: 136,
@@ -841,7 +837,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 4,
     beds: 7,
     baths: 3.5,
-    priceFrom: 520,
     rating: 4.9,
     reviewCount: 22,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
@@ -889,7 +884,6 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 4,
     beds: 7,
     baths: 3.5,
-    priceFrom: 300,
     rating: 4.9,
     reviewCount: 20,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],

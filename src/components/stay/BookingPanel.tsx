@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from 'react';
 import { SITE } from '@/data/site';
 import type { Property } from '@/data/types';
-import { plural } from '@/lib/format';
+import type { Quote } from '@/lib/booking/types';
+import { plural, wholeDollars } from '@/lib/format';
 import { NativeBookingCard } from './NativeBookingCard';
 import { WidgetSlot } from './WidgetSlot';
 
@@ -14,6 +15,8 @@ import { WidgetSlot } from './WidgetSlot';
  */
 export function BookingPanel({ property: p }: { property: Property }) {
   const [open, setOpen] = useState(false);
+  // The current quote from the booking card, so the mobile bar can show the total.
+  const [quote, setQuote] = useState<Quote | null>(null);
 
   useEffect(() => {
     document.body.classList.add('has-bar');
@@ -37,24 +40,28 @@ export function BookingPanel({ property: p }: { property: Property }) {
               ✕
             </button>
           </div>
-          <div className="booking-price">
-            From <strong>${p.priceFrom}</strong> / night
-          </div>
           {SITE.bookingMode === 'widget' ? (
             <>
+              <div className="booking-price">Check availability</div>
               <WidgetSlot property={p} />
               <p className="booking-foot">Secure checkout by Hospitable</p>
             </>
           ) : (
             <Suspense fallback={<p className="bk-loading">Loading booking…</p>}>
-              <NativeBookingCard property={p} />
+              <NativeBookingCard property={p} onQuote={setQuote} />
             </Suspense>
           )}
         </div>
       </aside>
       <div className="booking-bar">
         <div>
-          <strong>From ${p.priceFrom}</strong> / night
+          {quote ? (
+            <>
+              <strong>{wholeDollars(quote.totalBeforeTaxes, quote.currency)}</strong> for {plural(quote.nights, 'night')}
+            </>
+          ) : (
+            <strong>Add dates for prices</strong>
+          )}
           <div className="muted" style={{ fontSize: 13 }}>
             ★ {p.rating} · {plural(p.reviewCount, 'review')}
           </div>

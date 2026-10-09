@@ -54,6 +54,12 @@ export function endOfMonth(iso: string): string {
   return addDays(addMonths(iso, 1), -1);
 }
 
+/** "Oct 18 – 20", or "Oct 30 – Nov 1" across months, as Airbnb shows stay dates. */
+export function formatStayRange(checkin: string, checkout: string): string {
+  const end = checkin.slice(0, 7) === checkout.slice(0, 7) ? String(Number(checkout.slice(8))) : formatShortDate(checkout);
+  return `${formatShortDate(checkin)} – ${end}`;
+}
+
 export function formatShortDate(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {
     month: 'short',

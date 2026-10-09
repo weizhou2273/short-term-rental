@@ -77,6 +77,8 @@ export function normalizeQuote(raw: unknown, checkin: string, checkout: string):
   const { data } = quoteResponse.parse(raw);
   if (!isTrustedCheckoutUrl(data.booking_url)) throw new UntrustedCheckoutUrlError();
   const { financials } = data;
+  const taxes = toLines(financials.taxes, 'Tax');
+  const total = Math.round(financials.totals.total.amount);
   return {
     quoteId: data.quote_id,
     bookingUrl: data.booking_url,
@@ -87,8 +89,9 @@ export function normalizeQuote(raw: unknown, checkin: string, checkout: string):
     // says that in words instead of showing a zero.
     fees: toLines(financials.fees, 'Fee').filter((f) => f.amount !== 0),
     discounts: toLines(financials.discounts, 'Discount').filter((d) => d.amount !== 0),
-    taxes: toLines(financials.taxes, 'Tax'),
-    total: Math.round(financials.totals.total.amount),
+    taxes,
+    total,
+    totalBeforeTaxes: total - taxes.reduce((sum, t) => sum + t.amount, 0),
   };
 }
 
