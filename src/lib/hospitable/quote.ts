@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { hospitableFetch } from './client';
 import { nightsBetween } from '@/lib/dates';
 import type { MoneyLine, Quote } from '@/lib/booking/types';
-import type { GuestDetails } from '@/lib/booking/guest';
 
 /**
  * POST /properties/{uuid}/quote — Hospitable's "create quote" for a Direct
@@ -25,8 +24,6 @@ export type QuoteInput = {
   checkout: string;
   guests: GuestCounts;
   customSiteId: string;
-  /** Pre-fills Hospitable's checkout. Phone must already be E.164. */
-  guestDetails?: GuestDetails;
 };
 
 const amountLine = z.object({
@@ -97,7 +94,6 @@ export function normalizeQuote(raw: unknown, checkin: string, checkout: string):
 
 export async function createQuote(input: QuoteInput): Promise<Quote> {
   const { adults, children, infants, pets } = input.guests;
-  const details = input.guestDetails;
   const raw = await hospitableFetch<unknown>(
     `/properties/${encodeURIComponent(input.propertyUuid)}/quote`,
     {
@@ -112,16 +108,6 @@ export async function createQuote(input: QuoteInput): Promise<Quote> {
           ...(pets ? { pets } : {}),
         },
         custom_site_id: input.customSiteId,
-        ...(details
-          ? {
-              guest_details: {
-                first_name: details.firstName,
-                last_name: details.lastName,
-                email: details.email,
-                phone: details.phone,
-              },
-            }
-          : {}),
       },
     },
   );
