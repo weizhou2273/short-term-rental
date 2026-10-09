@@ -33,14 +33,17 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          <div>
+          <div id="contact" className="footer-contact">
             <h3>Contact</h3>
             <ul>
               <li>
                 <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
               </li>
-              <li>Phone placeholder</li>
-              <li>Instagram placeholder</li>
+              <li>
+                <a href={`https://www.instagram.com/${SITE.instagram}/`} target="_blank" rel="noopener noreferrer">
+                  Instagram @{SITE.instagram}
+                </a>
+              </li>
             </ul>
           </div>
         </div>
