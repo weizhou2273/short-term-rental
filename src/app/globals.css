@@ -156,9 +156,14 @@ p{margin:0}
 .every-estate{font-size:13px;color:var(--muted);margin-bottom:20px}
 .card-near{font-size:13px;color:var(--accent);letter-spacing:.02em}
 .map{position:sticky;top:96px;height:calc(100vh - 120px);border-radius:var(--radius-lg)}
-.map .ph{position:absolute;inset:0;border-radius:var(--radius-lg)}
-.pin{position:absolute;z-index:2;transform:translate(-50%,-50%);background:var(--bg);border:1px solid var(--text);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700;text-decoration:none}
+/* Leaflet's panes use z-index 400+; isolation keeps them under the sticky header */
+.search-map{position:absolute;inset:0;border-radius:var(--radius-lg);isolation:isolate;overflow:hidden;background:var(--fill);font:inherit}
+/* Price pins: a zero-size Leaflet icon on the point, with the pill centred on it */
+.pin-marker{background:none;border:none}
+.pin-marker:focus{outline:none}
+.pin{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;cursor:pointer;background:var(--bg);color:var(--text);border:1px solid var(--text);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700;box-shadow:0 2px 6px rgba(28,28,26,.18);transition:background .15s,color .15s}
 .pin.active,.pin:hover{background:var(--primary);border-color:var(--primary);color:var(--on-primary)}
+.pin-marker:focus-visible .pin{outline:2px solid var(--primary);outline-offset:2px}
 .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:32px;text-align:center}
 @media (max-width:900px){
   .results{grid-template-columns:1fr}
