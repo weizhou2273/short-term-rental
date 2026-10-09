@@ -9,7 +9,7 @@ import { nightsBetween } from '@/lib/dates';
 import { wholeDollars } from '@/lib/format';
 import { stayQuery, type SearchState } from '@/lib/search-params';
 import { PropertyCard } from '@/components/property/PropertyCard';
-import { Ph } from '@/components/ui/Ph';
+import { SearchMap, type MapPin } from './SearchMap';
 
 type Props = {
   /** Slugs that pass the where / guests / amenity filters (computed on the server). */
@@ -76,6 +76,25 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
     const s = hasStay ? undefined : suggested[slug];
     return s ? stayQuery({ checkin: s.checkin, checkout: s.checkout, adults }) : query;
   };
+  // One price pin per stay, leaving out stays that are booked for the chosen dates.
+  const pins: MapPin[] = properties.flatMap((p) => {
+    const { lat, lng } = p.coords;
+    const r = bySlug?.get(p.slug);
+    if (lat === null || lng === null || (r && !r.available)) return [];
+    const s = hasStay ? undefined : suggested[p.slug];
+    const total =
+      r?.totalWithoutTaxes != null ? wholeDollars(r.totalWithoutTaxes, r.currency) : s ? wholeDollars(s.total, s.currency) : null;
+    return [
+      {
+        id: p.id,
+        lat,
+        lng,
+        label: total ?? p.name,
+        title: total ? `${p.name}, ${total} total before taxes` : p.name,
+        href: `/stays/${p.slug}${cardQuery(p.slug)}`,
+      },
+    ];
+  });
 
   return (
     <div className="results">
@@ -124,25 +143,7 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
         )}
       </section>
       <aside className="map" aria-label="Map">
-        <Ph label="Map placeholder (Mapbox / Google Maps)" />
-        {properties.map((p) => {
-          const r = bySlug?.get(p.slug);
-          if (r && !r.available) return null;
-          const s = hasStay ? undefined : suggested[p.slug];
-          const total =
-            r?.totalWithoutTaxes != null ? wholeDollars(r.totalWithoutTaxes, r.currency) : s ? wholeDollars(s.total, s.currency) : null;
-          return (
-            <Link
-              key={p.id}
-              className={`pin${hovered === p.id ? ' active' : ''}`}
-              style={{ left: `${p.mapPos.x}%`, top: `${p.mapPos.y}%` }}
-              href={`/stays/${p.slug}${cardQuery(p.slug)}`}
-              aria-label={total ? `${p.name}, ${total} total before taxes` : p.name}
-            >
-              {total ?? p.name}
-            </Link>
-          );
-        })}
+        <SearchMap pins={pins} activeId={hovered} />
       </aside>
     </div>
   );

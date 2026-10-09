@@ -72,12 +72,10 @@ export type Property = {
   reviewCount: number;
   nearby: string[];
   features: PropertyFeatures;
-  /** % position on the search page's map placeholder. */
-  mapPos: { x: number; y: number };
   /**
-   * Center of the "Where you'll be" map, drawn as an approximate-area circle.
-   * Never the exact address: these values are public in the page.
-   * null = map placeholder.
+   * Approximate location: the center of the "Where you'll be" circle and the
+   * search map's price pin. Never the exact address: these values are public
+   * in the page. null = no map.
    */
   coords: { lat: number | null; lng: number | null };
   /** One line under the map, e.g. drive times. The exact-address note is added after it. */

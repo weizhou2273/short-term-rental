@@ -29,7 +29,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 56,
     nearby: ['shawnee', 'dwg', 'bushkill'],
     features: { privatePool: true, sportCourt: true, waterfront: true, petFriendly: true },
-    mapPos: { x: 32, y: 40 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.0354, lng: -75.1001 },
     neighborhood: 'One minute from Shawnee Mountain Ski Area, and about 10 minutes from the Delaware Water Gap and Bushkill Falls.',
@@ -298,7 +297,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 355,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { privatePool: true, sportCourt: true, waterfront: true, petFriendly: true },
-    mapPos: { x: 42, y: 62 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.142, lng: -75.352 },
     neighborhood: 'Near Camelback Mountain and Kalahari Resort, in a community with lakes, beaches and an outdoor pool (passes in season).',
@@ -555,7 +553,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 136,
     nearby: ['shawnee', 'dwg', 'bushkill'],
     features: { privatePool: true, sportCourt: true, waterfront: false, petFriendly: true },
-    mapPos: { x: 22, y: 72 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.058, lng: -75.098 },
     neighborhood: 'A quiet, wooded setting in the heart of the Poconos, with grocery stores about 10 minutes away.',
@@ -838,7 +835,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 331,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { privatePool: true, sportCourt: false, waterfront: false, petFriendly: true },
-    mapPos: { x: 82, y: 30 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.1398, lng: -75.3884 },
     neighborhood: 'A quiet neighborhood close to nature, about 10 minutes from Camelback Mountain and Kalahari Resort, with a supermarket 7 minutes away.',
@@ -1061,7 +1057,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 433,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { privatePool: true, sportCourt: false, waterfront: false, petFriendly: true },
-    mapPos: { x: 58, y: 28 },
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.137, lng: -75.351 },
     neighborhood: 'About 10 minutes from Camelback Mountain and Kalahari Resort, with grocery stores and restaurants a short drive away.',
@@ -1281,7 +1276,6 @@ const ALL_PROPERTIES: Property[] = [
     reviewCount: 22,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { privatePool: false, sportCourt: false, waterfront: false, petFriendly: true },
-    mapPos: { x: 72, y: 55 },
     coords: { lat: null, lng: null },
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid.
     photos: [],
