@@ -6,10 +6,10 @@ export const SITE: Site = {
   tagline: 'Private estates in the Pocono Mountains',
   subline: 'Pools, saunas and room for everyone. Book direct for the best rate.',
   contactEmail: 'hello@wkreserve.com',
-  // Hospitable Direct — shared by every property widget on this self-hosted site
+  // Hospitable Direct "New site" (self-hosted) — its styling applies to the checkout
   hospitable: {
     loaderSrc: 'https://cdn.hsptb.com/direct-booking-widget/widget-loader.prod.js',
-    siteUuid: 'a2ed54d4-814f-4f65-ac95-76f57e335dce',
+    siteUuid: 'e617fd89-303f-4d0c-8777-4369493463ff',
     theme: 'multi',
   },
   // Booking UI on property pages:
