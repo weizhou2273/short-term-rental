@@ -20,7 +20,7 @@ const ALL_PROPERTIES: Property[] = [
     location: 'East Stroudsburg, PA',
     area: 'East Stroudsburg',
     type: 'Entire villa',
-    guests: 16,
+    guests: 22,
     bedrooms: 8,
     beds: 13,
     baths: 4.5,
@@ -107,7 +107,7 @@ const ALL_PROPERTIES: Property[] = [
       { file: '26-bathrooms-12.jpg', room: 'Bathrooms', alt: 'Black-and-white bathroom with a shower' },
       { file: '26-bathrooms-13.jpg', room: 'Bathrooms', alt: 'Half bath with a pedestal sink' },
     ],
-    // From the Hospitable listing, edited.
+    // From the Hospitable listing, edited; outdoor kitchen, fees, parking and times confirmed by the owner.
     description: [
       'A 120-year-old estate, renovated top to bottom, with 8 bedrooms and 4.5 baths across 6,000 sq ft, one minute from Shawnee Mountain.',
       'Gather in the double-height great room with its wood-beamed ceiling and built-in bar, cook together in the chef’s kitchen, then spread out across the movie theater, billiards lounge, game room, sunroom and sauna. Outside there’s a 20 × 40 ft pool, a hot tub, a full-size tennis court, a playground, a fire pit, and a private pond and stream with a little sand beach.',
@@ -154,7 +154,7 @@ const ALL_PROPERTIES: Property[] = [
         text: 'You have the whole house: a 120-year-old home with modern updates, several refrigerators and a laundry room with washers and dryers. It’s a mountain property, so expect deer, the occasional bear and, in summer, bugs (we provide repellent).',
       },
     ],
-    // Read from the photos; matches the listing's 8 king, 1 queen and 4 twin beds.
+    // Read from the photos and confirmed by the owner: 8 king, 1 queen and 4 twin beds.
     sleeping: [
       { room: 'Bedroom 1', beds: '1 king bed' },
       { room: 'Bedroom 2', beds: '1 king bed, 1 twin bed' },
@@ -244,7 +244,7 @@ const ALL_PROPERTIES: Property[] = [
       'Fireplace guards',
     ],
     rules: {
-      checkIn: 'After 3:00 PM',
+      checkIn: 'After 4:00 PM',
       checkOut: 'Before 11:00 AM',
       house: ['No parties or events', 'No smoking', 'Pets welcome (tell us before booking)'],
       safety: ['Smoke alarm', 'Carbon monoxide alarm', 'Fire extinguisher', 'First aid kit'],
@@ -261,14 +261,14 @@ const ALL_PROPERTIES: Property[] = [
       { name: 'Ruby', date: 'November 2025', text: 'Our stay was memorable. The home has a unique charm with beautiful craftsmanship, high ceilings, and a thoughtful blend of historic character and modern updates. From the moment we arrived, it felt warm, inviting, and well cared for. The bedrooms were spacious and comfortable, with supportive beds and high-quality linens. The layout gave our group both privacy and shared space. The amenities were a highlight — the sauna and hot tub were perfect for relaxing, the movie room became a favorite hangout, and the double-range kitchen made cooking for a large group easy. The outdoor space was peaceful, with a pond, stream, grill, and plenty of seating. The private tennis court was a great bonus and kept everyone entertained. The location was ideal: one minute from Shawnee Mountain and about ten minutes from Bushkill Falls and the Delaware Water Gap.' },
     ],
     faqs: [
-      { q: 'How many cars can we park?', a: 'There’s free parking on the property.' },
+      { q: 'How many cars can we park?', a: 'There’s free parking on the property for up to 8 cars.' },
       {
         q: 'Can we check out late?',
-        a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through.',
+        a: 'Check-out is at 11 AM. Late check-out usually isn’t possible because our cleaners need the time to get the house ready, but message us before your stay and we’ll talk it through. Checking out after 11 AM without arranging it with us incurs a $200 fee.',
       },
       {
         q: 'Can we bring pets?',
-        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $100 pet cleaning fee for up to 2 pets, plus $50 for each additional pet, charged separately after booking.',
+        a: 'Yes, the house is pet friendly. Please tell us before you book. There’s a $50 fee per pet, charged separately after booking.',
       },
       { q: 'When is the pool open?', a: 'From Memorial Day weekend, weather permitting, until September. It isn’t heated.' },
       {

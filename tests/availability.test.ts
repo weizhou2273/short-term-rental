@@ -79,8 +79,8 @@ describe('search params', () => {
   });
 
   it('filters by attraction, guests and amenities', () => {
-    const state = parseSearchState({ where: 'shawnee', adults: '18', amenities: 'court' });
-    expect(filterProperties(state).map((p) => p.slug)).toEqual(['the-ridge']);
+    const state = parseSearchState({ where: 'shawnee', adults: '21', amenities: 'court' });
+    expect(filterProperties(state).map((p) => p.slug)).toEqual(['shawnee-estate']);
   });
 
   it('round-trips amenity toggles through the query string', () => {
