@@ -5,7 +5,7 @@ import { isIsoDate } from '@/lib/dates';
 
 /**
  * URL state shared by the search bar, results page and property pages:
- * ?where=&checkin=&checkout=&adults=&amenities=pool,pets
+ * ?where=&checkin=&checkout=&adults=&amenities=court,pets
  */
 
 export type SearchState = {
@@ -17,7 +17,6 @@ export type SearchState = {
 };
 
 export const AMENITY_FILTERS: { id: string; label: string; test: (p: Property) => boolean }[] = [
-  { id: 'pool', label: 'Private pool', test: (p) => p.features.privatePool },
   { id: 'court', label: 'Pickleball / tennis', test: (p) => p.features.sportCourt },
   { id: 'water', label: 'Waterfront', test: (p) => p.features.waterfront },
   { id: 'pets', label: 'Pet friendly', test: (p) => p.features.petFriendly },

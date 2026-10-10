@@ -30,5 +30,5 @@ export const SITE: Site = {
     { id: 'dwg', name: 'Delaware Water Gap', kind: 'Hiking · river' },
     { id: 'bushkill', name: 'Bushkill Falls', kind: 'Waterfalls' },
   ],
-  everyEstate: ['Hot tub', 'Sauna', 'Movie room', 'Game room', 'Fire pit'],
+  everyEstate: ['Private pool (summer)', 'Hot tub', 'Sauna', 'Movie room', 'Game room', 'Fire pit'],
 };
