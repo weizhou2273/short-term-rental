@@ -41,7 +41,6 @@ export type Site = {
 };
 
 export type PropertyFeatures = {
-  privatePool: boolean;
   sportCourt: boolean;
   waterfront: boolean;
   petFriendly: boolean;

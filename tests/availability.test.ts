@@ -69,12 +69,13 @@ describe('dates', () => {
 
 describe('search params', () => {
   it('ignores unknown values', () => {
-    expect(parseSearchState({ where: 'atlantis', adults: '-2', checkin: 'tomorrow', amenities: 'pool,spaceship' })).toEqual({
+    // "pool" was a filter until every estate had one; old links just drop it.
+    expect(parseSearchState({ where: 'atlantis', adults: '-2', checkin: 'tomorrow', amenities: 'court,pool,spaceship' })).toEqual({
       where: '',
       checkin: '',
       checkout: '',
       adults: 0,
-      amenities: ['pool'],
+      amenities: ['court'],
     });
   });
 
@@ -84,8 +85,8 @@ describe('search params', () => {
   });
 
   it('round-trips amenity toggles through the query string', () => {
-    const state = parseSearchState({ amenities: 'pool' });
-    expect(toQueryString(toggleAmenity(state, 'pets'))).toBe('?amenities=pool%2Cpets');
+    const state = parseSearchState({ amenities: 'court' });
+    expect(toQueryString(toggleAmenity(state, 'pets'))).toBe('?amenities=court%2Cpets');
     expect(toQueryString(toggleAmenity(state, 'clear'))).toBe('');
   });
 });
