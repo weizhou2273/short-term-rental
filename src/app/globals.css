@@ -117,6 +117,8 @@ p{margin:0}
 .hero-toggle:hover,.hero-toggle:focus-visible{opacity:1;background:rgba(0,0,0,.55)}
 .hero-toggle:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media (max-width:760px){.hero{min-height:420px;padding:16px 0}.hero-toggle{top:12px;right:12px;bottom:auto}}
+/* On phones the text fills most of the hero, so the shade reaches the top too */
+@media (max-width:760px){.hero::after{background:linear-gradient(to top,rgba(20,22,19,.8),rgba(20,22,19,.55) 55%,rgba(20,22,19,.45))}}
 
 .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px 24px}
 .grid-note{font-size:14px;margin:0 0 24px}
