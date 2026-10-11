@@ -40,6 +40,9 @@ export function Footer() {
                 <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
               </li>
               <li>
+                <a href={`tel:${SITE.contactPhone.replace(/[^\d+]/g, '')}`}>{SITE.contactPhone}</a>
+              </li>
+              <li>
                 <a href={`https://www.instagram.com/${SITE.instagram}/`} target="_blank" rel="noopener noreferrer">
                   Instagram @{SITE.instagram}
                 </a>
