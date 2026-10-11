@@ -6,6 +6,7 @@ export const SITE: Site = {
   tagline: 'Private estates in the Pocono Mountains',
   subline: 'Pools, saunas and room for everyone. Book direct for the best rate.',
   contactEmail: 'hello@wkreserve.com',
+  contactPhone: '+1 929-500-4160',
   instagram: 'wk.reserve',
   // Hospitable Direct site ID sent with every quote. This one gives the generic
   // booking.hospitable.com/book/external/... checkout, which takes payment.
