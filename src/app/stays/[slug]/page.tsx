@@ -45,7 +45,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
   return (
     <>
       <Header showMiniSearch />
-      <main id="main" className="container">
+      <main id="main" className="container stay">
         <PropertyHeader property={property} />
         <PhotoGrid property={property} photos={photos} />
         <div className="p-body">
