@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { SITE } from '@/data/site';
 import { Monogram } from '@/components/brand/Monogram';
+import { HeaderAutoHide } from './HeaderAutoHide';
 import { MiniSearch } from './MiniSearch';
 
 export function Logo() {
@@ -16,6 +17,7 @@ export function Logo() {
 export function Header({ showMiniSearch = false }: { showMiniSearch?: boolean }) {
   return (
     <header className="header">
+      <HeaderAutoHide />
       <div className="container header-inner">
         <Logo />
         {showMiniSearch ? (
