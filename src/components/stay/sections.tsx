@@ -7,7 +7,12 @@ import { AreaMap } from './AreaMap';
 
 /** Static content sections of a stay page, in page order. */
 
+/** The "Guest favorite" box is earned: a high rating over enough reviews. */
+const FAVORITE_MIN_RATING = 4.8;
+const FAVORITE_MIN_REVIEWS = 20;
+
 export function PropertyHeader({ property: p }: { property: Property }) {
+  const favorite = p.rating >= FAVORITE_MIN_RATING && p.reviewCount >= FAVORITE_MIN_REVIEWS;
   return (
     <section className="p-head">
       <span className="eyebrow">A W&amp;K Reserve estate</span>
@@ -15,10 +20,61 @@ export function PropertyHeader({ property: p }: { property: Property }) {
       <p className="p-tagline">{p.tagline}</p>
       <div className="p-head-row">
         <span>
-          ★ {p.rating} · <a href="#reviews">{plural(p.reviewCount, 'review')}</a> · {p.location}
+          {/* With the favorite box below, the rating lives there instead. */}
+          {favorite ? null : (
+            <>
+              ★ {p.rating} · <a href="#reviews">{plural(p.reviewCount, 'review')}</a> ·{' '}
+            </>
+          )}
+          {p.location}
         </span>
       </div>
+      {favorite ? <GuestFavorite property={p} /> : null}
     </section>
+  );
+}
+
+/** Airbnb-style highlight under the title: laurel badge, rating with stars, review count. Links to the reviews. */
+function GuestFavorite({ property: p }: { property: Property }) {
+  return (
+    <a className="fav" href="#reviews" aria-label={`Guest favorite: rated ${p.rating} out of 5 in ${p.reviewCount} reviews`}>
+      <span className="fav-badge" aria-hidden="true">
+        <Laurel />
+        <span>
+          Guest
+          <br />
+          favorite
+        </span>
+        <Laurel flip />
+      </span>
+      <span className="fav-stat" aria-hidden="true">
+        <strong>{p.rating}</strong>
+        <span className="fav-stars">★★★★★</span>
+      </span>
+      <span className="fav-stat" aria-hidden="true">
+        <strong>{p.reviewCount}</strong>
+        <span className="fav-label">Reviews</span>
+      </span>
+    </a>
+  );
+}
+
+function Laurel({ flip = false }: { flip?: boolean }) {
+  return (
+    <svg className={`laurel${flip ? ' flip' : ''}`} viewBox="0 0 18 42" fill="currentColor">
+      <path d="M14 38C4 32 2 18 9 3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <ellipse cx="7.8" cy="35.9" rx="4.6" ry="1.9" transform="rotate(-178 7.8 35.9)" />
+      <ellipse cx="10.9" cy="33.3" rx="3.6" ry="1.5" transform="rotate(-98 10.9 33.3)" />
+      <ellipse cx="4.3" cy="30.0" rx="4.6" ry="1.9" transform="rotate(-159 4.3 30.0)" />
+      <ellipse cx="8.0" cy="28.6" rx="3.6" ry="1.5" transform="rotate(-79 8.0 28.6)" />
+      <ellipse cx="2.7" cy="23.2" rx="4.6" ry="1.9" transform="rotate(-142 2.7 23.2)" />
+      <ellipse cx="6.7" cy="22.9" rx="3.6" ry="1.5" transform="rotate(-62 6.7 22.9)" />
+      <ellipse cx="2.8" cy="15.7" rx="4.6" ry="1.9" transform="rotate(-127 2.8 15.7)" />
+      <ellipse cx="6.7" cy="16.5" rx="3.6" ry="1.5" transform="rotate(-47 6.7 16.5)" />
+      <ellipse cx="4.6" cy="7.8" rx="4.6" ry="1.9" transform="rotate(-115 4.6 7.8)" />
+      <ellipse cx="8.3" cy="9.4" rx="3.6" ry="1.5" transform="rotate(-35 8.3 9.4)" />
+      <ellipse cx="10.0" cy="1.5" rx="3.6" ry="1.6" transform="rotate(-65 10.0 1.5)" />
+    </svg>
   );
 }
 

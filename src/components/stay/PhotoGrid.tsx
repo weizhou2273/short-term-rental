@@ -14,6 +14,28 @@ const UNASSIGNED = 'More photos';
 type OpenAt = 'top' | number;
 
 /**
+ * True when the previous history entry is on this site: the stay page was
+ * reached by an in-site link (the page first loaded at another path), or the
+ * full page load came from one of our pages.
+ */
+function cameFromThisSite(): boolean {
+  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (nav && new URL(nav.name).pathname !== window.location.pathname) return true;
+  try {
+    return new URL(document.referrer).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+/** Back: to the results the guest came from (scroll kept), else to search with this stay's dates. */
+function goBack(e: React.MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault();
+  if (cameFromThisSite() && window.history.length > 1) window.history.back();
+  else window.location.assign(`/search${window.location.search}`);
+}
+
+/**
  * Hero grid (one large photo + four small) and the photo tour, from the
  * property's ordered `photos`. On phones the same row of photos becomes an
  * Airbnb-style carousel: every photo, swiped one at a time, with a "1 / N"
@@ -25,6 +47,24 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
   const [openAt, setOpenAt] = useState<OpenAt | null>(null);
   // The carousel's current photo (phones only; the desktop grid doesn't scroll).
   const [current, setCurrent] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  // The phone's share sheet where there is one; otherwise copy the link.
+  const share = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      // Dismissing the share sheet rejects; nothing to do.
+      await navigator.share({ title: p.name, url }).catch(() => {});
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard blocked: the address bar still has the link.
+    }
+  };
   const tour = useMemo(() => photoTour(photos), [photos]);
   const hasRooms = tour.some((r) => r.room !== null);
 
@@ -91,6 +131,22 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
             {current + 1} / {photos.length}
           </span>
         ) : null}
+        {/* Phones: back and share float on the photos, as on Airbnb. */}
+        <div className="pg-actions">
+          <a className="pg-action" href="/search" onClick={goBack} aria-label="Back to all stays">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M10 2.5 4.5 8l5.5 5.5" />
+            </svg>
+          </a>
+          <button type="button" className="pg-action" onClick={share} aria-label={`Share ${p.name}`}>
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 10V1.5M4.75 4.75 8 1.5l3.25 3.25M3 7.5v6.5h10V7.5" />
+            </svg>
+          </button>
+        </div>
+        <span className="pg-toast" role="status">
+          {copied ? 'Link copied' : ''}
+        </span>
       </div>
       <Modal title={hasRooms ? 'Photo tour' : `${p.name} · all photos`} wide open={openAt !== null} onClose={() => setOpenAt(null)}>
         {hasRooms ? (
