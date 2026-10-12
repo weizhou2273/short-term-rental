@@ -15,12 +15,16 @@ type OpenAt = 'top' | number;
 
 /**
  * Hero grid (one large photo + four small) and the photo tour, from the
- * property's ordered `photos`. The tour lists the rooms at the top; picking
- * one scrolls to that room's photos. With no rooms assigned it is a plain
- * gallery. With no photos at all, the grid shows placeholders.
+ * property's ordered `photos`. On phones the same row of photos becomes an
+ * Airbnb-style carousel: every photo, swiped one at a time, with a "1 / N"
+ * counter; tapping one opens the tour there. The tour lists the rooms at the
+ * top; picking one scrolls to that room's photos. With no rooms assigned it
+ * is a plain gallery. With no photos at all, the grid shows placeholders.
  */
 export function PhotoGrid({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   const [openAt, setOpenAt] = useState<OpenAt | null>(null);
+  // The carousel's current photo (phones only; the desktop grid doesn't scroll).
+  const [current, setCurrent] = useState(0);
   const tour = useMemo(() => photoTour(photos), [photos]);
   const hasRooms = tour.some((r) => r.room !== null);
 
@@ -52,24 +56,42 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
 
   return (
     <>
-      <section className={`photo-grid${shown < GRID_COUNT ? ` count-${shown}` : ''}`} aria-label="Photos">
-        {photos.slice(0, shown).map((photo, i) => (
-          <button key={photo.src} type="button" className="pg-item" onClick={() => setOpenAt(i)} aria-label={`Open photo ${i + 1} of ${photos.length}`}>
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              sizes={i === 0 ? '(max-width: 760px) 100vw, 600px' : '300px'}
-              // The large photo is the page's main image: fetch it first.
-              loading={i === 0 ? 'eager' : 'lazy'}
-              fetchPriority={i === 0 ? 'high' : 'auto'}
-            />
-          </button>
-        ))}
+      <div className="pg-wrap">
+        <section
+          className={`photo-grid${shown < GRID_COUNT ? ` count-${shown}` : ''}`}
+          aria-label="Photos"
+          onScroll={(e) => setCurrent(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+        >
+          {/* All photos are here for the phone carousel; the desktop grid hides the extras (never fetched there). */}
+          {photos.map((photo, i) => (
+            <button
+              key={photo.src}
+              type="button"
+              className={`pg-item${i >= shown ? ' pg-extra' : ''}`}
+              onClick={() => setOpenAt(i)}
+              aria-label={`Open photo ${i + 1} of ${photos.length}`}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes={i === 0 ? '(max-width: 760px) 100vw, 600px' : '(max-width: 760px) 100vw, 300px'}
+                // The large photo is the page's main image: fetch it first.
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchPriority={i === 0 ? 'high' : 'auto'}
+              />
+            </button>
+          ))}
+        </section>
         <button className="btn show-all" onClick={() => setOpenAt('top')}>
           Show all {photos.length} photos
         </button>
-      </section>
+        {photos.length > 1 ? (
+          <span className="pg-count" aria-hidden="true">
+            {current + 1} / {photos.length}
+          </span>
+        ) : null}
+      </div>
       <Modal title={hasRooms ? 'Photo tour' : `${p.name} · all photos`} wide open={openAt !== null} onClose={() => setOpenAt(null)}>
         {hasRooms ? (
           <nav className="tour-index" aria-label="Rooms">

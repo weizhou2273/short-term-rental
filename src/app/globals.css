@@ -179,11 +179,9 @@ p{margin:0}
 .p-head-row{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-top:6px}
 .photo-grid{position:relative;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:200px 200px;gap:8px;border-radius:var(--radius-lg);overflow:hidden}
 .photo-grid .ph:first-of-type{grid-row:span 2}
-.photo-grid .show-all{position:absolute;right:16px;bottom:16px;z-index:2;background:var(--bg)}
-@media (max-width:760px){
-  .photo-grid{grid-template-columns:1fr;grid-template-rows:260px;margin:0 -24px;border-radius:0}
-  .photo-grid .ph:not(:first-of-type){display:none}
-}
+.pg-wrap{position:relative}
+.pg-wrap .show-all{position:absolute;right:16px;bottom:16px;z-index:2;background:var(--bg)}
+.pg-count{display:none}
 .p-body{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:64px;margin-top:8px}
 .summary-line{font-size:17px}
 .desc{max-width:68ch}
@@ -348,7 +346,7 @@ p{margin:0}
 .photo-grid .pg-item img{object-fit:cover;transition:transform .4s}
 .photo-grid .pg-item:hover img{transform:scale(1.02)}
 .photo-grid .pg-item:focus-visible{outline-offset:-4px}
-@media (max-width:760px){.photo-grid .pg-item:not(:first-of-type){display:none}}
+.photo-grid .pg-extra{display:none}
 /* Photo tour: room list on top, then each room's photos */
 .tour-index{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px 16px;margin-bottom:24px}
 .tour-index-item{display:flex;flex-direction:column;gap:8px;padding:0;border:0;background:none;text-align:left;font-size:15px;line-height:1.3}
@@ -377,7 +375,23 @@ p{margin:0}
 .photo-grid.count-2{grid-template-columns:1fr 1fr;grid-template-rows:408px}
 .photo-grid.count-2 .pg-item:first-of-type{grid-row:auto}
 .photo-grid.count-3{grid-template-columns:2fr 1fr}
-@media (max-width:760px){.photo-grid.count-1,.photo-grid.count-2,.photo-grid.count-3{grid-template-columns:1fr;grid-template-rows:260px}}
+
+/* Phones, like Airbnb: photos first and edge to edge, swiped one at a time
+   with a "1 / N" counter; the title sheet slides up over their bottom edge. */
+@media (max-width:760px){
+  .stay{display:flex;flex-direction:column}
+  .stay .pg-wrap{order:-1;margin:0 -24px}
+  .photo-grid,.photo-grid.count-1,.photo-grid.count-2,.photo-grid.count-3{display:flex;grid-template:none;gap:0;border-radius:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none}
+  .photo-grid::-webkit-scrollbar{display:none}
+  .photo-grid .pg-item,.photo-grid .pg-extra,.photo-grid .ph{display:block;flex:0 0 100%;aspect-ratio:4/3;scroll-snap-align:start;scroll-snap-stop:always}
+  .photo-grid .ph:not(:first-of-type){display:none}
+  .photo-grid .pg-item{cursor:pointer}
+  .photo-grid .pg-item:hover img{transform:none}
+  .pg-wrap .show-all{display:none}
+  .pg-count{display:block;position:absolute;right:16px;bottom:36px;z-index:2;pointer-events:none;background:rgba(28,28,26,.72);color:#fff;font-size:12px;font-weight:600;letter-spacing:.02em;padding:4px 10px;border-radius:999px}
+  .stay .p-head{position:relative;z-index:1;margin:-24px -24px 0;padding:24px 24px 8px;background:var(--bg);border-radius:24px 24px 0 0}
+  .stay .section{padding:28px 0}
+}
 
 /* Property taglines (under the name) */
 .p-tagline{font-size:17px;color:var(--muted);margin-top:6px}
