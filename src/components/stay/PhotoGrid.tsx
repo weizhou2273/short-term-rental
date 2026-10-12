@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Property } from '@/data/types';
 import { HERO_GRID_COUNT as GRID_COUNT, photoTour, type PropertyPhoto } from '@/lib/photos';
 import { Modal } from '@/components/ui/Modal';
@@ -48,6 +48,15 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
   // The carousel's current photo (phones only; the desktop grid doesn't scroll).
   const [current, setCurrent] = useState(0);
   const [copied, setCopied] = useState(false);
+  const trackRef = useRef<HTMLElement>(null);
+
+  // Arrows (mouse and trackpad) and the keyboard step the carousel one photo at a time.
+  const step = (dir: 1 | -1) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollBy({ left: dir * track.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+  };
 
   // The phone's share sheet where there is one; otherwise copy the link.
   const share = async () => {
@@ -98,9 +107,15 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
     <>
       <div className="pg-wrap">
         <section
+          ref={trackRef}
           className={`photo-grid${shown < GRID_COUNT ? ` count-${shown}` : ''}`}
           aria-label="Photos"
           onScroll={(e) => setCurrent(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+          onKeyDown={(e) => {
+            // Only the phone-layout carousel scrolls sideways; on the desktop grid this is a no-op.
+            if (e.key === 'ArrowRight') step(1);
+            else if (e.key === 'ArrowLeft') step(-1);
+          }}
         >
           {/* All photos are here for the phone carousel; the desktop grid hides the extras (never fetched there). */}
           {photos.map((photo, i) => (
@@ -127,15 +142,33 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
           Show all {photos.length} photos
         </button>
         {photos.length > 1 ? (
-          <span className="pg-count" aria-hidden="true">
-            {current + 1} / {photos.length}
-          </span>
+          <>
+            <span className="pg-count" aria-hidden="true">
+              {current + 1} / {photos.length}
+            </span>
+            {/* Phone layout with a mouse or trackpad (no swiping): previous / next arrows. */}
+            {current > 0 ? (
+              <button type="button" className="pg-arrow pg-prev" onClick={() => step(-1)} aria-label="Previous photo">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M10 2.5 4.5 8l5.5 5.5" />
+                </svg>
+              </button>
+            ) : null}
+            {current < photos.length - 1 ? (
+              <button type="button" className="pg-arrow pg-next" onClick={() => step(1)} aria-label="Next photo">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M6 2.5 11.5 8 6 13.5" />
+                </svg>
+              </button>
+            ) : null}
+          </>
         ) : null}
         {/* Phones: back and share float on the photos, as on Airbnb. */}
         <div className="pg-actions">
           <a className="pg-action" href="/search" onClick={goBack} aria-label="Back to all stays">
+            {/* An arrow with a tail, so it doesn't read as the carousel's "previous photo" chevron. */}
             <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M10 2.5 4.5 8l5.5 5.5" />
+              <path d="M14 8H2.5M7 3 2 8l5 5" />
             </svg>
           </a>
           <button type="button" className="pg-action" onClick={share} aria-label={`Share ${p.name}`}>
