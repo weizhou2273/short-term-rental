@@ -338,9 +338,23 @@ p{margin:0}
 @media (min-width:901px){.booking-card{max-height:calc(100vh - 120px);overflow-y:auto;overscroll-behavior:contain}}
 
 /* Property photos (from Hospitable) */
-.card-photo{position:relative;aspect-ratio:20/19;border-radius:var(--radius);overflow:hidden;margin-bottom:12px;background:var(--fill)}
-.card-photo img{object-fit:cover;transition:transform .3s}
-.card:hover .card-photo img{transform:scale(1.015)}
+/* Result card photos: a swipeable track, arrows on hover (mouse/trackpad), one dot per photo */
+.card-body{display:block;color:inherit;text-decoration:none}
+.card-photos{position:relative;margin-bottom:12px}
+.card-track{display:flex;aspect-ratio:20/19;border-radius:var(--radius);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;background:var(--fill)}
+.card-track::-webkit-scrollbar{display:none}
+.card-slide{position:relative;flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden}
+.card-slide img{object-fit:cover;transition:transform .3s}
+.card:hover .card-slide img{transform:scale(1.015)}
+.card-arrow{display:none;position:absolute;top:50%;z-index:2;width:30px;height:30px;margin-top:-15px;place-items:center;padding:0;border:none;border-radius:50%;background:rgba(255,255,255,.94);color:#1c1c1a;box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .15s}
+.card-arrow:hover{transform:scale(1.06)}
+.card-arrow svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.card-prev{left:10px}
+.card-next{right:10px}
+@media (hover:hover) and (pointer:fine){.card-photos:hover .card-arrow,.card-photos:focus-within .card-arrow{display:grid}}
+.card-dots{position:absolute;left:50%;bottom:10px;z-index:2;display:flex;gap:5px;transform:translateX(-50%);pointer-events:none}
+.card-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:0 0 2px rgba(0,0,0,.3)}
+.card-dot.on{background:#fff}
 .photo-grid .pg-item{position:relative;display:block;padding:0;border:0;margin:0;background:var(--fill);overflow:hidden;cursor:zoom-in}
 .photo-grid .pg-item:first-of-type{grid-row:span 2}
 .photo-grid .pg-item img{object-fit:cover;transition:transform .4s}

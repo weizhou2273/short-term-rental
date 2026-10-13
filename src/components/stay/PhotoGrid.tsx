@@ -1,11 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import type { Property } from '@/data/types';
 import { HERO_GRID_COUNT as GRID_COUNT, photoTour, type PropertyPhoto } from '@/lib/photos';
 import { Modal } from '@/components/ui/Modal';
 import { Ph } from '@/components/ui/Ph';
+import { useCarousel } from '@/components/ui/useCarousel';
 
 const PLACEHOLDER_LABELS = ['Exterior', 'Living room', 'Kitchen', 'Bedroom', 'Bathroom'];
 const UNASSIGNED = 'More photos';
@@ -28,12 +30,6 @@ function cameFromThisSite(): boolean {
   }
 }
 
-/** Back: to the results the guest came from (scroll kept), else to search with this stay's dates. */
-function goBack(e: React.MouseEvent<HTMLAnchorElement>) {
-  e.preventDefault();
-  if (cameFromThisSite() && window.history.length > 1) window.history.back();
-  else window.location.assign(`/search${window.location.search}`);
-}
 
 /**
  * Hero grid (one large photo + four small) and the photo tour, from the
@@ -45,17 +41,16 @@ function goBack(e: React.MouseEvent<HTMLAnchorElement>) {
  */
 export function PhotoGrid({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   const [openAt, setOpenAt] = useState<OpenAt | null>(null);
-  // The carousel's current photo (phones only; the desktop grid doesn't scroll).
-  const [current, setCurrent] = useState(0);
+  // The phone carousel (the desktop grid doesn't scroll): arrows and the keyboard step it one photo at a time.
+  const { ref: trackRef, index: current, onScroll, step } = useCarousel<HTMLElement>();
   const [copied, setCopied] = useState(false);
-  const trackRef = useRef<HTMLElement>(null);
+  const router = useRouter();
 
-  // Arrows (mouse and trackpad) and the keyboard step the carousel one photo at a time.
-  const step = (dir: 1 | -1) => {
-    const track = trackRef.current;
-    if (!track) return;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    track.scrollBy({ left: dir * track.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+  // Back: to the results the guest came from (scroll kept), else to search with this stay's dates.
+  const goBack = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (cameFromThisSite() && window.history.length > 1) router.back();
+    else router.push(`/search${window.location.search}`);
   };
 
   // The phone's share sheet where there is one; otherwise copy the link.
@@ -110,7 +105,7 @@ export function PhotoGrid({ property: p, photos }: { property: Property; photos:
           ref={trackRef}
           className={`photo-grid${shown < GRID_COUNT ? ` count-${shown}` : ''}`}
           aria-label="Photos"
-          onScroll={(e) => setCurrent(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+          onScroll={onScroll}
           onKeyDown={(e) => {
             // Only the phone-layout carousel scrolls sideways; on the desktop grid this is a no-op.
             if (e.key === 'ArrowRight') step(1);

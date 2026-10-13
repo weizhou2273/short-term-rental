@@ -122,8 +122,9 @@ export function SearchMap({ pins, activeId }: { pins: MapPin[]; activeId: string
     const ids = list.map((p) => p.id).join();
     if (framed.current !== ids) {
       framed.current = ids;
-      if (list.length) map.fitBounds(L.latLngBounds(list.map((p) => [p.lat, p.lng])), { padding: [56, 56], maxZoom: 11 });
-      else map.setView(POCONOS, 9);
+      // Framed without animation: leaving the page mid-animation makes Leaflet throw (_leaflet_pos).
+      if (list.length) map.fitBounds(L.latLngBounds(list.map((p) => [p.lat, p.lng])), { padding: [56, 56], maxZoom: 11, animate: false });
+      else map.setView(POCONOS, 9, { animate: false });
     }
     // Pins' relative positions only change with zoom, not with panning.
     const spread = () => declutter(map, placed.values());
