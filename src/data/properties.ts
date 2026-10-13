@@ -417,8 +417,8 @@ const ALL_PROPERTIES: Property[] = [
     sleeping: [
       { room: 'Bedroom 1', beds: '1 king bed, 1 twin bed' },
       { room: 'Bedroom 2', beds: '3 twin beds' },
-      { room: 'Bedroom 3', beds: '2 queen beds' },
-      { room: 'Bedroom 4', beds: '2 queen beds, 1 twin bed' },
+      { room: 'Bedroom 3', beds: '2 king beds' },
+      { room: 'Bedroom 4', beds: '2 king beds, 1 twin bed' },
       { room: 'Bedroom 5', beds: '2 queen beds' },
       { room: 'Bedroom 6', beds: '2 bunk beds (best for kids)' },
     ],
