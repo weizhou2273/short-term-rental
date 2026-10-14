@@ -436,4 +436,5 @@ p{margin:0}
 
 /* Property taglines (under the name) */
 .p-tagline{font-size:17px;color:var(--muted);margin-top:6px}
+.grid-intro{max-width:68ch;color:var(--muted);margin-bottom:16px}
 .card-tagline{font-size:14px;color:var(--accent);margin:2px 0 4px;letter-spacing:.01em}

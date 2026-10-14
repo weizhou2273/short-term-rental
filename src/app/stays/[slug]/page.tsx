@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPropertyBySlug, PROPERTIES } from '@/data/properties';
 import { coverPhoto, propertyPhotos } from '@/lib/photos';
+import { stayDescription, stayJsonLd, stayPath, stayTitle } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PhotoGrid } from '@/components/stay/PhotoGrid';
@@ -30,8 +32,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!property) return {};
   const cover = coverPhoto(property);
   return {
-    title: property.name,
-    description: `${property.tagline}. ${property.type} in ${property.area} for up to ${property.guests} guests. Book direct.`,
+    title: stayTitle(property),
+    description: stayDescription(property),
+    // Links with dates and guests are the same page to search engines.
+    alternates: { canonical: stayPath(property) },
     // Link previews (iMessage, WhatsApp, social) show the property's cover photo.
     ...(cover ? { openGraph: { images: [{ url: cover.src, alt: cover.alt }] } } : {}),
   };
@@ -44,6 +48,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
 
   return (
     <>
+      <JsonLd data={stayJsonLd(property)} />
       <Header showMiniSearch />
       <main id="main" className="container stay">
         <PropertyHeader property={property} />
