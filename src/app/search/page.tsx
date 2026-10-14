@@ -10,8 +10,11 @@ import { getSuggestedStays } from '@/lib/hospitable/suggested';
 import { attractionById, filterProperties, parseSearchState } from '@/lib/search-params';
 
 export const metadata: Metadata = {
-  title: 'Search stays',
-  description: 'Find a private estate in the Poconos and book direct.',
+  title: 'Search Pocono Vacation Rentals',
+  description:
+    'Search private Pocono Mountains vacation homes by dates, guests and amenities: pools, hot tubs, saunas, sport courts and waterfront stays near Camelback, Kalahari and Shawnee Mountain. Book direct.',
+  // Filtered and dated searches are the same page to search engines.
+  alternates: { canonical: '/search' },
 };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {

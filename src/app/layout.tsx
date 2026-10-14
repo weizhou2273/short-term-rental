@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import { SITE } from '@/data/site';
+import { SITE_URL } from '@/lib/seo';
 import './globals.css';
 
 const jost = Jost({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-jost', display: 'swap' });
@@ -12,12 +13,12 @@ const cormorant = Cormorant_Garamond({
   display: 'swap',
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${SITE.domain}`;
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: { default: `${SITE.brand} — Poconos Estates`, template: `%s · ${SITE.brand}` },
-  description: `${SITE.tagline}. ${SITE.subline}`,
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${SITE.brand} — Pocono Mountains Vacation Rentals`, template: `%s · ${SITE.brand}` },
+  description:
+    'Book direct with W&K Reserve: private Pocono Mountains vacation homes for 12 to 22 guests, each with a pool, hot tub, sauna and movie room, near Camelback, Kalahari and Shawnee Mountain. No service fee.',
+  applicationName: SITE.brand,
   openGraph: { siteName: SITE.brand, type: 'website', images: ['/media/hero-end.jpg'] },
 };
 
