@@ -39,7 +39,9 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   const guide = getGuide((await params).slug);
   const homes = guide ? guideHomes(guide, PROPERTIES) : [];
   if (!guide || !homes.length) notFound();
-  const suggested = await getSuggestedStays(homes);
+  // The homes that fit come first; every other home follows, since they're all a short drive apart and sleep a big group.
+  const otherHomes = PROPERTIES.filter((p) => !homes.includes(p));
+  const suggested = await getSuggestedStays(PROPERTIES);
   const priced = Object.keys(suggested).length > 0;
   const others = builtGuides().filter((g) => g.slug !== guide.slug);
 
@@ -70,6 +72,17 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             );
           })}
         </div>
+        {otherHomes.length ? (
+          <section className="guide-others" aria-labelledby="guide-others-title">
+            <h2 id="guide-others-title">More of our Poconos homes</h2>
+            <p className="muted">All a short drive away, each with a private pool (open in summer), hot tub, sauna and room for a big group.</p>
+            <div className="grid-cards">
+              {otherHomes.map((p) => (
+                <PropertyCard key={p.id} property={p} suggested={suggested[p.slug]} />
+              ))}
+            </div>
+          </section>
+        ) : null}
         <p className="guide-cta">
           <Link className="btn btn-solid" href={guide.searchHref}>
             Check dates and prices

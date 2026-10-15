@@ -7,7 +7,7 @@ import { AmenityFilters } from '@/components/search/AmenityFilters';
 import { SearchResults } from '@/components/search/SearchResults';
 import { plural } from '@/lib/format';
 import { getSuggestedStays } from '@/lib/hospitable/suggested';
-import { attractionById, filterProperties, parseSearchState } from '@/lib/search-params';
+import { attractionById, parseSearchState, rankProperties } from '@/lib/search-params';
 
 export const metadata: Metadata = {
   title: 'Search Pocono Vacation Rentals',
@@ -20,7 +20,8 @@ export const metadata: Metadata = {
 export default async function SearchPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const state = parseSearchState(await searchParams);
   const place = attractionById(state.where);
-  const results = filterProperties(state);
+  // Every home that fits the group, best matches for the place and amenities first.
+  const results = rankProperties(state);
   // Without dates, price each result's next open stay instead (as Airbnb does).
   const suggested = state.checkin && state.checkout ? {} : await getSuggestedStays(results);
 
@@ -36,10 +37,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           slugs={results.map((p) => p.slug)}
           state={state}
           suggested={suggested}
-          nearName={place?.name}
           heading={
             <h1 style={{ fontSize: 28 }}>
-              {plural(results.length, 'estate')} {place ? `near ${place.name}` : 'in the Poconos'}
+              {plural(results.length, 'estate')} in the Poconos{place ? `, nearest to ${place.name} first` : ''}
             </h1>
           }
           filters={<AmenityFilters state={state} />}

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { AMENITY_FILTERS, toggleAmenity, toQueryString, type SearchState } from '@/lib/search-params';
 
-/** Toggle chips. Each is a plain link to the toggled URL, so filtering works without JavaScript. */
+/** Toggle chips that bring homes with those amenities to the top. Each is a plain link to the toggled URL, so they work without JavaScript. */
 export function AmenityFilters({ state }: { state: SearchState }) {
   return (
-    <div className="filters" role="group" aria-label="Filter by amenity">
+    <div className="filters" role="group" aria-label="Show homes with these first">
       {AMENITY_FILTERS.map((f) => {
         const on = state.amenities.includes(f.id);
         return (
