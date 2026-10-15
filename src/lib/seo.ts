@@ -58,12 +58,19 @@ export function siteJsonLd() {
   };
 }
 
-/** A stay page: the home as a vacation rental, with the same facts and rating the page shows. */
+/**
+ * A stay page: the home as lodging, with the same facts and rating the page shows.
+ *
+ * Not schema.org VacationRental: Google validates that type for its vacation
+ * rental listings, which need a Hotel Center partnership and the home's exact
+ * coordinates. Those listings come through Hospitable's Google Vacation
+ * Rentals connection instead, and the exact location stays off the page.
+ */
 export function stayJsonLd(p: Property) {
   const fullBaths = Math.floor(p.baths);
   return {
     '@context': 'https://schema.org',
-    '@type': 'VacationRental',
+    '@type': 'LodgingBusiness',
     '@id': `${absoluteUrl(stayPath(p))}#rental`,
     name: p.name,
     description: stayDescription(p),

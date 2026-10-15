@@ -48,7 +48,7 @@ describe('structured data', () => {
     const p = getPropertyBySlug('the-ridge')!;
     const data = stayJsonLd(p);
     expect(data).toMatchObject({
-      '@type': 'VacationRental',
+      '@type': 'LodgingBusiness',
       name: 'The Ridge',
       url: 'https://wkreserve.com/stays/the-ridge',
       address: { addressLocality: p.area, addressRegion: 'PA', addressCountry: 'US' },
