@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { canCheckIn, canCheckOut, minStayFor, toDayMap } from '@/lib/booking/availability';
 import type { CalendarDay } from '@/lib/booking/types';
 import { createRateLimiter, clientIp } from '@/lib/rate-limit';
-import { filterProperties, parseSearchState, toggleAmenity, toQueryString } from '@/lib/search-params';
+import { parseSearchState, rankProperties, toggleAmenity, toQueryString } from '@/lib/search-params';
 import { addDays, endOfMonth, isIsoDate, nightsBetween, todayIso } from '@/lib/dates';
 
 const day = (date: string, available: boolean, extra: Partial<CalendarDay> = {}): CalendarDay => ({
@@ -79,9 +79,22 @@ describe('search params', () => {
     });
   });
 
-  it('filters by attraction, guests and amenities', () => {
-    const state = parseSearchState({ where: 'shawnee', adults: '21', amenities: 'court' });
-    expect(filterProperties(state).map((p) => p.slug)).toEqual(['shawnee-estate']);
+  it('ranks by attraction and amenities but shows every home that fits the group', () => {
+    const all = rankProperties(parseSearchState({}));
+    expect(all.map((p) => p.slug)).toEqual(['shawnee-estate', 'minsi-pond', 'the-ridge', 'the-clearview', 'clover-lodge']);
+
+    // Near Camelback: the Long Pond homes first, the others still listed after them.
+    const camelback = rankProperties(parseSearchState({ where: 'camelback' })).map((p) => p.slug);
+    expect(camelback).toEqual(['minsi-pond', 'the-clearview', 'clover-lodge', 'shawnee-estate', 'the-ridge']);
+
+    // More matching amenities rank higher: court + pond (Shawnee, Minsi), court (Ridge), then the rest.
+    const amenities = rankProperties(parseSearchState({ amenities: 'court,water' })).map((p) => p.slug);
+    expect(amenities).toEqual(['shawnee-estate', 'minsi-pond', 'the-ridge', 'the-clearview', 'clover-lodge']);
+  });
+
+  it('still leaves out homes too small for the group', () => {
+    const state = parseSearchState({ where: 'camelback', adults: '17' });
+    expect(rankProperties(state).map((p) => p.slug)).toEqual(['shawnee-estate', 'the-ridge']);
   });
 
   it('round-trips amenity toggles through the query string', () => {

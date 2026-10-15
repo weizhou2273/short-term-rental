@@ -446,6 +446,9 @@ p{margin:0}
 .guide-head p{color:var(--muted);margin-bottom:10px}
 .guide-note{font-size:14px;color:var(--muted);margin-top:8px;line-height:1.5}
 .guide-cta{margin:32px 0 8px}
+.guide-others{margin-top:48px}
+.guide-others h2{margin-bottom:6px}
+.guide-others > p{margin-bottom:20px}
 .guide-links{list-style:none;padding:0;margin:0;columns:2;column-gap:32px}
 .guide-links li{break-inside:avoid;margin-bottom:8px}
 .guide-index{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px 32px}

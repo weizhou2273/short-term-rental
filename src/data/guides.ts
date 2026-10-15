@@ -4,9 +4,10 @@ import type { Property } from './types';
 /**
  * Landing pages for the searches guests make ("vacation rentals near
  * Camelback", "Poconos rental with a hot tub", "pet-friendly Poconos"…),
- * at /poconos/[slug]. Each lists the homes that genuinely fit, and says why
- * in that home's own words (its pool, court, pet policy…), so the pages are
- * useful, not copies of each other. A guide with no matching home isn't built.
+ * at /poconos/[slug]. Each puts the homes that genuinely fit first, and says
+ * why in that home's own words (its pool, court, pet policy…), then shows our
+ * other homes, so the pages are useful, not copies of each other. A guide
+ * with no matching home isn't built.
  *
  * Only facts we can stand behind: attraction blurbs stay general, and drive
  * times come from each home's own `neighborhood` line.

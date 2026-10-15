@@ -7,17 +7,16 @@ import type { Property } from '@/data/types';
 import type { SearchResult, SuggestedStay } from '@/lib/booking/types';
 import { nightsBetween } from '@/lib/dates';
 import { wholeDollars } from '@/lib/format';
-import { stayQuery, type SearchState } from '@/lib/search-params';
+import { attractionById, stayQuery, type SearchState } from '@/lib/search-params';
 import { PropertyCard } from '@/components/property/PropertyCard';
 import { SearchMap, type MapPin } from './SearchMap';
 
 type Props = {
-  /** Slugs that pass the where / guests / amenity filters (computed on the server). */
+  /** Slugs of the homes that fit the group, best matches for the place and amenities first (ranked on the server). */
   slugs: string[];
   state: SearchState;
   /** Without dates: each property's next open stay and its price. */
   suggested: Record<string, SuggestedStay>;
-  nearName?: string;
   heading: React.ReactNode;
   filters: React.ReactNode;
   everyEstate: string;
@@ -34,8 +33,9 @@ type Live =
  * asks /api/search for live availability and pre-tax totals; available stays
  * sort first.
  */
-export function SearchResults({ slugs, state, suggested, nearName, heading, filters, everyEstate }: Props) {
+export function SearchResults({ slugs, state, suggested, heading, filters, everyEstate }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const place = attractionById(state.where);
   // Like Airbnb, dates alone are enough: until guests are chosen, price for one adult.
   const adults = state.adults || 1;
   const hasStay = Boolean(state.checkin && state.checkout);
@@ -122,7 +122,7 @@ export function SearchResults({ slugs, state, suggested, nearName, heading, filt
                 key={p.id}
                 property={p}
                 query={cardQuery(p.slug)}
-                nearName={nearName}
+                nearName={place && p.nearby.includes(place.id) ? place.name : undefined}
                 result={bySlug?.get(p.slug)}
                 nights={nights}
                 suggested={hasStay ? undefined : suggested[p.slug]}

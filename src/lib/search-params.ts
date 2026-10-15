@@ -65,14 +65,24 @@ export function toQueryString(state: Partial<SearchState>, keys: (keyof SearchSt
 /** The subset a property page cares about. */
 export const stayQuery = (state: Partial<SearchState>) => toQueryString(state, ['checkin', 'checkout', 'adults']);
 
-export function filterProperties(state: SearchState): Property[] {
+/** How well a stay fits the search's place and amenities: one point for each it has. */
+export function matchScore(p: Property, state: SearchState): number {
   const place = attractionById(state.where);
-  return PROPERTIES.filter(
-    (p) =>
-      (!place || p.nearby.includes(place.id)) &&
-      p.guests >= state.adults &&
-      state.amenities.every((id) => AMENITY_FILTERS.find((f) => f.id === id)?.test(p)),
-  );
+  const near = place && p.nearby.includes(place.id) ? 1 : 0;
+  return near + state.amenities.filter((id) => AMENITY_FILTERS.find((f) => f.id === id)?.test(p)).length;
+}
+
+/**
+ * The stays for a search. The group size is a hard limit (a house that sleeps
+ * 12 can't take 20), but the place and amenities only rank: every home is a
+ * short drive from the others and sleeps a big group, so all that fit are
+ * shown, best matches first and the rest in the usual order.
+ */
+export function rankProperties(state: SearchState): Property[] {
+  return PROPERTIES.map((p, i) => ({ p, i, score: matchScore(p, state) }))
+    .filter(({ p }) => p.guests >= state.adults)
+    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .map(({ p }) => p);
 }
 
 export function toggleAmenity(state: SearchState, id: string): SearchState {
