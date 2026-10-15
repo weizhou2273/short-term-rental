@@ -1,7 +1,18 @@
 import Link from 'next/link';
+import { getGuide, guidePath } from '@/data/guides';
 import { PROPERTIES } from '@/data/properties';
 import { SITE } from '@/data/site';
 import { Logo } from './Header';
+
+/** A few guides in the footer link every page to them; the rest are one click away on /poconos. */
+const FOOTER_GUIDES = [
+  'near-camelback-mountain',
+  'near-kalahari-resort',
+  'large-group-rentals',
+  'ski-rentals',
+  'rentals-with-hot-tub-and-sauna',
+  'pet-friendly-rentals',
+].flatMap((slug) => getGuide(slug) ?? []);
 
 export function Footer() {
   return (
@@ -20,6 +31,19 @@ export function Footer() {
                   <Link href={`/stays/${p.slug}`}>{p.name}</Link>
                 </li>
               ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Explore</h3>
+            <ul>
+              {FOOTER_GUIDES.map((g) => (
+                <li key={g.slug}>
+                  <Link href={guidePath(g)}>{g.label}</Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/poconos">All Poconos guides</Link>
+              </li>
             </ul>
           </div>
           <div>

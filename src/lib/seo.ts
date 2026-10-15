@@ -95,3 +95,16 @@ export function stayJsonLd(p: Property) {
 
 /** Script-safe JSON for a `<script type="application/ld+json">` (no `</script>` break-out). */
 export const jsonLdScript = (data: object) => JSON.stringify(data).replace(/</g, '\\u003c');
+
+/** A guide page's breadcrumb trail (Home › Poconos guides › guide), which Google can show in results. */
+export function guideJsonLd(title: string, path: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Poconos guides', item: absoluteUrl('/poconos') },
+      { '@type': 'ListItem', position: 3, name: title, item: absoluteUrl(path) },
+    ],
+  };
+}
