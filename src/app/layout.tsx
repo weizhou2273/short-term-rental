@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Jost } from 'next/font/google';
 import { SITE } from '@/data/site';
 import { SITE_URL } from '@/lib/seo';
 import { MetaPixel } from '@/components/analytics/MetaPixel';
+import { Metricool } from '@/components/analytics/Metricool';
 import './globals.css';
 
 const jost = Jost({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-jost', display: 'swap' });
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         {children}
         <MetaPixel />
+        <Metricool />
       </body>
     </html>
   );
