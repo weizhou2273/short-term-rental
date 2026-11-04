@@ -3,6 +3,7 @@ import { SITE } from '@/data/site';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SearchBar } from '@/components/search/SearchBar';
+import { MetaEvent } from '@/components/analytics/MetaPixel';
 import { AmenityFilters } from '@/components/search/AmenityFilters';
 import { SearchResults } from '@/components/search/SearchResults';
 import { plural } from '@/lib/format';
@@ -28,6 +29,16 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <Header />
+      <MetaEvent
+        event="Search"
+        params={{
+          search_string: place?.name ?? 'Poconos',
+          content_ids: results.map((p) => p.slug),
+          content_type: 'hotel',
+          ...(state.checkin && state.checkout ? { checkin_date: state.checkin, checkout_date: state.checkout } : {}),
+          num_adults: state.adults,
+        }}
+      />
       <main id="main" className="container">
         <div style={{ paddingTop: 16 }}>
           {/* key remounts the form when the URL changes so its fields match the query */}
