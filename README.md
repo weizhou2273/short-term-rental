@@ -115,6 +115,19 @@ shown; if traffic grows a lot, switch the tile URL in
 
 The search page's map is still a placeholder.
 
+## Meta (Facebook/Instagram) ads tracking
+
+- **Pixel** (`src/components/analytics/MetaPixel.tsx`): PageView, ViewContent (stay
+  pages), Search, and InitiateCheckout (on Reserve, with the quote total).
+- **Purchase** comes from the server: Hospitable calls
+  `/api/webhooks/hospitable?key=HOSPITABLE_WEBHOOK_KEY` on reservation.created /
+  reservation.changed, the route re-reads the reservation from Hospitable, and a
+  confirmed **direct** booking is sent to the Meta Conversions API
+  (`src/lib/meta/capi.ts`) with hashed guest email/phone/name/location.
+  Needs `META_CAPI_TOKEN` and `HOSPITABLE_WEBHOOK_KEY` on Vercel, and
+  `HOSPITABLE_PAT` must be able to read reservations.
+- Set `META_TEST_EVENT_CODE` temporarily to see events under Events Manager → Test events.
+
 ## Security
 
 - `HOSPITABLE_PAT` has **write** access. It is read only in
