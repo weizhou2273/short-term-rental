@@ -8,6 +8,7 @@ import { MAX_INFANTS, MAX_PETS } from '@/lib/booking/guest';
 import { formatShortDate, nightsBetween } from '@/lib/dates';
 import { money, plural, wholeDollars } from '@/lib/format';
 import { parseSearchState } from '@/lib/search-params';
+import { centsToUnits, trackMeta } from '@/lib/meta-pixel';
 import { DateRangePicker } from './DateRangePicker';
 
 type QuoteState =
@@ -160,6 +161,18 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
         setReserving(false);
         return;
       }
+      trackMeta('InitiateCheckout', {
+        content_ids: [p.slug],
+        content_name: p.name,
+        content_type: 'hotel',
+        value: centsToUnits(final.total),
+        currency: final.currency,
+        num_items: 1,
+        checkin_date: checkin,
+        checkout_date: checkout,
+      });
+      // Give the pixel a moment to send before the page unloads.
+      await new Promise((resolve) => setTimeout(resolve, 300));
       window.location.assign(final.bookingUrl);
     } catch (err) {
       setReserveError((err as Error).message);
