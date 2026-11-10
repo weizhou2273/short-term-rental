@@ -14,7 +14,8 @@ import { savePromo } from '@/lib/offer/promo';
  * page scrolled, or the mouse heading for the tab bar), never over the chat
  * or the booking sheet, and not again for 14 days after "No thanks" or ever
  * after signing up. On phones it is a small card at the bottom that leaves
- * the page usable, as Google asks of mobile pop-ups.
+ * the page usable, as Google asks of mobile pop-ups. Add ?offer to any URL
+ * to open it at once (a preview; nothing appears if the offer is off).
  *
  * Signing up returns the code (/api/subscribe), which is saved for the
  * booking card to apply automatically.
@@ -60,6 +61,14 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
   const onStayPage = usePathname().startsWith('/stays/');
 
   useEffect(() => {
+    // ?offer opens it straight away, even after signing up or "No thanks": for the owner to preview it.
+    if (new URLSearchParams(window.location.search).has('offer')) {
+      const timer = setTimeout(() => {
+        returnTo.current = document.activeElement as HTMLElement | null;
+        setPhase('form');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
     const prior = seen();
     if (prior?.state === 'joined' || (prior?.state === 'dismissed' && Date.now() - prior.at < SNOOZE_MS)) return;
 
