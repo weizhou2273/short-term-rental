@@ -288,7 +288,7 @@ const ALL_PROPERTIES: Property[] = [
     location: 'Long Pond, PA',
     area: 'Long Pond',
     type: 'Entire villa',
-    guests: 16,
+    guests: 20,
     bedrooms: 6,
     beds: 14,
     baths: 3,
