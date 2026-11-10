@@ -9,12 +9,16 @@ import { clientIp, createRateLimiter } from '@/lib/rate-limit';
  * POST /api/subscribe  { email }
  *   → 200 { code, percent, emailed }
  *
- * The welcome-offer popup: adds the email to the Resend contact list and
- * emails the guest their code. The code is returned either way, so a guest
- * who signed up is never left without it. If saving the contact fails (for
- * example a "Sending access" key), the address is emailed to the host and
- * written to the server log instead.
+ * The welcome-offer popup, all within the request (a second or two):
+ *   1. adds the email to the Resend contact list;
+ *   2. emails the guest their code and three questions from the host
+ *      (dates, group size, occasion), with replies going to the host;
+ *   3. emails the host "New sign-up", Reply going to the guest.
+ * The code is returned either way, so a guest who signed up is never left
+ * without it, and the host hears about every sign-up even if 1 or 2 fail.
  */
+
+const reason = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 const limiter = createRateLimiter({ limit: 5, windowMs: 60 * 60_000 });
 
@@ -35,16 +39,14 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const [saved, emailed] = await Promise.allSettled([addContact(email), sendEmail(welcomeEmail(email, offer))]);
   if (saved.status === 'rejected') {
-    const reason = saved.reason instanceof Error ? saved.reason.message : String(saved.reason);
-    console.error('[subscribe] contact not saved:', reason);
+    console.error('[subscribe] contact not saved:', reason(saved.reason));
     console.error('[subscribe] email (copy from here):', email);
-    // Send the address to the host instead, so the sign-up isn't lost.
-    await sendEmail(signupNoticeEmail(email, reason.slice(0, 200))).catch((err) =>
-      console.error('[subscribe] host notice not sent:', err instanceof Error ? err.message : err),
-    );
   }
-  if (emailed.status === 'rejected') {
-    console.error('[subscribe] welcome email not sent:', emailed.reason instanceof Error ? emailed.reason.message : emailed.reason);
-  }
+  if (emailed.status === 'rejected') console.error('[subscribe] welcome email not sent:', reason(emailed.reason));
+  // Tell the host right away, so they can follow up while the guest is still on the site.
+  const status = saved.status === 'fulfilled' ? ({ saved: true } as const) : ({ saved: false, reason: reason(saved.reason).slice(0, 200) } as const);
+  await sendEmail(signupNoticeEmail(email, status, emailed.status === 'fulfilled')).catch((err) =>
+    console.error('[subscribe] host notice not sent:', reason(err)),
+  );
   return json({ code: offer.code, percent: offer.percent, emailed: emailed.status === 'fulfilled' });
 }
