@@ -16,8 +16,11 @@ import { SITE } from '@/data/site';
 
 export class EmailNotConfiguredError extends Error {}
 
-/** `to` defaults to the host (LEADS_TO_EMAIL, else the site's contact email). */
-export type Email = { subject: string; text: string; html: string; replyTo?: string; to?: string };
+/**
+ * `to` defaults to the host (LEADS_TO_EMAIL, else the site's contact email).
+ * `fromName` replaces the sender's display name, keeping its address.
+ */
+export type Email = { subject: string; text: string; html: string; replyTo?: string; to?: string; fromName?: string };
 
 const DEFAULT_FROM = `${SITE.brand} chat <onboarding@resend.dev>`;
 
@@ -37,9 +40,16 @@ async function failure(res: Response): Promise<Error> {
   return new Error(`Resend answered ${res.status}: ${detail.slice(0, 300)}`);
 }
 
-export async function sendEmail({ subject, text, html, replyTo, to }: Email): Promise<void> {
+/** "Name <address>" with the display name swapped; quotes keep "&" and commas safe. */
+export function withDisplayName(from: string, name: string): string {
+  const address = from.match(/<([^>]+)>/)?.[1] ?? from.trim();
+  return `"${name.replace(/["\\]/g, '')}" <${address}>`;
+}
+
+export async function sendEmail({ subject, text, html, replyTo, to, fromName }: Email): Promise<void> {
+  const from = process.env.LEADS_FROM_EMAIL?.trim() || DEFAULT_FROM;
   const res = await resend('/emails', {
-    from: process.env.LEADS_FROM_EMAIL?.trim() || DEFAULT_FROM,
+    from: fromName ? withDisplayName(from, fromName) : from,
     to: [to || process.env.LEADS_TO_EMAIL?.trim() || SITE.contactEmail],
     subject,
     text,

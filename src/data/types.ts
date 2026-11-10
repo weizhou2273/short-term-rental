@@ -24,6 +24,8 @@ export type Site = {
   tagline: string;
   subline: string;
   contactEmail: string;
+  /** First name guests know the host by; signs the welcome email. */
+  hostName: string;
   /** Shown as written; the tel: link keeps only the digits and +. */
   contactPhone: string;
   /** Instagram handle, without the @. */

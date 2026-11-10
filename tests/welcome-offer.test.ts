@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST } from '@/app/api/subscribe/route';
-import { addContact } from '@/lib/email/send';
+import { addContact, withDisplayName } from '@/lib/email/send';
 import { welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
 
 let ip = 0;
@@ -51,13 +51,25 @@ describe('welcome offer', () => {
     expect(welcomeOffer()).toBeNull();
   });
 
-  it('emails the guest their code, with replies going to the host', () => {
+  it('emails the guest their code and three questions from the host, with replies going to the host', () => {
     const email = welcomeEmail('guest@example.com', { code: 'WELCOME5', percent: 5, minNights: 2 });
-    expect(email).toMatchObject({ to: 'guest@example.com', replyTo: 'stay@wkreserve.com', subject: 'Your 5% off code for W&K Reserve' });
-    expect(email.text).toContain('Your code: WELCOME5');
-    expect(email.text).toContain('5% off the nightly rate of your first direct stay of 2 nights or more, booked at wkreserve.com.');
-    expect(email.text).toContain('https://wkreserve.com/search');
-    expect(email.html).toContain('WELCOME5');
+    expect(email).toMatchObject({
+      to: 'guest@example.com',
+      replyTo: 'stay@wkreserve.com',
+      fromName: 'Edward at W&K Reserve',
+      subject: 'Your 5% code, and a quick question',
+    });
+    expect(email.text).toContain('Your code is WELCOME5: 5% off the nightly rate of your first direct stay of 2 nights or more.');
+    expect(email.text).toContain('1. Roughly when are you thinking of coming?\n2. How many people, and any kids or dogs?\n3. What’s the occasion');
+    expect(email.text).toContain('Reply “unsubscribe”');
+    expect(email.text).toMatch(/\n\nEdward\nW&K Reserve/);
+    expect(email.html).toContain('<strong style="letter-spacing:.06em">WELCOME5</strong>');
+    expect(email.html.match(/<li>/g)).toHaveLength(3);
+  });
+
+  it('signs it from the host at the verified sender address', () => {
+    expect(withDisplayName('W&K Reserve <chat@wkreserve.com>', 'Edward at W&K Reserve')).toBe('"Edward at W&K Reserve" <chat@wkreserve.com>');
+    expect(withDisplayName('stay@wkreserve.com', 'Ed "the host"')).toBe('"Ed the host" <stay@wkreserve.com>');
   });
 
   it('treats signing up twice as fine', async () => {
@@ -69,7 +81,8 @@ describe('welcome offer', () => {
 });
 
 describe('POST /api/subscribe', () => {
-  it('saves the contact, emails the code and returns it', async () => {
+  it('saves the contact, emails the guest and the host, and returns the code', async () => {
+    vi.stubEnv('LEADS_FROM_EMAIL', 'W&K Reserve <chat@wkreserve.com>');
     const calls = mockResend();
     const res = await POST(subscribe({ email: ' Guest@Example.com ' }, { origin: 'https://wkreserve.com' }));
     expect(res.status).toBe(200);
@@ -77,7 +90,16 @@ describe('POST /api/subscribe', () => {
     // The code reaches a browser only after signing up, never in the page's settings.
     expect(JSON.stringify((await import('@/data/site')).SITE)).not.toContain('WELCOME5');
     expect(calls.find((c) => c.path === '/contacts')?.body).toEqual({ email: 'Guest@Example.com', unsubscribed: false });
-    expect(calls.find((c) => c.path === '/emails')?.body).toMatchObject({ to: ['Guest@Example.com'], subject: 'Your 5% off code for W&K Reserve' });
+    const [welcome, notice] = calls.filter((c) => c.path === '/emails').map((c) => c.body);
+    expect(welcome).toMatchObject({
+      from: '"Edward at W&K Reserve" <chat@wkreserve.com>',
+      to: ['Guest@Example.com'],
+      reply_to: 'stay@wkreserve.com',
+      subject: 'Your 5% code, and a quick question',
+    });
+    expect(notice).toMatchObject({ from: 'W&K Reserve <chat@wkreserve.com>', to: ['stay@wkreserve.com'], subject: 'New sign-up: Guest@Example.com', reply_to: 'Guest@Example.com' });
+    expect(String(notice!.text)).toContain('Their answers will arrive in this inbox');
+    expect(String(notice!.text)).toContain('Saved to Resend → Contacts.');
   });
 
   it('still gives the code when Resend can’t save or send, and logs the email', async () => {
@@ -88,20 +110,32 @@ describe('POST /api/subscribe', () => {
     expect(log.mock.calls.flat().join(' ')).toContain('guest@example.com');
   });
 
-  it('emails the address to the host when the key can’t save contacts', async () => {
+  it('tells the host when the key can’t save contacts', async () => {
     const calls = mockResend({ contacts: 401, contactBody: '{"message":"This API key is restricted to only send emails"}' });
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await POST(subscribe({ email: 'guest@example.com' }));
     expect((await res.json()).emailed).toBe(true);
-    const notice = calls.filter((c) => c.path === '/emails').find((c) => String(c.body.subject).startsWith('New email sign-up'));
-    expect(notice?.body).toMatchObject({ to: ['stay@wkreserve.com'], subject: 'New email sign-up: guest@example.com', reply_to: 'guest@example.com' });
+    const notice = calls.find((c) => c.path === '/emails' && String(c.body.subject).startsWith('New sign-up'));
+    expect(notice?.body).toMatchObject({ to: ['stay@wkreserve.com'], reply_to: 'guest@example.com' });
     expect(String(notice?.body.text)).toContain('Full access');
   });
 
-  it('sends no host notice when the contact is saved', async () => {
-    const calls = mockResend();
-    await POST(subscribe({ email: 'guest@example.com' }));
-    expect(calls.filter((c) => c.path === '/emails')).toHaveLength(1);
+  it('tells the host when the welcome email couldn’t reach the guest, so they can write themselves', async () => {
+    // Resend refuses mail to guests until the sending domain is verified.
+    const calls: string[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const body = JSON.parse(String(init?.body));
+        calls.push(String(body.subject ?? 'contact'));
+        if (body.to?.[0] === 'guest@example.com') return new Response('{"message":"You can only send testing emails to your own email address"}', { status: 403 });
+        return new Response('{"id":"x"}', { status: 200 });
+      }),
+    );
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(subscribe({ email: 'guest@example.com' }));
+    expect((await res.json()).emailed).toBe(false);
+    expect(calls).toContain('New sign-up: guest@example.com');
   });
 
   it('refuses bad emails, other sites, and a site without the offer', async () => {
