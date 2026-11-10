@@ -4,6 +4,7 @@ import { SITE } from '@/data/site';
 import { SITE_URL } from '@/lib/seo';
 import { MetaPixel } from '@/components/analytics/MetaPixel';
 import { Metricool } from '@/components/analytics/Metricool';
+import { ChatWidget } from '@/components/chat/ChatWidget';
 import './globals.css';
 
 const jost = Jost({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-jost', display: 'swap' });
@@ -39,6 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         {children}
+        {/* Only the fact that a key is set reaches the page, never the key. */}
+        {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
         <MetaPixel />
         <Metricool />
       </body>

@@ -15,6 +15,7 @@
     "photos": "node scripts/prepare-photos.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "leaflet": "^1.9.4",
     "next": "^16.4.6",
     "react": "^19.3.0",
