@@ -94,7 +94,7 @@ describe('search params', () => {
 
   it('still leaves out homes too small for the group', () => {
     const state = parseSearchState({ where: 'camelback', adults: '17' });
-    expect(rankProperties(state).map((p) => p.slug)).toEqual(['shawnee-estate', 'the-ridge']);
+    expect(rankProperties(state).map((p) => p.slug)).toEqual(['minsi-pond', 'shawnee-estate', 'the-ridge']);
   });
 
   it('round-trips amenity toggles through the query string', () => {
