@@ -35,6 +35,7 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const offer = welcomeOffer();
   return (
     <html lang="en" className={`${jost.variable} ${cormorant.variable}`}>
       <body>
@@ -44,8 +45,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         {/* Only the fact that a key is set reaches the page, never the key. */}
         {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
-        {/* Only once the Hospitable code is named (WELCOME_PROMO_CODE) and email is set up; the code itself isn't in the page. */}
-        {welcomeOffer() ? <WelcomeOffer percent={SITE.welcomeOfferPercent} /> : null}
+        {/* Only when an offer is configured and email is set up; the code itself isn't in the page. */}
+        {offer ? <WelcomeOffer percent={offer.percent} /> : null}
         <MetaPixel />
         <Metricool />
       </body>

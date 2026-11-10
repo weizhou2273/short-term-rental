@@ -40,8 +40,12 @@ export type Site = {
   attractions: Attraction[];
   /** Shown once on the results page instead of as filters. */
   everyEstate: string[];
-  /** The welcome offer's discount, as the Hospitable promo code (WELCOME_PROMO_CODE) gives it. */
-  welcomeOfferPercent: number;
+  /**
+   * The welcome offer popup: a Hospitable Direct promo code (created in
+   * Hospitable → Direct → Promo codes) and the percent it takes off the
+   * nightly rate. null turns the popup off. WELCOME_PROMO_CODE overrides the code.
+   */
+  welcomeOffer: { code: string; percent: number } | null;
 };
 
 export type PropertyFeatures = {

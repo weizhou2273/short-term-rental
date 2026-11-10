@@ -39,11 +39,12 @@ afterEach(() => {
 });
 
 describe('welcome offer', () => {
-  it('is on only with a valid code and email set up', () => {
-    expect(welcomeOffer()).toEqual({ code: 'WELCOME5', percent: 5 });
-    vi.stubEnv('WELCOME_PROMO_CODE', 'not a code!');
-    expect(welcomeOffer()).toBeNull();
+  it('uses the code from site.ts, which the env can override, and needs email set up', () => {
     vi.stubEnv('WELCOME_PROMO_CODE', '');
+    expect(welcomeOffer()).toEqual({ code: 'WELCOME5', percent: 5 });
+    vi.stubEnv('WELCOME_PROMO_CODE', 'SPRING10');
+    expect(welcomeOffer()).toEqual({ code: 'SPRING10', percent: 5 });
+    vi.stubEnv('WELCOME_PROMO_CODE', 'not a code!');
     expect(welcomeOffer()).toBeNull();
     vi.stubEnv('WELCOME_PROMO_CODE', 'WELCOME5');
     vi.stubEnv('RESEND_API_KEY', '');
@@ -54,6 +55,7 @@ describe('welcome offer', () => {
     const email = welcomeEmail('guest@example.com', { code: 'WELCOME5', percent: 5 });
     expect(email).toMatchObject({ to: 'guest@example.com', replyTo: 'stay@wkreserve.com', subject: 'Your 5% off code for W&K Reserve' });
     expect(email.text).toContain('Your code: WELCOME5');
+    expect(email.text).toContain('5% off the nightly rate');
     expect(email.text).toContain('https://wkreserve.com/search');
     expect(email.html).toContain('WELCOME5');
   });
@@ -84,11 +86,27 @@ describe('POST /api/subscribe', () => {
     expect(log.mock.calls.flat().join(' ')).toContain('guest@example.com');
   });
 
+  it('emails the address to the host when the key can’t save contacts', async () => {
+    const calls = mockResend({ contacts: 401, contactBody: '{"message":"This API key is restricted to only send emails"}' });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(subscribe({ email: 'guest@example.com' }));
+    expect((await res.json()).emailed).toBe(true);
+    const notice = calls.filter((c) => c.path === '/emails').find((c) => String(c.body.subject).startsWith('New email sign-up'));
+    expect(notice?.body).toMatchObject({ to: ['stay@wkreserve.com'], subject: 'New email sign-up: guest@example.com', reply_to: 'guest@example.com' });
+    expect(String(notice?.body.text)).toContain('Full access');
+  });
+
+  it('sends no host notice when the contact is saved', async () => {
+    const calls = mockResend();
+    await POST(subscribe({ email: 'guest@example.com' }));
+    expect(calls.filter((c) => c.path === '/emails')).toHaveLength(1);
+  });
+
   it('refuses bad emails, other sites, and a site without the offer', async () => {
     mockResend();
     expect((await POST(subscribe({ email: 'nope' }))).status).toBe(400);
     expect((await POST(subscribe({ email: 'guest@example.com' }, { origin: 'https://evil.example' }))).status).toBe(403);
-    vi.stubEnv('WELCOME_PROMO_CODE', '');
+    vi.stubEnv('RESEND_API_KEY', '');
     expect((await POST(subscribe({ email: 'guest@example.com' }))).status).toBe(503);
   });
 
