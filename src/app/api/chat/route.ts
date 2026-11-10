@@ -1,12 +1,15 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { NextRequest } from 'next/server';
-import { errorResponse } from '@/lib/api';
+import { errorResponse, isSameOrigin, readJson } from '@/lib/api';
 import { type ChatEvent, runChat } from '@/lib/chat/agent';
+import { verifyLead } from '@/lib/chat/lead';
 import { chatRequestSchema } from '@/lib/chat/request';
+import { firstName } from '@/lib/chat/shared';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
- * POST /api/chat  { messages: [{ role, content }] }  (text only; the last one is the guest's)
+ * POST /api/chat  { lead, messages: [{ role, content }] }  (text only; the last one is the guest's;
+ *   lead = the token from /api/chat/lead)
  *   → 200 application/x-ndjson, one ChatEvent per line, ending in "done" or "error"
  *
  * Needs ANTHROPIC_API_KEY (server only). Without it the route answers 503
@@ -22,17 +25,6 @@ const daily = createRateLimiter({ limit: 60, windowMs: 24 * 60 * 60_000 });
 
 let client: Anthropic | null = null;
 
-/** Only our own pages may call this from a browser. */
-function sameOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  if (!origin) return true;
-  try {
-    return new URL(origin).host === request.headers.get('host');
-  } catch {
-    return false;
-  }
-}
-
 function guestMessage(err: unknown): string {
   if (err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError) {
     console.error('[chat] ANTHROPIC_API_KEY was rejected', err.message);
@@ -47,7 +39,7 @@ function guestMessage(err: unknown): string {
 
 export async function POST(request: NextRequest): Promise<Response> {
   if (!process.env.ANTHROPIC_API_KEY) return errorResponse('Chat isn’t available right now.', 503);
-  if (!sameOrigin(request)) return errorResponse('Forbidden.', 403);
+  if (!isSameOrigin(request)) return errorResponse('Forbidden.', 403);
 
   const ip = clientIp(request.headers);
   for (const limiter of [burst, daily]) {
@@ -59,14 +51,11 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse('Invalid request.', 400);
-  }
-  const parsed = chatRequestSchema.safeParse(body);
+  const parsed = chatRequestSchema.safeParse(await readJson(request));
   if (!parsed.success) return errorResponse(parsed.error.issues[0]?.message ?? 'Invalid request.', 400);
+  // The widget asks for name, email and phone first; their signed token comes with every message.
+  const lead = verifyLead(parsed.data.lead);
+  if (!lead) return errorResponse('Please share your contact details to start the chat.', 401);
 
   client ??= new Anthropic();
   const anthropic = client;
@@ -81,7 +70,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         }
       };
       try {
-        await runChat({ client: anthropic, history: parsed.data.messages, emit: send, signal: request.signal });
+        await runChat({ client: anthropic, history: parsed.data.messages, guestName: firstName(lead.name), emit: send, signal: request.signal });
         send({ type: 'done' });
       } catch (err) {
         // The guest closed the chat or left the page: nothing to send.

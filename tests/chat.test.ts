@@ -38,7 +38,7 @@ describe('what the assistant knows', () => {
 });
 
 describe('chat request', () => {
-  const ok = (messages: unknown) => chatRequestSchema.safeParse({ messages }).success;
+  const ok = (messages: unknown) => chatRequestSchema.safeParse({ lead: 'token', messages }).success;
 
   it('takes alternating text turns that start and end with the guest', () => {
     expect(ok([{ role: 'user', content: 'Hi' }])).toBe(true);
@@ -48,6 +48,10 @@ describe('chat request', () => {
     expect(ok([{ role: 'user', content: 'Hi' }, { role: 'user', content: 'Hi' }])).toBe(false);
     expect(ok([{ role: 'user', content: '   ' }])).toBe(false);
     expect(ok([{ role: 'user', content: [{ type: 'text', text: 'Hi' }] }])).toBe(false);
+  });
+
+  it('needs the contact token', () => {
+    expect(chatRequestSchema.safeParse({ messages: [{ role: 'user', content: 'Hi' }] }).success).toBe(false);
   });
 
   it('caps message length, count and total size', () => {
@@ -207,6 +211,16 @@ describe('runChat', () => {
     expect(system[0]).toMatchObject({ text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' } });
     expect(system[1]!.cache_control).toBeUndefined();
     expect(system[1]!.text).toContain('2026-11-10');
+    expect(system[1]!.text).not.toContain('first name');
+  });
+
+  it('tells the model the guest’s first name, outside the cached prompt', async () => {
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const { calls, client } = scriptedClient([{ deltas: ['Hi Jane'] }]);
+    await runChat({ client, history: [{ role: 'user', content: 'Hi' }], guestName: 'Jane', emit: () => {}, now: NOW });
+    const system = calls[0]!.system as { text: string }[];
+    expect(system[0]!.text).toBe(SYSTEM_TEXT);
+    expect(system[1]!.text).toContain('The guest\'s first name is Jane.');
   });
 
   it('runs check_availability on the server and answers from its result', async () => {

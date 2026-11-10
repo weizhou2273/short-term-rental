@@ -4,18 +4,31 @@ import Link from 'next/link';
 import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { SITE } from '@/data/site';
 import { type Inline, parseChat } from '@/lib/chat/markup';
-import { CHAT_LIMITS, type ChatEvent } from '@/lib/chat/request';
+import { CHAT_LIMITS, type ChatEvent, firstName, TRANSCRIPT_LIMITS } from '@/lib/chat/shared';
+import { trackMeta } from '@/lib/meta-pixel';
+import { type Guest, LeadForm } from './LeadForm';
 
 /**
- * Floating "Chat" button and panel. Replies stream from /api/chat, which
- * calls Claude on the server; this file never sees an API key. The
- * conversation is kept in sessionStorage so it survives a page reload.
+ * Floating "Chat" button and panel. The guest leaves their name, email and
+ * phone first (emailed to the host by /api/chat/lead); replies then stream
+ * from /api/chat, which calls Claude on the server, so this file never sees
+ * an API key. When the guest closes the chat or leaves the page, the
+ * conversation so far is emailed to the host (/api/chat/transcript).
+ *
+ * The conversation is kept in sessionStorage (it survives a reload), the
+ * guest's details in localStorage (they aren't asked again next visit).
  */
 
 type Msg = { role: 'user' | 'assistant'; text: string; failed?: boolean };
 
 const STORAGE_KEY = 'wk-chat-v1';
-const GREETING = 'Hi! I can help you choose a home, answer questions, and check live prices for your dates. When are you thinking of coming, and how many guests?';
+const GUEST_KEY = 'wk-chat-guest-v1';
+/** How many messages have already been emailed, so leaving twice doesn't resend. */
+const SENT_KEY = 'wk-chat-sent-v1';
+const GREETING_ASK =
+  'Hi! I can help you choose a home, answer questions and check live prices for your dates. First, how can we reach you? Our team can follow up if you need more help.';
+const greeting = (name: string) =>
+  `Hi ${firstName(name)}! I can help you choose a home, answer questions and check live prices for your dates. When are you thinking of coming, and how many guests?`;
 const SUGGESTIONS = ['Which home fits 16 guests?', 'Check prices for my dates', 'Which homes take dogs?', 'What’s near Camelback?'];
 
 const tel = SITE.contactPhone.replace(/[^\d+]/g, '');
@@ -26,6 +39,35 @@ function historyFor(messages: Msg[], next: string): { role: Msg['role']; content
   turns.push({ role: 'user', content: next });
   const size = () => turns.reduce((n, t) => n + t.content.length, 0);
   while (turns.length > 1 && (turns.length > CHAT_LIMITS.messages || size() > CHAT_LIMITS.totalChars)) turns.splice(0, 2);
+  return turns;
+}
+
+const store = {
+  get<T>(storage: () => Storage, key: string): T | null {
+    try {
+      return JSON.parse(storage().getItem(key) ?? 'null') as T | null;
+    } catch {
+      return null;
+    }
+  },
+  set(storage: () => Storage, key: string, value: unknown) {
+    try {
+      storage().setItem(key, JSON.stringify(value));
+    } catch {
+      // Storage blocked: the chat still works, it just isn't remembered.
+    }
+  },
+};
+const session = () => sessionStorage;
+const local = () => localStorage;
+
+/** The conversation for the host's email: finished messages, the oldest dropped to fit. */
+function transcriptOf(messages: Msg[], busy: boolean) {
+  const turns = messages.filter((m) => !m.failed && m.text.trim()).map((m) => ({ role: m.role, content: m.text }));
+  // A reply still being written is left for the next email.
+  if (busy && turns.at(-1)?.role === 'assistant') turns.pop();
+  const size = () => turns.reduce((n, t) => n + t.content.length, 0);
+  while (turns.length > 2 && (turns.length > TRANSCRIPT_LIMITS.messages || size() > TRANSCRIPT_LIMITS.totalChars)) turns.splice(0, 2);
   return turns;
 }
 
@@ -82,10 +124,13 @@ export function ChatWidget() {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+  const [guest, setGuest] = useState<Guest | null>(null);
+  const hasToken = Boolean(guest?.token);
   const titleId = useId();
   const panelId = useId();
   const launcherRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -96,12 +141,43 @@ export function ChatWidget() {
 
   useEffect(() => {
     if (busy || !restoredRef.current) return;
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch {
-      // Not saved; the chat still works.
-    }
+    store.set(session, STORAGE_KEY, messages);
   }, [messages, busy]);
+
+  // Latest state for the page-leave handlers below.
+  const latest = useRef({ messages, busy, guest, sent: 0 });
+  useEffect(() => {
+    latest.current = { ...latest.current, messages, busy, guest };
+  }, [messages, busy, guest]);
+
+  /** Emails the host the conversation so far, if there's anything new since the last time. */
+  const sendTranscript = useCallback(() => {
+    const { messages, busy, guest, sent } = latest.current;
+    if (!guest?.token) return;
+    const turns = transcriptOf(messages, busy);
+    const count = messages.filter((m) => !m.failed && m.text.trim()).length;
+    if (!turns.some((t) => t.role === 'user') || count <= sent) return;
+    const body = JSON.stringify({ lead: guest.token, page: window.location.pathname + window.location.search, messages: turns });
+    // sendBeacon survives the page closing; fall back to a keepalive fetch.
+    const queued = navigator.sendBeacon?.('/api/chat/transcript', new Blob([body], { type: 'application/json' }));
+    if (!queued) {
+      void fetch('/api/chat/transcript', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    }
+    latest.current.sent = count;
+    store.set(session, SENT_KEY, count);
+  }, []);
+
+  useEffect(() => {
+    const onHidden = () => {
+      if (document.visibilityState === 'hidden') sendTranscript();
+    };
+    document.addEventListener('visibilitychange', onHidden);
+    window.addEventListener('pagehide', sendTranscript);
+    return () => {
+      document.removeEventListener('visibilitychange', onHidden);
+      window.removeEventListener('pagehide', sendTranscript);
+    };
+  }, [sendTranscript]);
 
   useEffect(() => {
     const log = logRef.current;
@@ -109,20 +185,25 @@ export function ChatWidget() {
   }, [messages, status, open]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (open) (hasToken ? inputRef : nameRef).current?.focus();
+  }, [open, hasToken]);
 
   function openChat() {
     if (!restoredRef.current) {
       restoredRef.current = true;
-      try {
-        const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? 'null') as Msg[] | null;
-        if (Array.isArray(saved)) setMessages(saved.filter((m) => m && typeof m.text === 'string' && (m.role === 'user' || m.role === 'assistant')));
-      } catch {
-        // Storage blocked or corrupt: start fresh.
-      }
+      const saved = store.get<Msg[]>(session, STORAGE_KEY);
+      if (Array.isArray(saved)) setMessages(saved.filter((m) => m && typeof m.text === 'string' && (m.role === 'user' || m.role === 'assistant')));
+      const savedGuest = store.get<Guest>(local, GUEST_KEY);
+      if (savedGuest && typeof savedGuest.name === 'string') setGuest(savedGuest);
+      latest.current.sent = Number(store.get<number>(session, SENT_KEY)) || 0;
     }
     setOpen(true);
+  }
+
+  function onLead(next: Guest) {
+    setGuest(next);
+    store.set(local, GUEST_KEY, next);
+    trackMeta('Lead');
   }
 
   // Closing with the X or Escape puts focus back on the button (once it's shown again).
@@ -136,7 +217,8 @@ export function ChatWidget() {
   const close = useCallback(() => {
     returnFocusRef.current = true;
     setOpen(false);
-  }, []);
+    sendTranscript();
+  }, [sendTranscript]);
 
   // On a phone the panel covers the page, so following a link closes it.
   const onInternalLink = useCallback(() => {
@@ -147,7 +229,8 @@ export function ChatWidget() {
 
   async function send(raw: string) {
     const text = raw.trim().slice(0, CHAT_LIMITS.messageChars);
-    if (!text || busy) return;
+    const token = guest?.token;
+    if (!text || busy || !token) return;
     const history = historyFor(messages, text);
     setInput('');
     setBusy(true);
@@ -166,9 +249,17 @@ export function ChatWidget() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ lead: token, messages: history }),
         signal: controller.signal,
       });
+      if (res.status === 401) {
+        // The saved details are no longer accepted (e.g. expired): ask again, pre-filled.
+        const again = { ...guest, token: null };
+        setGuest(again);
+        store.set(local, GUEST_KEY, again);
+        fail('Please confirm your details to keep chatting.');
+        return;
+      }
       if (!res.ok || !res.body) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         fail(body.error || 'The assistant couldn’t answer just now. Please try again, or contact us directly.');
@@ -227,6 +318,9 @@ export function ChatWidget() {
 
   function restart() {
     abortRef.current?.abort();
+    sendTranscript();
+    latest.current.sent = 0;
+    store.set(session, SENT_KEY, 0);
     setMessages([]);
     setInput('');
     inputRef.current?.focus();
@@ -284,9 +378,10 @@ export function ChatWidget() {
 
         <div ref={logRef} className="chat-log" aria-live="polite" aria-busy={busy}>
           <div className="chat-msg assistant">
-            <p>{GREETING}</p>
+            <p>{guest && hasToken ? greeting(guest.name) : GREETING_ASK}</p>
           </div>
-          {messages.length === 0 ? (
+          {!hasToken ? <LeadForm key={guest?.email ?? 'new'} initial={guest} nameRef={nameRef} onDone={onLead} /> : null}
+          {hasToken && messages.length === 0 ? (
             <div className="chat-suggest">
               {SUGGESTIONS.map((s) => (
                 <button key={s} type="button" className="chat-chip" onClick={() => void send(s)}>
@@ -315,7 +410,7 @@ export function ChatWidget() {
           ) : null}
         </div>
 
-        <form className="chat-form" onSubmit={onSubmit}>
+        <form className="chat-form" onSubmit={onSubmit} hidden={!hasToken}>
           <textarea
             ref={inputRef}
             className="chat-input"

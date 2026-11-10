@@ -5,6 +5,7 @@ const runChat = vi.fn();
 vi.mock('@/lib/chat/agent', () => ({ runChat: (...args: unknown[]) => runChat(...args) }));
 
 const { POST } = await import('@/app/api/chat/route');
+const { signLead } = await import('@/lib/chat/lead');
 
 let ip = 0;
 function post(body: unknown, headers: Record<string, string> = {}) {
@@ -16,12 +17,14 @@ function post(body: unknown, headers: Record<string, string> = {}) {
   });
 }
 
-const hi = { messages: [{ role: 'user', content: 'Hi' }] };
+const JANE = { name: 'Jane Doe', email: 'jane@example.com', phone: '(929) 555-0101' };
+let hi: { lead: string; messages: { role: string; content: string }[] };
 
 describe('POST /api/chat', () => {
   beforeEach(() => {
     vi.stubEnv('ANTHROPIC_API_KEY', 'sk-ant-test');
     runChat.mockReset();
+    hi = { lead: signLead(JANE), messages: [{ role: 'user', content: 'Hi' }] };
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -38,6 +41,16 @@ describe('POST /api/chat', () => {
     expect(runChat).not.toHaveBeenCalled();
   });
 
+  it('needs the token from the contact form', async () => {
+    const forged = `${Buffer.from(JSON.stringify({ ...JANE, iat: Math.floor(Date.now() / 1000) })).toString('base64url')}.abc`;
+    for (const lead of ['', 'nonsense', forged, `${hi.lead}x`]) {
+      const res = await POST(post({ ...hi, lead }));
+      expect([400, 401]).toContain(res.status);
+    }
+    expect((await POST(post({ ...hi, lead: forged }))).status).toBe(401);
+    expect(runChat).not.toHaveBeenCalled();
+  });
+
   it('streams the reply as newline-delimited JSON events', async () => {
     runChat.mockImplementation(async ({ emit }) => {
       emit({ type: 'turn' });
@@ -47,6 +60,7 @@ describe('POST /api/chat', () => {
     expect(res.status).toBe(200);
     expect(res.headers.get('content-type')).toContain('application/x-ndjson');
     expect(runChat.mock.calls[0]![0].history).toEqual(hi.messages);
+    expect(runChat.mock.calls[0]![0].guestName).toBe('Jane');
     const lines = (await res.text()).trim().split('\n').map((l) => JSON.parse(l));
     expect(lines).toEqual([{ type: 'turn' }, { type: 'text', text: 'Hello' }, { type: 'done' }]);
   });
