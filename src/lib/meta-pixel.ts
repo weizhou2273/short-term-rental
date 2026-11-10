@@ -10,6 +10,7 @@
  *   ViewContent       a stay page is opened
  *   Search            the search page is shown with a query
  *   InitiateCheckout  "Reserve" is pressed, just before the redirect to Hospitable
+ *   Lead              a guest leaves their name, email and phone in the chat
  * Purchase can't be sent from here: payment happens on booking.hospitable.com.
  */
 

@@ -11,7 +11,7 @@ import type {
 import { SITE } from '@/data/site';
 import { searchProperties } from '@/lib/hospitable/search';
 import { dateContext, SYSTEM_TEXT } from './prompt';
-import type { ChatEvent } from './request';
+import type { ChatEvent } from './shared';
 import { CHECK_AVAILABILITY, checkAvailability, checkAvailabilityInput, checkAvailabilityTool, type ToolOutcome } from './tools';
 
 /**
@@ -47,6 +47,8 @@ export function echoContent(content: BetaContentBlock[]): BetaContentBlockParam[
 type RunOptions = {
   client: Pick<Anthropic, 'beta'>;
   history: ChatTurn[];
+  /** The guest's first name from the contact form (letters only), so replies can use it. */
+  guestName?: string;
   emit: (event: ChatEvent) => void;
   signal?: AbortSignal;
   now?: Date;
@@ -62,11 +64,11 @@ async function runToolDefault(block: BetaToolUseBlock): Promise<ToolOutcome> {
   return checkAvailability(parsed.data, { search: searchProperties });
 }
 
-export async function runChat({ client, history, emit, signal, now = new Date(), runTool = runToolDefault }: RunOptions): Promise<void> {
+export async function runChat({ client, history, guestName, emit, signal, now = new Date(), runTool = runToolDefault }: RunOptions): Promise<void> {
   const messages: BetaMessageParam[] = history.map((t) => ({ role: t.role, content: t.content }));
   const system = [
     { type: 'text' as const, text: SYSTEM_TEXT, cache_control: { type: 'ephemeral' as const } },
-    { type: 'text' as const, text: dateContext(now) },
+    { type: 'text' as const, text: dateContext(now) + (guestName ? `\nThe guest's first name is ${guestName}.` : '') },
   ];
   let wroteText = false;
   let jsonRetries = 0;

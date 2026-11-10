@@ -44,3 +44,23 @@ export function upstreamErrorResponse(err: unknown, context: string): Response {
   console.error(`[${context}]`, err);
   return errorResponse('Something went wrong. Please try again.', 500);
 }
+
+/** Browsers send Origin on POST; only our own pages may call the chat routes. */
+export function isSameOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin');
+  if (!origin) return true;
+  try {
+    return new URL(origin).host === request.headers.get('host');
+  } catch {
+    return false;
+  }
+}
+
+/** Parses a JSON body, or null if it isn't JSON. */
+export async function readJson(request: Request): Promise<unknown> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
