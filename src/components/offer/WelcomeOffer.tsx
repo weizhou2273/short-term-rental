@@ -10,7 +10,7 @@ import { savePromo } from '@/lib/offer/promo';
 /**
  * "X% off your first stay" popup that collects emails for the list.
  *
- * Shown once a visitor has spent a little time on the site (12 s, half a
+ * Shown once a visitor has had a moment on the site (4 s, a quarter of a
  * page scrolled, or the mouse heading for the tab bar), never over the chat
  * or the booking sheet, and not again for 14 days after "No thanks" or ever
  * after signing up. On phones it is a small card at the bottom that leaves
@@ -23,7 +23,9 @@ import { savePromo } from '@/lib/offer/promo';
 
 const SEEN_KEY = 'wk-offer-v1';
 const SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
-const DELAY_MS = 12_000;
+const DELAY_MS = 4_000;
+/** Share of the page scrolled that also opens it. */
+const SCROLL_SHARE = 0.25;
 /** Don't open over these; try again later instead. */
 const BUSY = '.chat-panel:not([hidden]), .booking-col.open, .modal:not([hidden])';
 
@@ -90,7 +92,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
     };
     function onScroll() {
       const h = document.documentElement;
-      if (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight) > 0.45) show();
+      if (h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight) > SCROLL_SHARE) show();
     }
     function onLeave(e: MouseEvent) {
       if (!e.relatedTarget && e.clientY <= 0) show();
