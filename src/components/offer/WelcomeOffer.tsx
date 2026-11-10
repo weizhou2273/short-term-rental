@@ -45,7 +45,8 @@ function remember(value: Seen) {
   }
 }
 
-export function WelcomeOffer({ percent }: { percent: number }) {
+export function WelcomeOffer({ percent, minNights }: { percent: number; minNights: number }) {
+  const ofMin = minNights > 1 ? ` of ${minNights} nights or more` : '';
   const [phase, setPhase] = useState<'hidden' | 'form' | 'done'>('hidden');
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +175,8 @@ export function WelcomeOffer({ percent }: { percent: number }) {
               <span className="eyebrow">Welcome offer</span>
               <h2 id={titleId}>{percent}% off your first stay</h2>
               <p className="offer-text">
-                Join our list for {percent}% off your first booking made directly on our site, plus first word on open dates and seasonal offers.
+                Join our list for {percent}% off the nightly rate of your first direct booking{ofMin}, plus first word on open dates and seasonal
+                offers.
               </p>
               <form className="offer-form" onSubmit={submit}>
                 <label className="sr-only" htmlFor={`${titleId}-email`}>
@@ -219,7 +221,7 @@ export function WelcomeOffer({ percent }: { percent: number }) {
                 </button>
               </div>
               <p className="offer-text" role="status">
-                It’s saved on this device and applied automatically when you check prices.
+                It’s saved on this device and applied automatically to stays{ofMin} when you check prices.
                 {result.emailed ? ' We’ve also emailed it to you.' : ''}
               </p>
               {onStayPage ? (

@@ -32,6 +32,7 @@ export const SITE: Site = {
     { id: 'bushkill', name: 'Bushkill Falls', kind: 'Waterfalls' },
   ],
   everyEstate: ['Private pool (summer)', 'Hot tub', 'Sauna', 'Movie room', 'Game room', 'Fire pit'],
-  // Must match the promo code set up in Hospitable; see src/lib/offer/welcome.ts.
-  welcomeOfferPercent: 5,
+  // Must match the promo code's settings in Hospitable (Direct → Promo codes), or
+  // guests are promised a discount checkout won't give. See src/lib/offer/welcome.ts.
+  welcomeOffer: { percent: 5, minNights: 2 },
 };

@@ -1,0 +1,74 @@
+{
+  "data": {
+    "quote_id": "c024d002-7b6e-4b26-806b-4211cc2c122a",
+    "instant_book_applies": true,
+    "max_stay_nights": 30,
+    "longer_stay_allowance_nights": 1125,
+    "booking_url": "https://booking.hospitable.com/book/external/527920/c024d002-7b6e-4b26-806b-4211cc2c122a",
+    "currency": "USD",
+    "financials": {
+      "taxes": [
+        {
+          "amount": 6926,
+          "formatted": "$69.26",
+          "label": "County lodging tax",
+          "category": "Taxes"
+        },
+        {
+          "amount": 13852,
+          "formatted": "$138.52",
+          "label": "State sales tax",
+          "category": "Taxes"
+        }
+      ],
+      "fees": [
+        {
+          "amount": 38600,
+          "formatted": "$386.00",
+          "label": "Cleaning fee",
+          "category": "Guest fees"
+        },
+        {
+          "amount": 0,
+          "formatted": "$0.00",
+          "label": "Service fee",
+          "category": "Guest fees"
+        }
+      ],
+      "discounts": [
+        {
+          "amount": 10119,
+          "formatted": "$101.19",
+          "label": "Discount (WELCOME5)",
+          "category": "Promotion Discount"
+        }
+      ],
+      "totals": {
+        "sub_total": {
+          "amount": 202383,
+          "formatted": "$2,023.83",
+          "label": "Sub Total",
+          "category": "Subtotal"
+        },
+        "total_fees": {
+          "amount": 38600,
+          "formatted": "$386.00",
+          "label": "Total Fees",
+          "category": "Guest total price"
+        },
+        "total": {
+          "amount": 251642,
+          "formatted": "$2,516.42",
+          "label": "Total Price",
+          "category": "Guest total price"
+        },
+        "total_without_taxes": {
+          "amount": 230864,
+          "formatted": "$2,308.64",
+          "label": "Total without taxes",
+          "category": "Guest total price"
+        }
+      }
+    }
+  }
+}

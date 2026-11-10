@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { errorResponse, isSameOrigin, json, readJson } from '@/lib/api';
 import { addContact, sendEmail } from '@/lib/email/send';
-import { welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
+import { signupNoticeEmail, welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
@@ -11,8 +11,9 @@ import { clientIp, createRateLimiter } from '@/lib/rate-limit';
  *
  * The welcome-offer popup: adds the email to the Resend contact list and
  * emails the guest their code. The code is returned either way, so a guest
- * who signed up is never left without it; if saving the contact fails, the
- * email is written to the server log instead.
+ * who signed up is never left without it. If saving the contact fails (for
+ * example a "Sending access" key), the address is emailed to the host and
+ * written to the server log instead.
  */
 
 const limiter = createRateLimiter({ limit: 5, windowMs: 60 * 60_000 });
@@ -34,8 +35,13 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const [saved, emailed] = await Promise.allSettled([addContact(email), sendEmail(welcomeEmail(email, offer))]);
   if (saved.status === 'rejected') {
-    console.error('[subscribe] contact not saved:', saved.reason instanceof Error ? saved.reason.message : saved.reason);
+    const reason = saved.reason instanceof Error ? saved.reason.message : String(saved.reason);
+    console.error('[subscribe] contact not saved:', reason);
     console.error('[subscribe] email (copy from here):', email);
+    // Send the address to the host instead, so the sign-up isn't lost.
+    await sendEmail(signupNoticeEmail(email, reason.slice(0, 200))).catch((err) =>
+      console.error('[subscribe] host notice not sent:', err instanceof Error ? err.message : err),
+    );
   }
   if (emailed.status === 'rejected') {
     console.error('[subscribe] welcome email not sent:', emailed.reason instanceof Error ? emailed.reason.message : emailed.reason);

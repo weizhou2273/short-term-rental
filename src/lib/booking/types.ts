@@ -3,7 +3,12 @@
  * cents, as Hospitable sends them, so nothing is ever rounded twice.
  */
 
-export type MoneyLine = { label: string; amount: number };
+export type MoneyLine = {
+  label: string;
+  amount: number;
+  /** A discount from a promo code (Hospitable's "Promotion Discount", labelled "Discount (CODE)"). */
+  promo?: boolean;
+};
 
 export type Quote = {
   quoteId: string;
