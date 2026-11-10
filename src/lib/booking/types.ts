@@ -19,6 +19,8 @@ export type Quote = {
   total: number;
   /** Total with all fees, before taxes: the figure cards and the price heading show. */
   totalBeforeTaxes: number;
+  /** The promo code the guest sent, and whether Hospitable accepted it for this stay. */
+  promo?: { code: string; applied: boolean; message?: string };
 };
 
 export type SearchResult = {

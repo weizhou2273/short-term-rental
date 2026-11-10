@@ -5,6 +5,8 @@ import { SITE_URL } from '@/lib/seo';
 import { MetaPixel } from '@/components/analytics/MetaPixel';
 import { Metricool } from '@/components/analytics/Metricool';
 import { ChatWidget } from '@/components/chat/ChatWidget';
+import { WelcomeOffer } from '@/components/offer/WelcomeOffer';
+import { welcomeOffer } from '@/lib/offer/welcome';
 import './globals.css';
 
 const jost = Jost({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-jost', display: 'swap' });
@@ -42,6 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         {/* Only the fact that a key is set reaches the page, never the key. */}
         {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
+        {/* Only once the Hospitable code is named (WELCOME_PROMO_CODE) and email is set up; the code itself isn't in the page. */}
+        {welcomeOffer() ? <WelcomeOffer percent={SITE.welcomeOfferPercent} /> : null}
         <MetaPixel />
         <Metricool />
       </body>

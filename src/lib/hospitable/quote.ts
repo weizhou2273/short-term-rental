@@ -24,6 +24,8 @@ export type QuoteInput = {
   checkout: string;
   guests: GuestCounts;
   customSiteId: string;
+  /** Hospitable validates it; an unknown or ineligible code fails the whole quote ("This code is invalid."). */
+  promoCode?: string;
 };
 
 const amountLine = z.object({
@@ -108,6 +110,7 @@ export async function createQuote(input: QuoteInput): Promise<Quote> {
           ...(pets ? { pets } : {}),
         },
         custom_site_id: input.customSiteId,
+        ...(input.promoCode ? { promo_code: input.promoCode } : {}),
       },
     },
   );

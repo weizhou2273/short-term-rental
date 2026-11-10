@@ -9,6 +9,7 @@ import { formatShortDate, nightsBetween } from '@/lib/dates';
 import { money, plural, wholeDollars } from '@/lib/format';
 import { parseSearchState } from '@/lib/search-params';
 import { centsToUnits, trackMeta } from '@/lib/meta-pixel';
+import { PROMO_PATTERN, readSavedPromo, savePromo } from '@/lib/offer/promo';
 import { DateRangePicker } from './DateRangePicker';
 
 type QuoteState =
@@ -64,6 +65,11 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   const [infants, setInfants] = useState(() => countParam(searchParams, 'infants', MAX_INFANTS));
   const [pets, setPets] = useState(() => (p.features.petFriendly ? countParam(searchParams, 'pets', MAX_PETS) : 0));
   const [pickerOpen, setPickerOpen] = useState(false);
+  // A saved code (the welcome offer's, or one typed in before) goes with every price check.
+  const [promo, setPromo] = useState<string | null>(null);
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoInput, setPromoInput] = useState('');
+  const [promoError, setPromoError] = useState<string | null>(null);
   const [quote, setQuote] = useState<QuoteState>({ status: 'idle' });
   // Bumped by "Try again" to re-run the price check for the same stay.
   const [attempt, setAttempt] = useState(0);
@@ -76,7 +82,33 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   const [priceChanged, setPriceChanged] = useState(false);
 
   const ready = Boolean(checkin && checkout && adults && nightsBetween(checkin, checkout) >= 1);
-  const stay = { slug: p.slug, checkin, checkout, adults, children, infants, pets };
+  const stay = { slug: p.slug, checkin, checkout, adults, children, infants, pets, ...(promo ? { promo } : {}) };
+
+  // Read after hydration (the server can't see localStorage); the popup announces a new code.
+  useEffect(() => {
+    const load = () => setPromo(readSavedPromo());
+    load();
+    window.addEventListener('wk-promo', load);
+    return () => window.removeEventListener('wk-promo', load);
+  }, []);
+
+  function applyPromo() {
+    const code = promoInput.trim();
+    if (!PROMO_PATTERN.test(code)) {
+      setPromoError('Enter the code as written, letters and numbers only.');
+      return;
+    }
+    savePromo(code);
+    setPromo(code);
+    setPromoOpen(false);
+    setPromoError(null);
+  }
+
+  function removePromo() {
+    savePromo(null);
+    setPromo(null);
+    setPromoInput('');
+  }
 
   // Keep the stay in the URL so it survives refresh and sharing.
   useEffect(() => {
@@ -111,7 +143,7 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
     const controller = new AbortController();
     setQuote({ status: 'loading' });
     const timer = setTimeout(() => {
-      postQuote({ slug: p.slug, checkin, checkout, adults, children, infants, pets }, controller.signal)
+      postQuote({ slug: p.slug, checkin, checkout, adults, children, infants, pets, ...(promo ? { promo } : {}) }, controller.signal)
         .then((q) => setQuote({ status: 'ready', quote: q }))
         .catch((err: Error) => {
           if (err.name !== 'AbortError') setQuote({ status: 'error', message: err.message });
@@ -121,7 +153,7 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
       clearTimeout(timer);
       controller.abort();
     };
-  }, [ready, p.slug, checkin, checkout, adults, children, infants, pets, attempt]);
+  }, [ready, p.slug, checkin, checkout, adults, children, infants, pets, promo, attempt]);
 
   const q = quote.status === 'ready' ? quote.quote : null;
 
@@ -250,6 +282,46 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
       <p className="bk-hint">
         {p.guests} guests max, not counting infants{p.features.petFriendly ? '' : ' · No pets'}
       </p>
+
+      {promo ? (
+        <p className={`bk-promo${q?.promo?.applied === false ? ' is-off' : ''}`}>
+          <span>
+            {q?.promo?.applied === false
+              ? `Code ${promo} can’t be used for this stay. ${q.promo.message ?? ''}`.trim()
+              : `Promo code ${promo}${q?.promo?.applied ? ' applied' : ''}`}
+          </span>
+          <button type="button" className="btn-link" onClick={removePromo}>
+            Remove
+          </button>
+        </p>
+      ) : promoOpen ? (
+        <>
+          <div className="bk-promo-row">
+            <input
+              aria-label="Promo code"
+              value={promoInput}
+              maxLength={30}
+              autoCapitalize="characters"
+              autoComplete="off"
+              onChange={(e) => setPromoInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  applyPromo();
+                }
+              }}
+            />
+            <button type="button" className="btn" onClick={applyPromo}>
+              Apply
+            </button>
+          </div>
+          {promoError ? <p className="bk-error">{promoError}</p> : null}
+        </>
+      ) : (
+        <button type="button" className="btn-link bk-promo-link" onClick={() => setPromoOpen(true)}>
+          Have a promo code?
+        </button>
+      )}
 
       {pickerOpen ? (
         <DateRangePicker

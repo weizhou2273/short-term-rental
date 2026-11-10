@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PROMO_PATTERN } from '@/lib/offer/promo';
 import { getPropertyBySlug } from '@/data/properties';
 import type { Property } from '@/data/types';
 import { isIsoDate, nightsBetween, todayIso } from '@/lib/dates';
@@ -24,6 +25,8 @@ export const quoteRequestSchema = z.object({
   children: count(50).optional(),
   infants: count(MAX_INFANTS).optional(),
   pets: count(MAX_PETS).optional(),
+  /** A Hospitable promo code, e.g. the welcome offer's. */
+  promo: z.string().trim().regex(PROMO_PATTERN, 'That promo code doesn’t look right.').optional(),
 });
 
 export type QuoteRequest = z.infer<typeof quoteRequestSchema>;

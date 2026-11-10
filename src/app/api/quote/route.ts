@@ -1,13 +1,19 @@
 import type { NextRequest } from 'next/server';
 import { SITE } from '@/data/site';
 import { validateQuoteRequest } from '@/lib/booking/validate';
-import { createQuote, UntrustedCheckoutUrlError } from '@/lib/hospitable/quote';
+import { HospitableError } from '@/lib/hospitable/client';
+import { createQuote, type QuoteInput, UntrustedCheckoutUrlError } from '@/lib/hospitable/quote';
+import type { Quote } from '@/lib/booking/types';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { errorResponse, json, upstreamErrorResponse } from '@/lib/api';
 
 /**
- * POST /api/quote  { slug, checkin, checkout, adults, children?, infants?, pets? }
+ * POST /api/quote  { slug, checkin, checkout, adults, children?, infants?, pets?, promo? }
  *   → 200 Quote  (price breakdown + bookingUrl to Hospitable's hosted checkout)
+ *
+ * With a promo code, Hospitable applies it or refuses the whole quote. A
+ * refused code is retried without it, so the guest still gets the regular
+ * price, with `promo.applied: false` and Hospitable's reason.
  *
  * Guest contact details are never sent to Hospitable here: when a quote
  * carries them, Hospitable's checkout skips its own details step and then
@@ -38,16 +44,17 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const result = validateQuoteRequest(body);
   if (!result.ok) return errorResponse(result.error, result.status);
-  const { property, checkin, checkout, adults, children, infants, pets } = result.value;
+  const { property, checkin, checkout, adults, children, infants, pets, promo } = result.value;
 
   try {
-    const quote = await createQuote({
+    const input: QuoteInput = {
       propertyUuid: property.hospitable.uuid,
       checkin,
       checkout,
       guests: { adults, children, infants, pets },
       customSiteId: SITE.hospitable.siteUuid,
-    });
+    };
+    const quote = promo ? await quoteWithPromo(input, promo) : await createQuote(input);
     return json(quote, { headers: { 'X-RateLimit-Remaining': String(rate.remaining) } });
   } catch (err) {
     if (err instanceof UntrustedCheckoutUrlError) {
@@ -55,5 +62,17 @@ export async function POST(request: NextRequest): Promise<Response> {
       return errorResponse('Couldn’t start checkout. Please try again.', 502);
     }
     return upstreamErrorResponse(err, 'quote');
+  }
+}
+
+/** Tries the code; if Hospitable refuses the quote with it, prices the stay without it. */
+async function quoteWithPromo(input: QuoteInput, code: string): Promise<Quote> {
+  try {
+    return { ...(await createQuote({ ...input, promoCode: code })), promo: { code, applied: true } };
+  } catch (err) {
+    if (!(err instanceof HospitableError) || ![400, 404, 409, 422].includes(err.status)) throw err;
+    // If the stay itself can't be booked, this fails the same way and the guest sees that error.
+    const quote = await createQuote(input);
+    return { ...quote, promo: { code, applied: false, message: err.upstreamMessage || 'This code can’t be used for this stay.' } };
   }
 }
