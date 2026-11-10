@@ -213,3 +213,49 @@ describe('POST /api/quote', () => {
     expect(other.status).toBe(200);
   });
 });
+
+describe('POST /api/quote with a promo code', () => {
+  const stay = { slug: 'clover-lodge', checkin, checkout, adults: 2 };
+
+  it('sends the code to Hospitable and marks it applied', async () => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    const res = await POST(quoteRequest({ ...stay, promo: 'WELCOME5' }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).promo).toEqual({ code: 'WELCOME5', applied: true });
+    const sent = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body));
+    expect(sent.promo_code).toBe('WELCOME5');
+  });
+
+  it('falls back to the regular price, with the reason, when Hospitable refuses the code', async () => {
+    // Hospitable answers an unknown code like this (seen live, Nov 2026).
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) =>
+      JSON.parse(String(init?.body)).promo_code
+        ? new Response(JSON.stringify({ message: 'This code is invalid.' }), { status: 422 })
+        : new Response(JSON.stringify(cloverQuote), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(quoteRequest({ ...stay, promo: 'NOPE' }));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.promo).toEqual({ code: 'NOPE', applied: false, message: 'This code is invalid.' });
+    expect(body.bookingUrl).toContain('booking.hospitable.com');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports the stay’s own problem when it can’t be booked with or without the code', async () => {
+    mockHospitable(422, { message: 'The selected dates are not available.' });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await POST(quoteRequest({ ...stay, promo: 'WELCOME5' }));
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toBe('The selected dates are not available.');
+  });
+
+  it('rejects codes that could not be Hospitable codes', async () => {
+    const fetchMock = mockHospitable(200, cloverQuote);
+    for (const promo of ['x', 'has space', 'a'.repeat(31), '<script>']) {
+      expect((await POST(quoteRequest({ ...stay, promo }))).status).toBe(400);
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
