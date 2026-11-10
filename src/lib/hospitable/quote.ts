@@ -31,6 +31,7 @@ export type QuoteInput = {
 const amountLine = z.object({
   amount: z.number(),
   label: z.string().optional(),
+  category: z.string().optional(),
 });
 
 const quoteResponse = z.object({
@@ -87,7 +88,13 @@ export function normalizeQuote(raw: unknown, checkin: string, checkout: string):
     // A $0 "Service fee" line is Hospitable saying there is none; the card
     // says that in words instead of showing a zero.
     fees: toLines(financials.fees, 'Fee').filter((f) => f.amount !== 0),
-    discounts: toLines(financials.discounts, 'Discount').filter((d) => d.amount !== 0),
+    discounts: financials.discounts
+      .filter((d) => d.amount !== 0)
+      .map((d) => ({
+        label: d.label || 'Discount',
+        amount: Math.round(d.amount),
+        ...(/promotion/i.test(d.category ?? '') ? { promo: true } : {}),
+      })),
     taxes,
     total,
     totalBeforeTaxes: total - taxes.reduce((sum, t) => sum + t.amount, 0),

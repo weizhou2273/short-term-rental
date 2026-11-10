@@ -39,11 +39,11 @@ afterEach(() => {
 });
 
 describe('welcome offer', () => {
-  it('uses the code from site.ts, which the env can override, and needs email set up', () => {
+  it('uses the built-in code, which the env can override, and needs email set up', () => {
     vi.stubEnv('WELCOME_PROMO_CODE', '');
-    expect(welcomeOffer()).toEqual({ code: 'WELCOME5', percent: 5 });
+    expect(welcomeOffer()).toEqual({ code: 'WELCOME5', percent: 5, minNights: 2 });
     vi.stubEnv('WELCOME_PROMO_CODE', 'SPRING10');
-    expect(welcomeOffer()).toEqual({ code: 'SPRING10', percent: 5 });
+    expect(welcomeOffer()).toEqual({ code: 'SPRING10', percent: 5, minNights: 2 });
     vi.stubEnv('WELCOME_PROMO_CODE', 'not a code!');
     expect(welcomeOffer()).toBeNull();
     vi.stubEnv('WELCOME_PROMO_CODE', 'WELCOME5');
@@ -52,10 +52,10 @@ describe('welcome offer', () => {
   });
 
   it('emails the guest their code, with replies going to the host', () => {
-    const email = welcomeEmail('guest@example.com', { code: 'WELCOME5', percent: 5 });
+    const email = welcomeEmail('guest@example.com', { code: 'WELCOME5', percent: 5, minNights: 2 });
     expect(email).toMatchObject({ to: 'guest@example.com', replyTo: 'stay@wkreserve.com', subject: 'Your 5% off code for W&K Reserve' });
     expect(email.text).toContain('Your code: WELCOME5');
-    expect(email.text).toContain('5% off the nightly rate');
+    expect(email.text).toContain('5% off the nightly rate of your first direct stay of 2 nights or more, booked at wkreserve.com.');
     expect(email.text).toContain('https://wkreserve.com/search');
     expect(email.html).toContain('WELCOME5');
   });
@@ -74,6 +74,8 @@ describe('POST /api/subscribe', () => {
     const res = await POST(subscribe({ email: ' Guest@Example.com ' }, { origin: 'https://wkreserve.com' }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ code: 'WELCOME5', percent: 5, emailed: true });
+    // The code reaches a browser only after signing up, never in the page's settings.
+    expect(JSON.stringify((await import('@/data/site')).SITE)).not.toContain('WELCOME5');
     expect(calls.find((c) => c.path === '/contacts')?.body).toEqual({ email: 'Guest@Example.com', unsubscribed: false });
     expect(calls.find((c) => c.path === '/emails')?.body).toMatchObject({ to: ['Guest@Example.com'], subject: 'Your 5% off code for W&K Reserve' });
   });

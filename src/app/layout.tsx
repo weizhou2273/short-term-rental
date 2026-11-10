@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Only the fact that a key is set reaches the page, never the key. */}
         {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
         {/* Only when an offer is configured and email is set up; the code itself isn't in the page. */}
-        {offer ? <WelcomeOffer percent={offer.percent} /> : null}
+        {offer ? <WelcomeOffer percent={offer.percent} minNights={offer.minNights} /> : null}
         <MetaPixel />
         <Metricool />
       </body>

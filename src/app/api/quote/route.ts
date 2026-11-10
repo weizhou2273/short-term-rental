@@ -4,6 +4,7 @@ import { validateQuoteRequest } from '@/lib/booking/validate';
 import { HospitableError } from '@/lib/hospitable/client';
 import { createQuote, type QuoteInput, UntrustedCheckoutUrlError } from '@/lib/hospitable/quote';
 import type { Quote } from '@/lib/booking/types';
+import { welcomeOffer } from '@/lib/offer/welcome';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { errorResponse, json, upstreamErrorResponse } from '@/lib/api';
 
@@ -11,9 +12,11 @@ import { errorResponse, json, upstreamErrorResponse } from '@/lib/api';
  * POST /api/quote  { slug, checkin, checkout, adults, children?, infants?, pets?, promo? }
  *   → 200 Quote  (price breakdown + bookingUrl to Hospitable's hosted checkout)
  *
- * With a promo code, Hospitable applies it or refuses the whole quote. A
- * refused code is retried without it, so the guest still gets the regular
- * price, with `promo.applied: false` and Hospitable's reason.
+ * With a promo code, Hospitable refuses the whole quote for an unknown code
+ * ("This code is invalid."), and accepts but takes nothing off when the stay
+ * doesn't meet the code's terms (e.g. its minimum nights). A refused code is
+ * retried without it, so the guest still gets the regular price. Either way
+ * `promo.applied` says whether the code's discount is really in the price.
  *
  * Guest contact details are never sent to Hospitable here: when a quote
  * carries them, Hospitable's checkout skips its own details step and then
@@ -65,10 +68,21 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 }
 
+/** Why an accepted code took nothing off: the welcome offer's minimum stay, if that's it. */
+function notAppliedReason(code: string, nights: number): string {
+  const offer = welcomeOffer();
+  if (offer && offer.code.toUpperCase() === code.toUpperCase() && nights < offer.minNights) {
+    return `It applies to stays of ${offer.minNights} nights or more.`;
+  }
+  return 'It doesn’t apply to these dates.';
+}
+
 /** Tries the code; if Hospitable refuses the quote with it, prices the stay without it. */
 async function quoteWithPromo(input: QuoteInput, code: string): Promise<Quote> {
   try {
-    return { ...(await createQuote({ ...input, promoCode: code })), promo: { code, applied: true } };
+    const quote = await createQuote({ ...input, promoCode: code });
+    const applied = quote.discounts.some((d) => d.promo || d.label.toUpperCase().includes(code.toUpperCase()));
+    return { ...quote, promo: applied ? { code, applied } : { code, applied, message: notAppliedReason(code, quote.nights) } };
   } catch (err) {
     if (!(err instanceof HospitableError) || ![400, 404, 409, 422].includes(err.status)) throw err;
     // If the stay itself can't be booked, this fails the same way and the guest sees that error.

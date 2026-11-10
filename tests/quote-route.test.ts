@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import cloverQuote from './fixtures/quote-1680-clover-rd.json';
 import turkeyQuote from './fixtures/quote-60-turkey-ridge.json';
+import welcomeQuote from './fixtures/quote-minsi-welcome5-3n.json';
 import { POST } from '@/app/api/quote/route';
 import { addDays, todayIso } from '@/lib/dates';
 
@@ -216,14 +217,29 @@ describe('POST /api/quote', () => {
 
 describe('POST /api/quote with a promo code', () => {
   const stay = { slug: 'clover-lodge', checkin, checkout, adults: 2 };
+  // The welcome offer's terms (2-night minimum) come from welcomeOffer(), which needs email set up.
+  beforeEach(() => vi.stubEnv('RESEND_API_KEY', 're_test'));
+  afterEach(() => vi.unstubAllEnvs());
 
-  it('sends the code to Hospitable and marks it applied', async () => {
-    const fetchMock = mockHospitable(200, cloverQuote);
-    const res = await POST(quoteRequest({ ...stay, promo: 'WELCOME5' }));
+  it('sends the code to Hospitable and shows its discount line', async () => {
+    // Hospitable's real answer for WELCOME5 at Minsi Pond, Jan 12–15 2027 (Nov 2026).
+    const fetchMock = mockHospitable(200, welcomeQuote);
+    const res = await POST(quoteRequest({ ...stay, slug: 'minsi-pond', checkout: addDays(checkin, 3), promo: 'WELCOME5' }));
     expect(res.status).toBe(200);
-    expect((await res.json()).promo).toEqual({ code: 'WELCOME5', applied: true });
+    const body = await res.json();
+    expect(body.promo).toEqual({ code: 'WELCOME5', applied: true });
+    expect(body.discounts).toEqual([{ label: 'Discount (WELCOME5)', amount: 10119, promo: true }]);
+    expect(body).toMatchObject({ accommodation: 202383, total: 251642 });
     const sent = JSON.parse(String((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body));
     expect(sent.promo_code).toBe('WELCOME5');
+  });
+
+  it('says so when Hospitable accepts the code but takes nothing off', async () => {
+    mockHospitable(200, cloverQuote);
+    const twoNights = await (await POST(quoteRequest({ ...stay, promo: 'SPRING' }))).json();
+    expect(twoNights.promo).toEqual({ code: 'SPRING', applied: false, message: 'It doesn’t apply to these dates.' });
+    const oneNight = await (await POST(quoteRequest({ ...stay, checkout: addDays(checkin, 1), promo: 'welcome5' }))).json();
+    expect(oneNight.promo).toEqual({ code: 'welcome5', applied: false, message: 'It applies to stays of 2 nights or more.' });
   });
 
   it('falls back to the regular price, with the reason, when Hospitable refuses the code', async () => {
