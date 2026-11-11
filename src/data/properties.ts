@@ -32,17 +32,20 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.0354, lng: -75.1001 },
     neighborhood: 'One minute from Shawnee Mountain Ski Area, and about 10 minutes from the Delaware Water Gap and Bushkill Falls.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid
-    // (the owner's c1–c5 picks). `room` groups them in the photo tour, in
-    // order of each room's first photo; bedroom names match `sleeping` below.
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
+    // chosen as the most striking (Nov 2026): the aerial (the only one: tennis
+    // court, pool, fire pit, stream, playground and house; also the cover on cards
+    // and link previews), the great room, the pool, the theater, the outdoor
+    // kitchen at night. `room` groups them in the photo tour, in order of each
+    // room's first photo; bedroom names match `sleeping` below.
     photos: [
-      { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the estate with its pool, tennis court and stream' },
+      { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the estate: the tennis court, the pool with umbrellas and loungers, the fire pit, the stream, the playground and the house' },
       { file: '08-great-room-01-c2.jpg', room: 'Great room', alt: 'Great room with a beamed wood ceiling, chandelier and leather sofas' },
-      { file: '10-dining-room-01-c3.jpg', room: 'Dining room', alt: 'Dining room with one long table and a crystal chandelier' },
-      { file: '12-theater-01-c4.jpg', room: 'Movie theater', alt: 'Movie theater with a big screen and leather seating' },
-      { file: '03-outdoor-kitchen-01-c5.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen and bar in a covered pavilion by the pool' },
-      { file: '01-exterior-02.jpg', room: 'Exterior', alt: 'Deck with chairs under a pergola' },
       { file: '02-pool-01.jpg', room: 'Pool', alt: 'In-ground pool with loungers and umbrellas beside the house' },
+      { file: '12-theater-01-c4.jpg', room: 'Movie theater', alt: 'Movie theater with a big screen and leather seating' },
+      { file: '03-outdoor-kitchen-01-c5.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen and bar in the covered pavilion at night, with the lit pool beyond' },
+      { file: '10-dining-room-01-c3.jpg', room: 'Dining room', alt: 'Dining room with one long table and a crystal chandelier' },
+      { file: '01-exterior-02.jpg', room: 'Exterior', alt: 'Deck with chairs under a pergola' },
       { file: '03-outdoor-kitchen-02.jpg', room: 'Outdoor kitchen', alt: 'Outdoor bar with stools, a sink and a TV' },
       { file: '03-outdoor-kitchen-03.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen pavilion with string lights' },
       { file: '03-outdoor-kitchen-04.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen island and dining table' },
