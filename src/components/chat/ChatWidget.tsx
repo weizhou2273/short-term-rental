@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { SITE } from '@/data/site';
 import { type Inline, parseChat } from '@/lib/chat/markup';
@@ -30,6 +31,13 @@ const GREETING_ASK =
 const greeting = (name: string) =>
   `Hi ${firstName(name)}! I can help you choose a home, answer questions and check live prices for your dates. When are you thinking of coming, and how many guests?`;
 const SUGGESTIONS = ['Which home fits 16 guests?', 'Check prices for my dates', 'Which homes take dogs?', 'What’s near Camelback?'];
+const stayQuestions = (name: string) => [`Is ${name} free on my dates?`, `Is ${name} good for families?`, 'Can we bring our dog?', 'Which home fits my group?'];
+
+/** The greeting bubble over the button: after this long on the site, once per visit. */
+const TEASER_DELAY_MS = 15_000;
+const TEASER_KEY = 'wk-chat-teased';
+/** Not while these are open; try again a little later. */
+const TEASER_BUSY = '.offer-backdrop, .booking-col.open, .modal:not([hidden])';
 
 const tel = SITE.contactPhone.replace(/[^\d+]/g, '');
 
@@ -118,8 +126,11 @@ function ChatIcon() {
   );
 }
 
-export function ChatWidget() {
+export function ChatWidget({ stays }: { stays: Record<string, string> }) {
   const [open, setOpen] = useState(false);
+  const [teaser, setTeaser] = useState(false);
+  const pathname = usePathname();
+  const stayName = stays[/^\/stays\/([^/?#]+)/.exec(pathname)?.[1] ?? ''] ?? null;
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
@@ -138,6 +149,36 @@ export function ChatWidget() {
   const restoredRef = useRef(false);
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // A friendly nudge to ask before booking: a bubble over the button after a
+  // while on the site, unless the chat was already opened this visit.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(TEASER_KEY)) return;
+    } catch {
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout>;
+    const show = () => {
+      if (openRef.current) return;
+      if (document.querySelector(TEASER_BUSY)) {
+        timer = setTimeout(show, 10_000);
+        return;
+      }
+      setTeaser(true);
+      try {
+        sessionStorage.setItem(TEASER_KEY, '1');
+      } catch {
+        // Shown once anyway in this page view.
+      }
+    };
+    timer = setTimeout(show, TEASER_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (busy || !restoredRef.current) return;
@@ -198,6 +239,12 @@ export function ChatWidget() {
       latest.current.sent = Number(store.get<number>(session, SENT_KEY)) || 0;
     }
     setOpen(true);
+    setTeaser(false);
+    try {
+      sessionStorage.setItem(TEASER_KEY, '1');
+    } catch {
+      // Fine: the bubble simply may appear later.
+    }
   }
 
   function onLead(next: Guest) {
@@ -341,9 +388,29 @@ export function ChatWidget() {
         hidden={open}
         onClick={openChat}
       >
-        <ChatIcon />
-        <span className="chat-launcher-label">Questions? Chat</span>
+        <span className="chat-launcher-icon">
+          <ChatIcon />
+          <span className="chat-online" aria-hidden="true" />
+        </span>
+        <span className="chat-launcher-label">Ask us anything</span>
       </button>
+
+      {teaser && !open ? (
+        <div className="chat-teaser">
+          <button type="button" className="chat-teaser-body" onClick={openChat}>
+            <strong>Hi there!</strong>{' '}
+            {stayName
+              ? `Thinking about ${stayName}? I can check your dates and answer any question.`
+              : 'Planning a Poconos getaway? Ask me about the homes, your dates or prices.'}
+            <span className="chat-teaser-cta">Ask a question</span>
+          </button>
+          <button type="button" className="chat-teaser-close" aria-label="Dismiss" onClick={() => setTeaser(false)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </div>
+      ) : null}
 
       <section
         id={panelId}
@@ -360,7 +427,9 @@ export function ChatWidget() {
             <div id={titleId} className="chat-title">
               {SITE.brand} concierge
             </div>
-            <div className="chat-sub">AI assistant · usually answers in seconds</div>
+            <div className="chat-sub">
+              <span className="chat-online" aria-hidden="true" /> AI concierge · instant answers, real people follow up
+            </div>
           </div>
           <div className="chat-head-actions">
             {messages.length ? (
@@ -383,7 +452,7 @@ export function ChatWidget() {
           {!hasToken ? <LeadForm key={guest?.email ?? 'new'} initial={guest} nameRef={nameRef} onDone={onLead} /> : null}
           {hasToken && messages.length === 0 ? (
             <div className="chat-suggest">
-              {SUGGESTIONS.map((s) => (
+              {(stayName ? stayQuestions(stayName) : SUGGESTIONS).map((s) => (
                 <button key={s} type="button" className="chat-chip" onClick={() => void send(s)}>
                   {s}
                 </button>
