@@ -561,15 +561,19 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.058, lng: -75.098 },
     neighborhood: 'A quiet, wooded setting in the heart of the Poconos, with grocery stores about 10 minutes away.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid
-    // (the owner's c1–c5 picks). `room` groups them in the photo tour, in
-    // order of each room's first photo; bedroom names match `sleeping` below.
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
+    // chosen by the owner and as the most striking (Nov 2026): a tighter crop of
+    // the top-down aerial (house, pool, pickleball court and hot tub in one frame;
+    // also the cover on cards and link previews), the dusk aerial, the great room,
+    // the theater, the pool. `room` groups them in the photo tour, in order of
+    // each room's first photo; bedroom names match `sleeping` below.
     photos: [
+      { file: '01-exterior-02-crop.jpg', room: 'Exterior', alt: 'Aerial view in fall: the house, the pool with its slide and deck, the pickleball court and the hot tub, ringed by the driveway and woods' },
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the house, pool, hot tub and pickleball court at dusk' },
-      { file: '02-pool-01-c2.jpg', room: 'Pool', alt: 'In-ground pool with a slide, surrounded by trees' },
       { file: '09-living-room-01-c3.jpg', room: 'Living room', alt: 'Living room with a stone fireplace, leather sofas and a vaulted ceiling' },
-      { file: '04-pickleball-court-01-c4.jpg', room: 'Pickleball court', alt: 'Pickleball court on the lawn' },
       { file: '15-theater-01-c5.jpg', room: 'Movie theater', alt: 'Movie theater with a big screen and leather recliners' },
+      { file: '02-pool-01-c2.jpg', room: 'Pool', alt: 'In-ground pool with a slide, surrounded by trees' },
+      { file: '04-pickleball-court-01-c4.jpg', room: 'Pickleball court', alt: 'Pickleball court on the lawn' },
       { file: '01-exterior-02.jpg', room: 'Exterior', alt: 'Aerial view of the house among fall trees' },
       { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Aerial view of the property and its long driveway' },
       { file: '01-exterior-04.jpg', room: 'Exterior', alt: 'Front of the house with a stone entry and balcony' },
