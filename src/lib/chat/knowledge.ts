@@ -21,7 +21,7 @@ export function propertyKnowledge(p: Property): string {
     `Page: /stays/${p.slug}`,
     `${p.type} in ${p.location}. ${p.tagline}.`,
     `Sleeps up to ${p.guests} guests · ${plural(p.bedrooms, 'bedroom')} · ${plural(p.beds, 'bed')} · ${baths(p.baths)}.`,
-    `Rating: ${p.rating.toFixed(2)} from ${p.reviewCount} Airbnb reviews.`,
+    `Rating: ${p.rating.toFixed(2)} from ${p.reviewCount} guest reviews.`,
   ];
   if (p.nearby.length) lines.push(`Near: ${p.nearby.map(attractionName).join(', ')}.`);
   if (p.neighborhood) lines.push(`Location: ${p.neighborhood} The exact address is sent after booking.`);
