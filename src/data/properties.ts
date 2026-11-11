@@ -301,17 +301,20 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: 41.142, lng: -75.352 },
     neighborhood: 'Near Camelback Mountain and Kalahari Resort, in a community with lakes, beaches and an outdoor pool (passes in season).',
     // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
-    // chosen as the most striking (Nov 2026): dusk across the pond, the dining
-    // table for the whole group, the movie room, the pool, the hot tub at night
-    // (last, as "Show all photos" covers that tile's corner).
+    // chosen by the owner and as the most striking (Nov 2026): the aerial view
+    // (court, beach, pond and pool in one frame; it is also the cover on cards
+    // and link previews), dusk across the pond, the dining table for the whole
+    // group, the movie room, the hot tub at night (last, as "Show all photos"
+    // covers that tile's corner).
     // `room` groups them in the photo tour, in order of each room's first
     // photo; bedroom names match `sleeping` below.
     photos: [
+      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Aerial view in fall: the house, pickleball court, pool, fire pit, sand beach and private pond with a dock, and the playground' },
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'The house at dusk across the pond, with the pool and patio lit up' },
       { file: '09-dining-room-01.jpg', room: 'Dining room', alt: 'Long dining table for the whole group, with the fireplace, sofas and kitchen beyond' },
       { file: '11-theater-04.jpg', room: 'Movie & game room', alt: 'Movie room with a big screen, a putting green and a leather sectional' },
-      { file: '03-pool-02.jpg', room: 'Pool', alt: 'Pool with yellow-striped umbrellas and loungers' },
       { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Hot tub deck at night under string lights, with an outdoor TV and bar' },
+      { file: '03-pool-02.jpg', room: 'Pool', alt: 'Pool with yellow-striped umbrellas and loungers' },
       { file: '07-living-room-01-c2.jpg', room: 'Living room', alt: 'Open living room with leather sofas, a pool table and the kitchen beyond' },
       { file: '11-theater-01-c3.jpg', room: 'Movie & game room', alt: 'Movie and game room with a big screen and a leather sectional' },
       { file: '03-pool-01-c4.jpg', room: 'Pool', alt: 'Pool with lounge chairs and umbrellas' },
@@ -320,7 +323,6 @@ const ALL_PROPERTIES: Property[] = [
       { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Back of the house with the pool and patio' },
       { file: '01-exterior-04.jpg', room: 'Exterior', alt: 'Backyard with the pool, patio and pond' },
       { file: '01-exterior-05.jpg', room: 'Exterior', alt: 'The backyard and pond at dusk' },
-      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Aerial view of the house and backyard' },
       { file: '01-exterior-07.jpg', room: 'Exterior', alt: 'Covered front porch with rocking chairs' },
       { file: '01-exterior-08.jpg', room: 'Exterior', alt: 'Wooded driveway to the house' },
       { file: '02-pond-beach-01.jpg', room: 'Pond', alt: 'Private pond with a dock' },
