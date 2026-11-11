@@ -111,7 +111,7 @@ export type Property = {
     safety: string[];
     cancellation: string;
   };
-  /** Guest first name, "Month YYYY", and the public review text. */
+  /** A few featured 5-star reviews shown on the page: guest first name, "Month YYYY", public text. The full list is in src/data/reviews. */
   reviews: { name: string; date: string; text: string }[];
   faqs: { q: string; a: string }[];
   hospitable: {
@@ -121,3 +121,6 @@ export type Property = {
     uuid: string;
   };
 };
+
+/** One guest review from the full list in src/data/reviews: first name, "Month YYYY", stars (4 or 5), public text. */
+export type GuestReview = { name: string; date: string; rating: number; text: string };

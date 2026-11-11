@@ -10,6 +10,10 @@ import type { Property } from './types';
  * Delete the flag to bring it back.
  *
  * The site lists properties in the order they appear here.
+ *
+ * `rating` and `reviewCount` are the average and number of ALL the home's
+ * rated reviews in Hospitable, low ones included (src/data/reviews has the
+ * same figures); `reviews` is a few featured ones shown on the page.
  */
 const ALL_PROPERTIES: Property[] = [
   {
@@ -24,9 +28,9 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 8,
     beds: 13,
     baths: 4.5,
-    // Hospitable, Oct 2026: average of all 56 Airbnb reviews.
-    rating: 4.96,
-    reviewCount: 56,
+    // Hospitable, Nov 11 2026: average of all 59 reviews (Airbnb).
+    rating: 4.97,
+    reviewCount: 59,
     nearby: ['shawnee', 'dwg', 'bushkill'],
     features: { sportCourt: true, waterfront: true, petFriendly: true },
     // About 500 m from the house, so the map circle covers the area, not the address.
@@ -295,9 +299,9 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 6,
     beds: 14,
     baths: 3,
-    // Hospitable, Oct 2026: average of 354 rated reviews (Airbnb and Booking.com), 355 in all.
+    // Hospitable, Nov 11 2026: average of all 356 rated reviews (Airbnb and Booking.com); 1 more has no rating.
     rating: 4.94,
-    reviewCount: 355,
+    reviewCount: 356,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { sportCourt: true, waterfront: true, petFriendly: true },
     // About 500 m from the house, so the map circle covers the area, not the address.
@@ -556,9 +560,9 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 7,
     beds: 11,
     baths: 4.5,
-    // Hospitable, Oct 2026: average of 133 rated Airbnb reviews, 136 in all.
-    rating: 4.89,
-    reviewCount: 136,
+    // Hospitable, Nov 11 2026: average of all 139 rated reviews (Airbnb); 3 more have no rating.
+    rating: 4.88,
+    reviewCount: 139,
     nearby: ['shawnee', 'dwg', 'bushkill'],
     features: { sportCourt: true, waterfront: false, petFriendly: true },
     // About 500 m from the house, so the map circle covers the area, not the address.
@@ -842,9 +846,9 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 5,
     beds: 7,
     baths: 3.5,
-    // Hospitable, Oct 2026: average of 330 rated Airbnb reviews, 331 in all.
+    // Hospitable, Nov 11 2026: average of all 334 rated reviews (Airbnb); 1 more has no rating.
     rating: 4.88,
-    reviewCount: 331,
+    reviewCount: 334,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { sportCourt: false, waterfront: false, petFriendly: true },
     // About 500 m from the house, so the map circle covers the area, not the address.
@@ -1064,9 +1068,9 @@ const ALL_PROPERTIES: Property[] = [
     bedrooms: 4,
     beds: 7,
     baths: 2.5,
-    // Hospitable, Oct 2026: average of 432 rated reviews (Airbnb and Booking.com), 433 in all.
+    // Hospitable, Nov 11 2026: average of all 436 rated reviews (Airbnb and Booking.com); 1 more has no rating.
     rating: 4.88,
-    reviewCount: 433,
+    reviewCount: 436,
     nearby: ['camelback', 'kalahari', 'raceway', 'jackfrost', 'mountairy'],
     features: { sportCourt: false, waterfront: false, petFriendly: true },
     // About 500 m from the house, so the map circle covers the area, not the address.
