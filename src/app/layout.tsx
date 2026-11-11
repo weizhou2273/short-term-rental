@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
+import { PROPERTIES } from '@/data/properties';
 import { SITE } from '@/data/site';
 import { SITE_URL } from '@/lib/seo';
 import { MetaPixel } from '@/components/analytics/MetaPixel';
@@ -36,6 +37,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const offer = welcomeOffer();
+  // Home names by slug, so the chat can greet visitors by the home they're looking at.
+  const stayNames = Object.fromEntries(PROPERTIES.map((p) => [p.slug, p.name]));
   return (
     <html lang="en" className={`${jost.variable} ${cormorant.variable}`}>
       <body>
@@ -44,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         {children}
         {/* Only the fact that a key is set reaches the page, never the key. */}
-        {process.env.ANTHROPIC_API_KEY ? <ChatWidget /> : null}
+        {process.env.ANTHROPIC_API_KEY ? <ChatWidget stays={stayNames} /> : null}
         {/* Only when an offer is configured and email is set up; the code itself isn't in the page. */}
         {offer ? <WelcomeOffer percent={offer.percent} minNights={offer.minNights} /> : null}
         <MetaPixel />
