@@ -90,6 +90,9 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   // Read after hydration (the server can't see localStorage); the popup announces a new code.
   useEffect(() => {
     const load = () => setPromo(readSavedPromo());
+    // A link with ?promo=CODE (e.g. from the follow-up email) applies and saves the code.
+    const fromLink = new URLSearchParams(window.location.search).get('promo');
+    if (fromLink && PROMO_PATTERN.test(fromLink)) savePromo(fromLink);
     load();
     window.addEventListener('wk-promo', load);
     return () => window.removeEventListener('wk-promo', load);
