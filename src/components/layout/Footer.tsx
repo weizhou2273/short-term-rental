@@ -79,7 +79,7 @@ export function Footer() {
             © {new Date().getFullYear()} {SITE.brand}
           </span>
           <span>
-            <a href="#">Terms</a> &nbsp; <a href="#">Privacy</a>
+            <a href="#">Terms</a> &nbsp; <Link href="/privacy">Privacy</Link>
           </span>
         </div>
       </div>
