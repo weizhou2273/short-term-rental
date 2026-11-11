@@ -19,7 +19,7 @@ export function Stars({ rating }: { rating: number }) {
 }
 
 /**
- * "Show N guest reviews": the home's 4- and 5-star reviews in a dialog,
+ * "Show more guest reviews": the home's 4- and 5-star reviews in a dialog,
  * newest first. The list (up to ~110 KB) loads when the guest points at or
  * opens the button, not with the page.
  */
@@ -57,7 +57,7 @@ export function ReviewHistory({ slug, rating, reviewCount }: { slug: string; rat
           setOpen(true);
         }}
       >
-        Show {history.shown} guest reviews
+        Show more guest reviews
       </button>
       <Modal title="Guest reviews" open={open} onClose={close}>
         <p className="review-note">
