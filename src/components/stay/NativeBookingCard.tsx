@@ -8,6 +8,7 @@ import { MAX_INFANTS, MAX_PETS } from '@/lib/booking/guest';
 import { formatShortDate, nightsBetween } from '@/lib/dates';
 import { money, plural, wholeDollars } from '@/lib/format';
 import { parseSearchState } from '@/lib/search-params';
+import { trackGa } from '@/lib/google-analytics';
 import { centsToUnits, trackMeta } from '@/lib/meta-pixel';
 import { PROMO_PATTERN, readSavedPromo, savePromo } from '@/lib/offer/promo';
 import { DateRangePicker } from './DateRangePicker';
@@ -76,6 +77,8 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
   // Shown when "Check availability" is pressed with something still missing.
   const [nudge, setNudge] = useState<string | null>(null);
   const adultsRef = useRef<HTMLSelectElement>(null);
+  // The last stay reported as "checked dates", so re-pricing the same stay isn't counted twice.
+  const pricedRef = useRef<string | null>(null);
 
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState<string | null>(null);
@@ -144,7 +147,36 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
     setQuote({ status: 'loading' });
     const timer = setTimeout(() => {
       postQuote({ slug: p.slug, checkin, checkout, adults, children, infants, pets, ...(promo ? { promo } : {}) }, controller.signal)
-        .then((q) => setQuote({ status: 'ready', quote: q }))
+        .then((q) => {
+          setQuote({ status: 'ready', quote: q });
+          // Funnel step "checked dates": once per stay priced, not again for the same dates and guests.
+          const key = [p.slug, checkin, checkout, adults, children, infants, pets, promo ?? ''].join('|');
+          if (pricedRef.current === key) return;
+          pricedRef.current = key;
+          const value = centsToUnits(q.totalBeforeTaxes);
+          trackMeta('AddToCart', {
+            content_ids: [p.slug],
+            content_name: p.name,
+            content_type: 'hotel',
+            value,
+            currency: q.currency,
+            checkin_date: checkin,
+            checkout_date: checkout,
+            num_adults: adults,
+            num_children: children,
+          });
+          trackGa('check_availability', {
+            item_id: p.slug,
+            item_name: p.name,
+            checkin,
+            checkout,
+            nights: q.nights,
+            guests: adults + children,
+            value,
+            currency: q.currency,
+            promo_applied: Boolean(q.promo?.applied),
+          });
+        })
         .catch((err: Error) => {
           if (err.name !== 'AbortError') setQuote({ status: 'error', message: err.message });
         });
@@ -153,7 +185,7 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
       clearTimeout(timer);
       controller.abort();
     };
-  }, [ready, p.slug, checkin, checkout, adults, children, infants, pets, promo, attempt]);
+  }, [ready, p.slug, p.name, checkin, checkout, adults, children, infants, pets, promo, attempt]);
 
   const q = quote.status === 'ready' ? quote.quote : null;
 
@@ -193,6 +225,14 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
         setReserving(false);
         return;
       }
+      trackGa('begin_checkout', {
+        currency: final.currency,
+        value: centsToUnits(final.total),
+        checkin,
+        checkout,
+        items: [{ item_id: p.slug, item_name: p.name, price: centsToUnits(final.total), quantity: 1 }],
+        ...(final.promo?.applied ? { coupon: final.promo.code } : {}),
+      });
       trackMeta('InitiateCheckout', {
         content_ids: [p.slug],
         content_name: p.name,
@@ -203,7 +243,7 @@ export function NativeBookingCard({ property: p, onQuote }: { property: Property
         checkin_date: checkin,
         checkout_date: checkout,
       });
-      // Give the pixel a moment to send before the page unloads.
+      // Give the pixel and GA a moment to send before the page unloads.
       await new Promise((resolve) => setTimeout(resolve, 300));
       window.location.assign(final.bookingUrl);
     } catch (err) {

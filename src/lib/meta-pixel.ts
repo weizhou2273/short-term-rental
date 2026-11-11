@@ -9,6 +9,7 @@
  *   PageView          every page, including client-side navigations
  *   ViewContent       a stay page is opened
  *   Search            the search page is shown with a query
+ *   AddToCart         a price appears in the booking card for chosen dates
  *   InitiateCheckout  "Reserve" is pressed, just before the redirect to Hospitable
  *   Lead              a guest leaves their details in the chat, or signs up for the welcome offer
  * Purchase can't be sent from here: payment happens on booking.hospitable.com.
@@ -28,9 +29,23 @@ declare global {
   }
 }
 
-/** Sends a standard Meta event. A no-op on the server, when disabled, or if the pixel is blocked. */
-export function trackMeta(event: string, params?: Record<string, unknown>): void {
-  if (typeof window === 'undefined' || !META_PIXEL_ID || typeof window.fbq !== 'function') return;
+const RETRY_MS = 250;
+const RETRY_FOR_MS = 8_000;
+
+/**
+ * Sends a standard Meta event. A no-op on the server or when disabled.
+ *
+ * An event sent while the page is still starting (e.g. ViewContent when a
+ * visitor lands straight on a home's page) can run before the pixel's script
+ * has defined fbq, so it waits for it briefly instead of being dropped. If the
+ * pixel is blocked, the event is quietly given up.
+ */
+export function trackMeta(event: string, params?: Record<string, unknown>, waited = 0): void {
+  if (typeof window === 'undefined' || !META_PIXEL_ID) return;
+  if (typeof window.fbq !== 'function') {
+    if (waited < RETRY_FOR_MS) setTimeout(() => trackMeta(event, params, waited + RETRY_MS), RETRY_MS);
+    return;
+  }
   try {
     window.fbq('track', event, params);
   } catch {
