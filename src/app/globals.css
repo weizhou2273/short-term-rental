@@ -215,7 +215,7 @@ p{margin:0}
 .review-head{display:flex;gap:12px;align-items:center;margin-bottom:8px}
 .avatar{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:var(--fill-2);color:var(--text);font-family:var(--display);font-size:20px}
 @media (max-width:760px){.reviews{grid-template-columns:1fr}}
-.review-note{color:var(--muted);font-size:14px;margin:-8px 0 20px}
+.review-note{color:var(--muted);font-size:14px;margin:0 0 12px}
 .btn.review-more{margin-top:28px}
 .review-list{display:grid;gap:0}
 .review-list article{padding:20px 0;border-top:1px solid var(--line)}
@@ -224,7 +224,6 @@ p{margin:0}
 .review-stars{color:var(--text);letter-spacing:1px}
 .review-stars-off{opacity:.25}
 .review-text{white-space:pre-line;margin:0}
-.modal .review-note{margin:0 0 12px}
 .faq details{border-bottom:1px solid var(--line);padding:14px 0}
 .faq summary{font-weight:400;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px}
 .faq summary::-webkit-details-marker{display:none}

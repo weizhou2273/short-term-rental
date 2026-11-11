@@ -203,9 +203,9 @@ export function HouseRules({ property: p }: { property: Property }) {
 }
 
 /**
- * A few featured reviews, then every 4- and 5-star review in a dialog. Since
- * lower ones aren't shown, the section says so, and the rating above it is
- * the average of all reviews (FTC rule on review suppression).
+ * A few featured reviews, then every 4- and 5-star review in a dialog. The
+ * rating above them is the average of all reviews, and the dialog says lower
+ * ones aren't listed (FTC rule on review suppression); keep that note.
  */
 export function Reviews({ property: p }: { property: Property }) {
   const hasHistory = Boolean(REVIEW_HISTORY[p.slug]);
@@ -214,11 +214,6 @@ export function Reviews({ property: p }: { property: Property }) {
       <div className="rating-big">
         ★ {p.rating} · {plural(p.reviewCount, 'review')}
       </div>
-      {hasHistory ? (
-        <p className="review-note">
-          Shown here: reviews rated 4 or 5 stars. The ★ {p.rating} rating is the average of all {plural(p.reviewCount, 'review')}.
-        </p>
-      ) : null}
       <div className="reviews">
         {p.reviews.map((r) => (
           <article key={`${r.name}-${r.date}`}>
