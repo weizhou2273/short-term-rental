@@ -8,6 +8,10 @@ import { leadSchema } from '@/lib/chat/request';
 import { isPhone } from '@/lib/chat/shared';
 import { EmailNotConfiguredError, sendEmail } from '@/lib/email/send';
 
+// The guest's recap (tests/recap.test.ts) is checked here only for being triggered.
+const sendRecap = vi.hoisted(() => vi.fn(async () => 'sent'));
+vi.mock('@/lib/chat/recap', () => ({ sendRecap }));
+
 const JANE = { name: 'Jane Doe', email: 'jane@example.com', phone: '(929) 555-0101' };
 const NOW = new Date('2026-11-10T17:05:00Z');
 
@@ -173,17 +177,31 @@ describe('POST /api/chat/transcript', () => {
   ];
 
   it('emails the conversation for a known guest', async () => {
+    vi.stubEnv('LEADS_FROM_EMAIL', 'W&K Reserve <stay@wkreserve.com>');
     const sent = mockResend();
     const res = await postTranscript(post('/api/chat/transcript', { lead: signLead(JANE), messages, page: '/' }));
     expect(res.status).toBe(204);
     expect(sent[0]).toMatchObject({ subject: 'Website chat: Jane Doe', reply_to: 'jane@example.com' });
     expect(String(sent[0]!.text)).toContain('Do you take dogs?');
+    // Then the guest's recap from Edward, with the welcome offer.
+    expect(sendRecap).toHaveBeenCalledWith(JANE, messages, expect.objectContaining({ offer: { code: 'WELCOME5', percent: 5, minNights: 2 } }));
+  });
+
+  it('sends no recap while guests can’t be emailed (Resend’s test sender)', async () => {
+    sendRecap.mockClear();
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    const sent = mockResend();
+    expect((await postTranscript(post('/api/chat/transcript', { lead: signLead(JANE), messages }))).status).toBe(204);
+    expect(sent).toHaveLength(1);
+    expect(sendRecap).not.toHaveBeenCalled();
   });
 
   it('ignores unknown guests and malformed conversations', async () => {
+    sendRecap.mockClear();
     const sent = mockResend();
     expect((await postTranscript(post('/api/chat/transcript', { lead: 'forged.token', messages }))).status).toBe(401);
     expect((await postTranscript(post('/api/chat/transcript', { lead: signLead(JANE), messages: [messages[1]] }))).status).toBe(400);
     expect(sent).toHaveLength(0);
+    expect(sendRecap).not.toHaveBeenCalled();
   });
 });

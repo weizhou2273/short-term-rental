@@ -19,18 +19,28 @@ export class EmailNotConfiguredError extends Error {}
 /**
  * `to` defaults to the host (LEADS_TO_EMAIL, else the site's contact email).
  * `fromName` replaces the sender's display name, keeping its address.
+ * `bccHost` sends the host a blind copy (of an email to a guest).
  */
-export type Email = { subject: string; text: string; html: string; replyTo?: string; to?: string; fromName?: string };
+export type Email = { subject: string; text: string; html: string; replyTo?: string; to?: string; fromName?: string; bccHost?: boolean };
+
+/**
+ * Whether email can reach guests: Resend's test sender (the default) only
+ * delivers to the account's own address, so guests need a sender on the
+ * verified wkreserve.com domain.
+ */
+export const canEmailGuests = () => !(process.env.LEADS_FROM_EMAIL?.trim() || DEFAULT_FROM).includes('@resend.dev');
+
+const hostAddress = () => process.env.LEADS_TO_EMAIL?.trim() || SITE.contactEmail;
 
 const DEFAULT_FROM = `${SITE.brand} chat <onboarding@resend.dev>`;
 
-async function resend(path: string, body: object): Promise<Response> {
+async function resend(path: string, body?: object): Promise<Response> {
   const key = process.env.RESEND_API_KEY;
   if (!key) throw new EmailNotConfiguredError('RESEND_API_KEY is not set');
   return fetch(`https://api.resend.com${path}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    method: body ? 'POST' : 'GET',
+    headers: { Authorization: `Bearer ${key}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
     signal: AbortSignal.timeout(10_000),
   });
 }
@@ -46,11 +56,12 @@ export function withDisplayName(from: string, name: string): string {
   return `"${name.replace(/["\\]/g, '')}" <${address}>`;
 }
 
-export async function sendEmail({ subject, text, html, replyTo, to, fromName }: Email): Promise<void> {
+export async function sendEmail({ subject, text, html, replyTo, to, fromName, bccHost }: Email): Promise<void> {
   const from = process.env.LEADS_FROM_EMAIL?.trim() || DEFAULT_FROM;
   const res = await resend('/emails', {
     from: fromName ? withDisplayName(from, fromName) : from,
-    to: [to || process.env.LEADS_TO_EMAIL?.trim() || SITE.contactEmail],
+    to: [to || hostAddress()],
+    ...(bccHost && to ? { bcc: [hostAddress()] } : {}),
     subject,
     text,
     html,
@@ -70,4 +81,31 @@ export async function addContact(email: string): Promise<void> {
   const err = await failure(res);
   if (/already exist/i.test(err.message)) return;
   throw err;
+}
+
+/**
+ * Whether an email to `to` whose subject starts with `subjectPrefix` was sent
+ * in the last `withinMs` (from Resend's list of recent emails), so a guest
+ * isn't sent the same follow-up twice. Needs a "Full access" key; with any
+ * error it says "no", so a follow-up is never lost to a lookup failure.
+ */
+export async function sentRecently(to: string, subjectPrefix: string, withinMs = 24 * 60 * 60 * 1000, now = Date.now()): Promise<boolean> {
+  try {
+    const res = await resend('/emails?limit=100');
+    if (!res.ok) return false;
+    const { data } = (await res.json()) as { data?: { to?: string[]; subject?: string; created_at?: string }[] };
+    const target = to.toLowerCase();
+    return (data ?? []).some((e) => {
+      // Resend writes times like "2026-11-11 02:19:14.478000+00".
+      const at = Date.parse(`${(e.created_at ?? '').slice(0, 19).replace(' ', 'T')}Z`);
+      return (
+        (e.to ?? []).some((t) => t.toLowerCase() === target) &&
+        (e.subject ?? '').startsWith(subjectPrefix) &&
+        Number.isFinite(at) &&
+        now - at < withinMs
+      );
+    });
+  } catch {
+    return false;
+  }
 }
