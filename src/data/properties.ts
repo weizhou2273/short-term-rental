@@ -300,11 +300,18 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.142, lng: -75.352 },
     neighborhood: 'Near Camelback Mountain and Kalahari Resort, in a community with lakes, beaches and an outdoor pool (passes in season).',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid
-    // (the owner's c1–c5 picks). `room` groups them in the photo tour, in
-    // order of each room's first photo; bedroom names match `sleeping` below.
+    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
+    // chosen as the most striking (Nov 2026): dusk across the pond, the dining
+    // table for the whole group, the movie room, the pool, the hot tub at night
+    // (last, as "Show all photos" covers that tile's corner).
+    // `room` groups them in the photo tour, in order of each room's first
+    // photo; bedroom names match `sleeping` below.
     photos: [
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'The house at dusk across the pond, with the pool and patio lit up' },
+      { file: '09-dining-room-01.jpg', room: 'Dining room', alt: 'Long dining table for the whole group, with the fireplace, sofas and kitchen beyond' },
+      { file: '11-theater-04.jpg', room: 'Movie & game room', alt: 'Movie room with a big screen, a putting green and a leather sectional' },
+      { file: '03-pool-02.jpg', room: 'Pool', alt: 'Pool with yellow-striped umbrellas and loungers' },
+      { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Hot tub deck at night under string lights, with an outdoor TV and bar' },
       { file: '07-living-room-01-c2.jpg', room: 'Living room', alt: 'Open living room with leather sofas, a pool table and the kitchen beyond' },
       { file: '11-theater-01-c3.jpg', room: 'Movie & game room', alt: 'Movie and game room with a big screen and a leather sectional' },
       { file: '03-pool-01-c4.jpg', room: 'Pool', alt: 'Pool with lounge chairs and umbrellas' },
@@ -317,10 +324,8 @@ const ALL_PROPERTIES: Property[] = [
       { file: '01-exterior-07.jpg', room: 'Exterior', alt: 'Covered front porch with rocking chairs' },
       { file: '01-exterior-08.jpg', room: 'Exterior', alt: 'Wooded driveway to the house' },
       { file: '02-pond-beach-01.jpg', room: 'Pond', alt: 'Private pond with a dock' },
-      { file: '03-pool-02.jpg', room: 'Pool', alt: 'Pool and lounge chairs by the house' },
       { file: '03-pool-03.jpg', room: 'Pool', alt: 'Pool, fire pit seating and the hot tub deck' },
       { file: '04-hot-tub-01.jpg', room: 'Hot tub', alt: 'Hot tub on the deck at night' },
-      { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Deck with the hot tub, an outdoor TV and seating' },
       { file: '04-hot-tub-03.jpg', room: 'Hot tub', alt: 'Hot tub on the deck beside an outdoor bar' },
       { file: '05-pickleball-court-02.jpg', room: 'Pickleball court', alt: 'Pickleball court with a basketball hoop' },
       { file: '06-playground-01.jpg', room: 'Playground', alt: 'Playground with yellow slides' },
@@ -332,7 +337,6 @@ const ALL_PROPERTIES: Property[] = [
       { file: '08-kitchen-03.jpg', room: 'Full kitchen', alt: 'Open kitchen and dining area' },
       { file: '08-kitchen-04.jpg', room: 'Full kitchen', alt: 'Kitchen with stainless steel appliances' },
       { file: '08-kitchen-05.jpg', room: 'Full kitchen', alt: 'Kitchen island and range' },
-      { file: '09-dining-room-01.jpg', room: 'Dining room', alt: 'Long dining table in the great room' },
       { file: '09-dining-room-02.jpg', room: 'Dining room', alt: 'Dining table set for a group' },
       { file: '10-billiards-01.jpg', room: 'Billiards', alt: 'Pool table in the great room' },
       { file: '10-billiards-02.jpg', room: 'Billiards', alt: 'Pool table and lounge area' },
@@ -341,7 +345,6 @@ const ALL_PROPERTIES: Property[] = [
       { file: '10-billiards-05.jpg', room: 'Billiards', alt: 'Pool table and sofas' },
       { file: '11-theater-02.jpg', room: 'Movie & game room', alt: 'Movie screen and sectional sofa' },
       { file: '11-theater-03.jpg', room: 'Movie & game room', alt: 'Movie room with a putting green' },
-      { file: '11-theater-04.jpg', room: 'Movie & game room', alt: 'Big screen and lounge seating' },
       { file: '11-theater-05.jpg', room: 'Movie & game room', alt: 'Game room with arcade machines' },
       { file: '11-theater-06.jpg', room: 'Movie & game room', alt: 'Sectional sofa and putting green' },
       { file: '11-theater-07.jpg', room: 'Movie & game room', alt: 'Game room lounge' },
