@@ -6,6 +6,7 @@ import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEff
 import { SITE } from '@/data/site';
 import { type Inline, parseChat } from '@/lib/chat/markup';
 import { CHAT_LIMITS, type ChatEvent, firstName, TRANSCRIPT_LIMITS } from '@/lib/chat/shared';
+import { trackGa } from '@/lib/google-analytics';
 import { trackMeta } from '@/lib/meta-pixel';
 import { type Guest, LeadForm } from './LeadForm';
 
@@ -251,6 +252,7 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
     setGuest(next);
     store.set(local, GUEST_KEY, next);
     trackMeta('Lead');
+    trackGa('generate_lead', { lead_source: 'chat' });
   }
 
   // Closing with the X or Escape puts focus back on the button (once it's shown again).

@@ -4,6 +4,7 @@ import { getPropertyBySlug, PROPERTIES } from '@/data/properties';
 import { coverPhoto, propertyPhotos } from '@/lib/photos';
 import { stayDescription, stayJsonLd, stayPath, stayTitle } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { GaEvent } from '@/components/analytics/GoogleAnalytics';
 import { MetaEvent } from '@/components/analytics/MetaPixel';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -54,6 +55,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
         event="ViewContent"
         params={{ content_ids: [property.slug], content_name: property.name, content_type: 'hotel' }}
       />
+      <GaEvent event="view_item" params={{ items: [{ item_id: property.slug, item_name: property.name }] }} />
       <Header showMiniSearch />
       <main id="main" className="container stay">
         <PropertyHeader property={property} />

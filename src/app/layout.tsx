@@ -4,6 +4,7 @@ import { PROPERTIES } from '@/data/properties';
 import { SITE } from '@/data/site';
 import { SITE_URL } from '@/lib/seo';
 import { MetaPixel } from '@/components/analytics/MetaPixel';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { Metricool } from '@/components/analytics/Metricool';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 import { WelcomeOffer } from '@/components/offer/WelcomeOffer';
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Only when an offer is configured and email is set up; the code itself isn't in the page. */}
         {offer ? <WelcomeOffer percent={offer.percent} minNights={offer.minNights} /> : null}
         <MetaPixel />
+        <GoogleAnalytics />
         <Metricool />
       </body>
     </html>

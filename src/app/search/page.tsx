@@ -3,6 +3,7 @@ import { SITE } from '@/data/site';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SearchBar } from '@/components/search/SearchBar';
+import { GaEvent } from '@/components/analytics/GoogleAnalytics';
 import { MetaEvent } from '@/components/analytics/MetaPixel';
 import { AmenityFilters } from '@/components/search/AmenityFilters';
 import { SearchResults } from '@/components/search/SearchResults';
@@ -37,6 +38,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           content_type: 'hotel',
           ...(state.checkin && state.checkout ? { checkin_date: state.checkin, checkout_date: state.checkout } : {}),
           num_adults: state.adults,
+        }}
+      />
+      <GaEvent
+        event="search"
+        params={{
+          search_term: place?.name ?? 'Poconos',
+          ...(state.checkin && state.checkout ? { checkin: state.checkin, checkout: state.checkout } : {}),
+          guests: state.adults,
         }}
       />
       <main id="main" className="container">

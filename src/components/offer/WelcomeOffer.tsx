@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { SITE } from '@/data/site';
+import { trackGa } from '@/lib/google-analytics';
 import { trackMeta } from '@/lib/meta-pixel';
 import { savePromo } from '@/lib/offer/promo';
 
@@ -134,6 +135,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
       // Lets an open booking card re-price with the code right away.
       window.dispatchEvent(new Event('wk-promo'));
       trackMeta('Lead', { content_name: 'Welcome offer' });
+      trackGa('generate_lead', { lead_source: 'welcome_offer' });
       setResult({ code: body.code, emailed: Boolean(body.emailed) });
       setPhase('done');
     } catch {
