@@ -4,6 +4,8 @@ import { POST } from '@/app/api/subscribe/route';
 import { addContact, withDisplayName } from '@/lib/email/send';
 import { welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
 
+const JANE = { name: 'Jane Doe', email: 'guest@example.com', phone: '(929) 555-0101' };
+
 let ip = 0;
 function subscribe(body: unknown, headers: Record<string, string> = {}) {
   return new NextRequest('https://wkreserve.com/api/subscribe', {
@@ -62,7 +64,12 @@ describe('welcome offer', () => {
     expect(email.text).toContain('Your code is WELCOME5: 5% off the nightly rate of your first direct stay of 2 nights or more.');
     expect(email.text).toContain('1. Roughly when are you thinking of coming?\n2. How many people, and any kids or dogs?\n3. What’s the occasion');
     expect(email.text).toContain('Reply “unsubscribe”');
+    expect(email.text).toMatch(/^Hi there,\n/);
     expect(email.text).toMatch(/\n\nEdward\nW&K Reserve/);
+    // With a name, it greets them by first name.
+    const named = welcomeEmail('guest@example.com', { code: 'WELCOME5', percent: 5, minNights: 2 }, 'Jane Doe');
+    expect(named.text).toMatch(/^Hi Jane,\n/);
+    expect(named.html).toContain('<p>Hi Jane,</p>');
     expect(email.html).toContain('<strong style="letter-spacing:.06em">WELCOME5</strong>');
     expect(email.html.match(/<li>/g)).toHaveLength(3);
   });
@@ -74,7 +81,7 @@ describe('welcome offer', () => {
 
   it('treats signing up twice as fine', async () => {
     mockResend({ contacts: 409, contactBody: '{"message":"Contact already exists"}' });
-    await expect(addContact('guest@example.com')).resolves.toBeUndefined();
+    await expect(addContact('guest@example.com', 'Jane Doe')).resolves.toBeUndefined();
     mockResend({ contacts: 401, contactBody: '{"message":"This API key is restricted to only send emails"}' });
     await expect(addContact('guest@example.com')).rejects.toThrow(/401/);
   });
@@ -84,12 +91,12 @@ describe('POST /api/subscribe', () => {
   it('saves the contact, emails the guest and the host, and returns the code', async () => {
     vi.stubEnv('LEADS_FROM_EMAIL', 'W&K Reserve <chat@wkreserve.com>');
     const calls = mockResend();
-    const res = await POST(subscribe({ email: ' Guest@Example.com ' }, { origin: 'https://wkreserve.com' }));
+    const res = await POST(subscribe({ name: ' Jane van Doe ', email: ' Guest@Example.com ', phone: '(929) 555-0101' }, { origin: 'https://wkreserve.com' }));
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ code: 'WELCOME5', percent: 5, emailed: true });
     // The code reaches a browser only after signing up, never in the page's settings.
     expect(JSON.stringify((await import('@/data/site')).SITE)).not.toContain('WELCOME5');
-    expect(calls.find((c) => c.path === '/contacts')?.body).toEqual({ email: 'Guest@Example.com', unsubscribed: false });
+    expect(calls.find((c) => c.path === '/contacts')?.body).toEqual({ email: 'Guest@Example.com', unsubscribed: false, first_name: 'Jane', last_name: 'van Doe' });
     const [welcome, notice] = calls.filter((c) => c.path === '/emails').map((c) => c.body);
     expect(welcome).toMatchObject({
       from: '"Edward at W&K Reserve" <chat@wkreserve.com>',
@@ -97,23 +104,29 @@ describe('POST /api/subscribe', () => {
       reply_to: 'stay@wkreserve.com',
       subject: 'Your 5% code, and a quick question',
     });
-    expect(notice).toMatchObject({ from: 'W&K Reserve <chat@wkreserve.com>', to: ['stay@wkreserve.com'], subject: 'New sign-up: Guest@Example.com', reply_to: 'Guest@Example.com' });
+    expect(String(welcome!.text)).toMatch(/^Hi Jane,\n/);
+    // The host gets the name, email and phone, with one-tap call and text links.
+    expect(notice).toMatchObject({ from: 'W&K Reserve <chat@wkreserve.com>', to: ['stay@wkreserve.com'], subject: 'New sign-up: Jane van Doe', reply_to: 'Guest@Example.com' });
+    expect(String(notice!.text)).toContain('Name: Jane van Doe\nEmail: Guest@Example.com\nPhone: (929) 555-0101');
+    expect(String(notice!.html)).toContain('<a href="sms:9295550101">Text</a>');
+    expect(String(notice!.html)).toContain('<a href="tel:9295550101">Call</a>');
     expect(String(notice!.text)).toContain('Their answers will arrive in this inbox');
     expect(String(notice!.text)).toContain('Saved to Resend → Contacts.');
   });
 
-  it('still gives the code when Resend can’t save or send, and logs the email', async () => {
+  it('still gives the code when Resend can’t save or send, and logs the details', async () => {
     mockResend({ contacts: 500, emails: 403 });
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const res = await POST(subscribe({ email: 'guest@example.com' }));
+    const res = await POST(subscribe(JANE));
     expect(await res.json()).toEqual({ code: 'WELCOME5', percent: 5, emailed: false });
-    expect(log.mock.calls.flat().join(' ')).toContain('guest@example.com');
+    const logged = log.mock.calls.flat().join(' ');
+    for (const detail of Object.values(JANE)) expect(logged).toContain(detail);
   });
 
   it('tells the host when the key can’t save contacts', async () => {
     const calls = mockResend({ contacts: 401, contactBody: '{"message":"This API key is restricted to only send emails"}' });
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    const res = await POST(subscribe({ email: 'guest@example.com' }));
+    const res = await POST(subscribe(JANE));
     expect((await res.json()).emailed).toBe(true);
     const notice = calls.find((c) => c.path === '/emails' && String(c.body.subject).startsWith('New sign-up'));
     expect(notice?.body).toMatchObject({ to: ['stay@wkreserve.com'], reply_to: 'guest@example.com' });
@@ -133,23 +146,41 @@ describe('POST /api/subscribe', () => {
       }),
     );
     vi.spyOn(console, 'error').mockImplementation(() => {});
-    const res = await POST(subscribe({ email: 'guest@example.com' }));
+    const res = await POST(subscribe(JANE));
     expect((await res.json()).emailed).toBe(false);
-    expect(calls).toContain('New sign-up: guest@example.com');
+    expect(calls).toContain('New sign-up: Jane Doe');
   });
 
-  it('refuses bad emails, other sites, and a site without the offer', async () => {
+  it('needs a real-looking name, email and phone, and says which is wrong', async () => {
+    const calls = mockResend();
+    const tries: [object, string][] = [
+      [{ ...JANE, email: 'nope' }, 'Please enter a valid email address.'],
+      [{ ...JANE, name: '' }, 'Please enter your name.'],
+      [{ ...JANE, name: 'Jane <script>' }, 'Please enter your name using letters only.'],
+      [{ ...JANE, phone: '555-0101' }, 'Please enter a phone number we can call or text, with area code.'],
+    ];
+    for (const [body, message] of tries) {
+      const res = await POST(subscribe(body));
+      expect(res.status, JSON.stringify(body)).toBe(400);
+      expect((await res.json()).error).toBe(message);
+    }
+    // An email alone, as the form used to send, is no longer enough.
+    expect((await POST(subscribe({ email: JANE.email }))).status).toBe(400);
+    // Nothing is saved or sent for a refused sign-up.
+    expect(calls).toHaveLength(0);
+  });
+
+  it('refuses other sites, and a site without the offer', async () => {
     mockResend();
-    expect((await POST(subscribe({ email: 'nope' }))).status).toBe(400);
-    expect((await POST(subscribe({ email: 'guest@example.com' }, { origin: 'https://evil.example' }))).status).toBe(403);
+    expect((await POST(subscribe(JANE, { origin: 'https://evil.example' }))).status).toBe(403);
     vi.stubEnv('RESEND_API_KEY', '');
-    expect((await POST(subscribe({ email: 'guest@example.com' }))).status).toBe(503);
+    expect((await POST(subscribe(JANE))).status).toBe(503);
   });
 
   it('limits sign-ups from one visitor', async () => {
     mockResend();
     const statuses: number[] = [];
-    for (let i = 0; i < 6; i++) statuses.push((await POST(subscribe({ email: `g${i}@example.com` }, { 'x-forwarded-for': '192.168.7.7' }))).status);
+    for (let i = 0; i < 6; i++) statuses.push((await POST(subscribe({ ...JANE, email: `g${i}@example.com` }, { 'x-forwarded-for': '192.168.7.7' }))).status);
     expect(statuses).toEqual([200, 200, 200, 200, 200, 429]);
   });
 });

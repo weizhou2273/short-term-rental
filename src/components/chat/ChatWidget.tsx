@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { SITE } from '@/data/site';
 import { type Inline, parseChat } from '@/lib/chat/markup';
-import { CHAT_LIMITS, type ChatEvent, firstName, TRANSCRIPT_LIMITS } from '@/lib/chat/shared';
+import { CHAT_LIMITS, firstName, GUEST_KEY, TRANSCRIPT_LIMITS, type ChatEvent } from '@/lib/chat/shared';
 import { trackGa } from '@/lib/google-analytics';
 import { trackMeta } from '@/lib/meta-pixel';
 import { type Guest, LeadForm } from './LeadForm';
@@ -24,7 +24,6 @@ import { type Guest, LeadForm } from './LeadForm';
 type Msg = { role: 'user' | 'assistant'; text: string; failed?: boolean };
 
 const STORAGE_KEY = 'wk-chat-v1';
-const GUEST_KEY = 'wk-chat-guest-v1';
 /** How many messages have already been emailed, so leaving twice doesn't resend. */
 const SENT_KEY = 'wk-chat-sent-v1';
 const GREETING_ASK =

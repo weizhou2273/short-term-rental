@@ -1,4 +1,6 @@
 import 'server-only';
+import type { Lead } from '@/lib/chat/request';
+import { firstName } from '@/lib/chat/shared';
 import { SITE } from '@/data/site';
 import type { Email } from '@/lib/email/send';
 import { SITE_URL } from '@/lib/seo';
@@ -6,7 +8,7 @@ import { PROMO_PATTERN } from './promo';
 
 /**
  * The welcome offer: a percentage off the nightly rate of a guest's first
- * direct booking, for joining the email list. The code is created in
+ * direct booking, for joining the list with their name, email and phone. The code is created in
  * Hospitable (Direct → Promo codes; percentage codes apply to the nightly
  * rate, not fees, and this one needs a minimum stay). Its terms are in
  * SITE.welcomeOffer; its name is here, server-only, so it isn't in the
@@ -40,8 +42,9 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
  * purpose (people answer a note from a person, not a promo); replies go to
  * the host's inbox.
  */
-export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOffer): Email {
+export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOffer, name = ''): Email {
   const host = SITE.hostName;
+  const hello = `Hi ${firstName(name) || 'there'},`;
   const terms = `${percent}% off the nightly rate of your first direct stay${minStayText(minNights)}`;
   const subject = `Your ${percent}% code, and a quick question`;
   const how = `It’s applied automatically on the device you signed up with. Anywhere else, enter it under “Have a promo code?” on any home’s page at ${SITE.domain}.`;
@@ -54,7 +57,7 @@ export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOf
   const promise = 'I’ll write back personally with the homes that fit and what’s open.';
   const optOut = `You’re getting this because you signed up at ${SITE.domain}. Not interested? Reply “unsubscribe” and we won’t email you again.`;
   const text = [
-    'Hi there,',
+    hello,
     `Thanks for joining ${SITE.brand}! Your code is ${code}: ${terms}. ${how}`,
     `${ask}\n${questions.map((q, i) => `${i + 1}. ${q}`).join('\n')}`,
     promise,
@@ -62,7 +65,7 @@ export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOf
     optOut,
   ].join('\n\n');
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1c1c1a;max-width:560px">
-<p>Hi there,</p>
+<p>${esc(hello)}</p>
 <p>Thanks for joining ${esc(SITE.brand)}! Your code is <strong style="letter-spacing:.06em">${esc(code)}</strong>: ${esc(terms)}. ${esc(how)}</p>
 <p>${esc(ask)}</p>
 <ol style="padding-left:20px;margin:0 0 14px">${questions.map((q) => `<li>${esc(q)}</li>`).join('')}</ol>
@@ -73,15 +76,25 @@ export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOf
   return { to, subject, text, html, replyTo: SITE.contactEmail, fromName: `${host} at ${SITE.brand}` };
 }
 
-/** To the host, for every sign-up, so they can follow up; Reply goes to the guest. */
-export function signupNoticeEmail(email: string, status: { saved: true } | { saved: false; reason: string }, welcomed: boolean): Email {
-  const lines = [
-    `New welcome-offer sign-up on ${SITE.domain}: ${email}`,
+/**
+ * To the host, for every sign-up, so they can follow up while the guest is
+ * still looking: name, email and phone, with one-tap call and text links.
+ * Reply goes to the guest.
+ */
+export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved: false; reason: string }, welcomed: boolean): Email {
+  const tel = lead.phone.replace(/[^\d+]/g, '');
+  const intro = `New welcome-offer sign-up on ${SITE.domain}:`;
+  const notes = [
     welcomed
       ? 'They’ve been sent your welcome email with their code and three questions (dates, group size, occasion). Their answers will arrive in this inbox; reply to this email to write to them now.'
       : 'Your welcome email could NOT be sent to them (usually because wkreserve.com isn’t verified in Resend yet). Reply to this email to send them their code and say hello yourself.',
     status.saved ? 'Saved to Resend → Contacts.' : `Not saved to Resend Contacts (${status.reason}). Check that the Resend API key has Full access.`,
   ];
-  const text = lines.join('\n\n');
-  return { subject: `New sign-up: ${email}`, text, html: `<p>${lines.map(esc).join('</p><p>')}</p>`, replyTo: email };
+  const text = [intro, `Name: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone}`, ...notes].join('\n\n');
+  const html = `<p>${esc(intro)}</p>
+<p>Name: <strong>${esc(lead.name)}</strong><br>
+Email: <a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a><br>
+Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(tel)}">Text</a> · <a href="tel:${esc(tel)}">Call</a></p>
+<p>${notes.map(esc).join('</p><p>')}</p>`;
+  return { subject: `New sign-up: ${lead.name}`, text, html, replyTo: lead.email };
 }

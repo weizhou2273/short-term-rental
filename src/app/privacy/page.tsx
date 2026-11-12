@@ -63,9 +63,9 @@ export default function PrivacyPage() {
             you search, the buttons you tap, your device and browser type, your approximate location, and an identifier for your browser.
           </li>
           <li>
-            <strong>Browser storage:</strong> our website saves a few small items in your browser, such as an offer code you’ve claimed and
-            the contact details and messages from your website chat, so it can apply the code when you check prices and you don’t have to
-            start the chat over.
+            <strong>Browser storage:</strong> our website saves a few small items in your browser, such as an offer code you’ve claimed,
+            the contact details you’ve given us and your website chat messages, so it can apply the code when you check prices and you don’t
+            have to type your details or start the chat again.
           </li>
           <li>
             <strong>Maps:</strong> the area map on each home’s page loads its map images from OpenStreetMap, which receives your IP address

@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { SITE } from '@/data/site';
+import { GUEST_KEY, isPhone, LEAD_LIMITS, NAME_PATTERN } from '@/lib/chat/shared';
 import { trackGa } from '@/lib/google-analytics';
 import { trackMeta } from '@/lib/meta-pixel';
 import { savePromo } from '@/lib/offer/promo';
 
 /**
- * "X% off your first stay" popup that collects emails for the list.
+ * "X% off your first stay" popup that collects a name, email and phone
+ * number for the list (and for the host to follow up).
  *
  * Shown once a visitor has had a moment on the site (4 s, a quarter of a
  * page scrolled, or the mouse heading for the tab bar), never over the chat
@@ -19,7 +21,9 @@ import { savePromo } from '@/lib/offer/promo';
  * to open it at once (a preview; nothing appears if the offer is off).
  *
  * Signing up returns the code (/api/subscribe), which is saved for the
- * booking card to apply automatically.
+ * booking card to apply automatically. The form starts with whatever the
+ * guest already told the chat, and the chat starts with what they enter
+ * here, so nobody types their details twice.
  */
 
 const SEEN_KEY = 'wk-offer-v1';
@@ -41,6 +45,27 @@ function seen(): Seen | null {
   }
 }
 
+type Details = { name: string; email: string; phone: string };
+
+/** What the guest already gave the chat (or this form), if anything. */
+function savedDetails(): Details {
+  try {
+    const g = JSON.parse(localStorage.getItem(GUEST_KEY) ?? 'null') as Partial<Details> | null;
+    return { name: g?.name ?? '', email: g?.email ?? '', phone: g?.phone ?? '' };
+  } catch {
+    return { name: '', email: '', phone: '' };
+  }
+}
+
+/** Keeps the details for the chat's sign-in, unless the chat already has its own (with its token). */
+function shareWithChat(details: Details) {
+  try {
+    if (!localStorage.getItem(GUEST_KEY)) localStorage.setItem(GUEST_KEY, JSON.stringify({ ...details, token: null }));
+  } catch {
+    // The chat will simply ask.
+  }
+}
+
 function remember(value: Seen) {
   try {
     localStorage.setItem(SEEN_KEY, JSON.stringify(value));
@@ -52,7 +77,8 @@ function remember(value: Seen) {
 export function WelcomeOffer({ percent, minNights }: { percent: number; minNights: number }) {
   const ofMin = minNights > 1 ? ` of ${minNights} nights or more` : '';
   const [phase, setPhase] = useState<'hidden' | 'form' | 'done'>('hidden');
-  const [email, setEmail] = useState('');
+  const [details, setDetails] = useState<Details>({ name: '', email: '', phone: '' });
+  const set = (field: keyof Details) => (e: { target: { value: string } }) => setDetails((d) => ({ ...d, [field]: e.target.value }));
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ code: string; emailed: boolean } | null>(null);
@@ -68,6 +94,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
     if (new URLSearchParams(window.location.search).has('offer')) {
       const timer = setTimeout(() => {
         returnTo.current = document.activeElement as HTMLElement | null;
+        setDetails(savedDetails());
         setPhase('form');
       }, 300);
       return () => clearTimeout(timer);
@@ -89,6 +116,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
       }
       stop();
       returnTo.current = document.activeElement as HTMLElement | null;
+      setDetails(savedDetails());
       setPhase('form');
     };
     function onScroll() {
@@ -117,13 +145,16 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (sending) return;
+    const lead = { name: details.name.trim(), email: details.email.trim(), phone: details.phone.trim() };
+    if (!NAME_PATTERN.test(lead.name)) return setError('Please enter your name using letters only.');
+    if (!isPhone(lead.phone)) return setError('Please enter a phone number we can call or text, with area code.');
     setSending(true);
     setError(null);
     try {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify(lead),
       });
       const body = (await res.json().catch(() => ({}))) as { code?: string; emailed?: boolean; error?: string };
       if (!res.ok || !body.code) {
@@ -131,6 +162,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
         return;
       }
       remember({ state: 'joined' });
+      shareWithChat(lead);
       savePromo(body.code);
       // Lets an open booking card re-price with the code right away.
       window.dispatchEvent(new Event('wk-promo'));
@@ -192,22 +224,49 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                 offers.
               </p>
               <form className="offer-form" onSubmit={submit}>
+                <label className="sr-only" htmlFor={`${titleId}-name`}>
+                  Name
+                </label>
+                <input
+                  ref={inputRef}
+                  id={`${titleId}-name`}
+                  autoComplete="name"
+                  required
+                  maxLength={LEAD_LIMITS.name}
+                  placeholder="Name"
+                  value={details.name}
+                  onChange={set('name')}
+                />
+                <label className="sr-only" htmlFor={`${titleId}-phone`}>
+                  Phone
+                </label>
+                <input
+                  id={`${titleId}-phone`}
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  required
+                  maxLength={LEAD_LIMITS.phone}
+                  placeholder="Phone"
+                  value={details.phone}
+                  onChange={set('phone')}
+                />
                 <label className="sr-only" htmlFor={`${titleId}-email`}>
                   Email
                 </label>
                 <input
-                  ref={inputRef}
                   id={`${titleId}-email`}
+                  className="offer-wide"
                   type="email"
                   inputMode="email"
                   autoComplete="email"
                   required
-                  maxLength={254}
-                  placeholder="Your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  maxLength={LEAD_LIMITS.email}
+                  placeholder="Email"
+                  value={details.email}
+                  onChange={set('email')}
                 />
-                <button type="submit" className="btn btn-solid" disabled={sending}>
+                <button type="submit" className="btn btn-solid offer-wide" disabled={sending}>
                   {sending ? 'One moment…' : `Get my ${percent}% code`}
                 </button>
               </form>
@@ -220,7 +279,9 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                 No thanks
               </button>
               <p className="offer-fine">
-                By signing up you agree to get emails from {SITE.brand}; unsubscribe anytime. For stays booked directly on {SITE.domain}.
+                By signing up you agree that {SITE.brand} may email, call or text you about your stay and our offers. Message and data rates may
+                apply; reply STOP or “unsubscribe” anytime. <Link href="/privacy">Privacy Policy</Link>. For stays booked directly on{' '}
+                {SITE.domain}.
               </p>
             </>
           ) : result ? (
