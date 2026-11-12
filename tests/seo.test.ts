@@ -9,14 +9,15 @@ describe('sitemap.xml', () => {
   const entries = sitemap();
   const urls = entries.map((e) => e.url);
 
-  it('lists the home page, search, every listed stay and every built guide at the live domain', () => {
+  it('lists the home page, search, the privacy policy, every listed stay and every built guide at the live domain', () => {
     expect(urls[0]).toBe('https://wkreserve.com/');
     expect(urls).toContain('https://wkreserve.com/search');
     expect(urls).toContain('https://wkreserve.com/poconos');
     for (const p of PROPERTIES) expect(urls).toContain(`https://wkreserve.com/stays/${p.slug}`);
     const built = GUIDES.filter((g) => guideHomes(g, PROPERTIES).length > 0);
     for (const g of built) expect(urls).toContain(`https://wkreserve.com/poconos/${g.slug}`);
-    expect(urls).toHaveLength(PROPERTIES.length + built.length + 3);
+    expect(urls).toContain('https://wkreserve.com/privacy');
+    expect(urls).toHaveLength(PROPERTIES.length + built.length + 4);
     expect(new Set(urls).size).toBe(urls.length);
   });
 
