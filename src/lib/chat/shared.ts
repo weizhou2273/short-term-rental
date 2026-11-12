@@ -29,6 +29,9 @@ export function isPhone(value: string): boolean {
 
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 
+/** localStorage key for the guest's name, email and phone, so the chat and the welcome offer don't ask twice. */
+export const GUEST_KEY = 'wk-chat-guest-v1';
+
 /** Newline-delimited JSON events sent to the browser by /api/chat. */
 export type ChatEvent =
   /** A model call starts. A later `reset` drops the text sent since this point. */

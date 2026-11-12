@@ -561,7 +561,8 @@ body:has(.offer-backdrop) .chat-teaser{display:none}
 .offer-text{color:var(--muted);font-size:15px;line-height:1.55}
 .offer-close{position:absolute;top:12px;right:12px;width:34px;height:34px;display:grid;place-items:center;padding:0;border:none;border-radius:50%;background:transparent;color:var(--muted)}
 .offer-close:hover{background:var(--fill);color:var(--text)}
-.offer-form{display:grid;gap:10px;margin-top:18px}
+.offer-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.offer-wide{grid-column:1 / -1}
 .offer-form input{min-width:0;height:46px;padding:0 14px;border:1px solid var(--line);border-radius:2px;background:var(--bg);color:var(--text);font:inherit;font-size:16px}
 .offer-form input:focus{outline:none;border-color:var(--text)}
 .offer-form .btn{height:46px}
@@ -569,6 +570,7 @@ body:has(.offer-backdrop) .chat-teaser{display:none}
 .offer-error{margin-top:8px;font-size:13px;color:#B4533A}
 .offer-skip{display:block;margin:12px auto 0;font-size:13px;color:var(--muted)}
 .offer-fine{margin-top:12px;font-size:11.5px;line-height:1.45;color:var(--muted);text-align:center}
+.offer-fine a{color:inherit}
 .offer-code{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 12px;padding:14px 16px;border:1px dashed var(--brass);border-radius:var(--radius)}
 .offer-code strong{font-size:22px;font-weight:500;letter-spacing:.1em}
 .offer-cta{width:100%;margin-top:16px}
@@ -577,14 +579,13 @@ body:has(.offer-backdrop) .chat-teaser{display:none}
 @media (max-width:640px){
   /* A small card at the bottom, page still usable: no dimming, taps pass through around it. */
   .offer-backdrop{align-items:flex-end;padding:0 10px calc(10px + env(safe-area-inset-bottom,0px));background:transparent;pointer-events:none}
-  .offer{grid-template-columns:minmax(0,1fr);pointer-events:auto;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+  .offer{grid-template-columns:minmax(0,1fr);max-height:calc(100dvh - 20px);overflow-y:auto;pointer-events:auto;box-shadow:0 8px 32px rgba(0,0,0,.3)}
   .offer-art{display:none}
   .offer-body{padding:18px 16px 12px}
   .offer-body .eyebrow{display:none}
   .offer-body h2{font-size:24px;margin-bottom:6px;padding-right:28px}
   .offer-text{font-size:14px}
-  .offer-form{grid-template-columns:minmax(0,1fr) auto;margin-top:12px}
-  .offer-form .btn{padding:0 12px;font-size:12px;letter-spacing:.06em}
+  .offer-form{gap:8px;margin-top:12px}
   .offer-skip{margin-top:8px}
   .offer-fine{margin-top:6px}
 }

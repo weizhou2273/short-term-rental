@@ -71,12 +71,18 @@ export async function sendEmail({ subject, text, html, replyTo, to, fromName, bc
 }
 
 /**
- * Adds an email to the Resend contact list (Resend → Contacts), where it can
- * be exported or sent a broadcast. Needs a "Full access" API key; a
+ * Adds an email, with the guest's name if known, to the Resend contact list
+ * (Resend → Contacts), where it can be exported or sent a broadcast. Needs a "Full access" API key; a
  * "Sending access" key can only send. Someone signing up twice is not an error.
  */
-export async function addContact(email: string): Promise<void> {
-  const res = await resend('/contacts', { email, unsubscribed: false });
+export async function addContact(email: string, name = ''): Promise<void> {
+  const [first, ...rest] = name.trim().split(/\s+/).filter(Boolean);
+  const res = await resend('/contacts', {
+    email,
+    unsubscribed: false,
+    ...(first ? { first_name: first } : {}),
+    ...(rest.length ? { last_name: rest.join(' ') } : {}),
+  });
   if (res.ok) return;
   const err = await failure(res);
   if (/already exist/i.test(err.message)) return;
