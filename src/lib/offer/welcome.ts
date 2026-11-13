@@ -1,6 +1,7 @@
 import 'server-only';
 import type { Lead } from '@/lib/chat/request';
 import { firstName } from '@/lib/chat/shared';
+import { crmConfig } from '@/lib/crm/highlevel';
 import { SITE } from '@/data/site';
 import type { Email } from '@/lib/email/send';
 import { SITE_URL } from '@/lib/seo';
@@ -13,8 +14,9 @@ import { PROMO_PATTERN } from './promo';
  * rate, not fees, and this one needs a minimum stay). Its terms are in
  * SITE.welcomeOffer; its name is here, server-only, so it isn't in the
  * page's JavaScript for anyone to find without signing up.
- * WELCOME_PROMO_CODE overrides the name. The popup only shows with
- * RESEND_API_KEY set, so sign-ups always have somewhere to go.
+ * WELCOME_PROMO_CODE overrides the name. The popup only shows when Go High
+ * Level (GHL_API_TOKEN and GHL_LOCATION_ID) or Resend (RESEND_API_KEY) is
+ * set up, so sign-ups always have somewhere to go.
  *
  * Checked live (Nov 10 2026): WELCOME5 gives "Discount (WELCOME5)" of 5% of
  * the nightly subtotal on stays of 2+ nights.
@@ -25,7 +27,7 @@ const WELCOME_CODE = 'WELCOME5';
 export type WelcomeOffer = { code: string; percent: number; minNights: number };
 
 export function welcomeOffer(): WelcomeOffer | null {
-  if (!SITE.welcomeOffer || !process.env.RESEND_API_KEY) return null;
+  if (!SITE.welcomeOffer || !(crmConfig() || process.env.RESEND_API_KEY)) return null;
   const code = process.env.WELCOME_PROMO_CODE?.trim() || WELCOME_CODE;
   if (!PROMO_PATTERN.test(code)) return null;
   return { code, ...SITE.welcomeOffer };
@@ -76,13 +78,23 @@ export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOf
   return { to, subject, text, html, replyTo: SITE.contactEmail, fromName: `${host} at ${SITE.brand}` };
 }
 
+/** The guest's details for an email to the host: plain text, and HTML with one-tap call and text links. */
+function detailsFor(lead: Lead) {
+  const tel = lead.phone.replace(/[^\d+]/g, '');
+  return {
+    text: `Name: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone}`,
+    html: `<p>Name: <strong>${esc(lead.name)}</strong><br>
+Email: <a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a><br>
+Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(tel)}">Text</a> · <a href="tel:${esc(tel)}">Call</a></p>`,
+  };
+}
+
 /**
- * To the host, for every sign-up, so they can follow up while the guest is
- * still looking: name, email and phone, with one-tap call and text links.
- * Reply goes to the guest.
+ * To the host, for every sign-up handled by email (no Go High Level), so
+ * they can follow up while the guest is still looking: name, email and
+ * phone, with one-tap call and text links. Reply goes to the guest.
  */
 export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved: false; reason: string }, welcomed: boolean): Email {
-  const tel = lead.phone.replace(/[^\d+]/g, '');
   const intro = `New welcome-offer sign-up on ${SITE.domain}:`;
   const notes = [
     welcomed
@@ -90,11 +102,27 @@ export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved:
       : 'Your welcome email could NOT be sent to them (usually because wkreserve.com isn’t verified in Resend yet). Reply to this email to send them their code and say hello yourself.',
     status.saved ? 'Saved to Resend → Contacts.' : `Not saved to Resend Contacts (${status.reason}). Check that the Resend API key has Full access.`,
   ];
-  const text = [intro, `Name: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone}`, ...notes].join('\n\n');
-  const html = `<p>${esc(intro)}</p>
-<p>Name: <strong>${esc(lead.name)}</strong><br>
-Email: <a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a><br>
-Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(tel)}">Text</a> · <a href="tel:${esc(tel)}">Call</a></p>
-<p>${notes.map(esc).join('</p><p>')}</p>`;
+  const details = detailsFor(lead);
+  const text = [intro, details.text, ...notes].join('\n\n');
+  const html = `<p>${esc(intro)}</p>\n${details.html}\n<p>${notes.map(esc).join('</p><p>')}</p>`;
   return { subject: `New sign-up: ${lead.name}`, text, html, replyTo: lead.email };
+}
+
+/**
+ * To the host when a sign-up could not be added to Go High Level (or was
+ * added without its tag), so the lead isn't lost: their details, what went
+ * wrong and what to check. Reply goes to the guest.
+ */
+export function crmProblemEmail(lead: Lead, problem: { saved: boolean; reason: string }): Email {
+  const intro = problem.saved
+    ? `A welcome-offer sign-up on ${SITE.domain} was added to Go High Level, but without its tag, so an automation that starts from the tag won’t run for them:`
+    : `A welcome-offer sign-up on ${SITE.domain} could NOT be added to Go High Level. Please add them by hand:`;
+  const notes = [
+    `What went wrong: ${problem.reason}`,
+    'To fix it, check GHL_API_TOKEN and GHL_LOCATION_ID in Vercel (Settings → Environment Variables), and that the token can View and Edit Contacts. The guest was still shown their code.',
+  ];
+  const details = detailsFor(lead);
+  const text = [intro, details.text, ...notes].join('\n\n');
+  const html = `<p>${esc(intro)}</p>\n${details.html}\n<p>${notes.map(esc).join('</p><p>')}</p>`;
+  return { subject: `New sign-up: ${lead.name} (${problem.saved ? 'tag not added in' : 'NOT added to'} Go High Level)`, text, html, replyTo: lead.email };
 }

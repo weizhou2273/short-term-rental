@@ -120,7 +120,8 @@ export default function PrivacyPage() {
         <ul>
           <li>
             <strong>Service providers</strong> that help us run our business. They include our booking and property management system
-            (Hospitable) and its payment processor, our email providers (Google Workspace and Resend), our website host (Vercel), the
+            (Hospitable) and its payment processor, the system where we keep our contacts and messages (HighLevel), our email providers
+            (Google Workspace and Resend), our website host (Vercel), the
             service that runs our website chat assistant, the map shown on our website (OpenStreetMap), our social media and analytics tools
             (Meta, Google and Metricool), and any phone or text messaging service we use. They may use the information only to provide their
             services to us.
