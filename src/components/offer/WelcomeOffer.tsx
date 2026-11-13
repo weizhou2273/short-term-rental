@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import { SmsConsent } from '@/components/legal/SmsConsent';
 import { SITE } from '@/data/site';
 import { GUEST_KEY, isPhone, LEAD_LIMITS, NAME_PATTERN } from '@/lib/chat/shared';
 import { trackGa } from '@/lib/google-analytics';
@@ -266,6 +267,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                   value={details.email}
                   onChange={set('email')}
                 />
+                <SmsConsent className="offer-consent offer-wide" />
                 <button type="submit" className="btn btn-solid offer-wide" disabled={sending}>
                   {sending ? 'One moment…' : `Get my ${percent}% code`}
                 </button>
@@ -279,9 +281,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                 No thanks
               </button>
               <p className="offer-fine">
-                By signing up you agree that {SITE.brand} may email, call or text you about your stay and our offers. Message and data rates may
-                apply; reply STOP or “unsubscribe” anytime. <Link href="/privacy">Privacy Policy</Link>. For stays booked directly on{' '}
-                {SITE.domain}.
+                We may also email or call you about your stay and our offers; unsubscribe anytime. For stays booked directly on {SITE.domain}.
               </p>
             </>
           ) : result ? (

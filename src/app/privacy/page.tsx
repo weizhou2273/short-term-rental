@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SITE } from '@/data/site';
@@ -114,6 +115,9 @@ export default function PrivacyPage() {
           stop texts or <strong>HELP</strong> for help, or contact us at <Email />.
         </p>
         <p>We do not sell or share your mobile number, or your agreement to receive texts, with anyone else for their own marketing.</p>
+        <p>
+          Our <Link href="/terms#texts">Terms</Link> describe our text messages in full.
+        </p>
 
         <h2>Who we share it with</h2>
         <p>We don’t sell your personal information for money. We share it only as follows:</p>

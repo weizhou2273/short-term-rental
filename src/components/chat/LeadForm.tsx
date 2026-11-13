@@ -1,6 +1,7 @@
 'use client';
 
 import { type FormEvent, type RefObject, useState } from 'react';
+import { SmsConsent } from '@/components/legal/SmsConsent';
 import { isPhone, LEAD_LIMITS, NAME_PATTERN } from '@/lib/chat/shared';
 
 export type Guest = { name: string; email: string; phone: string; token: string | null };
@@ -81,6 +82,7 @@ export function LeadForm({
           maxLength={LEAD_LIMITS.phone}
         />
       </label>
+      <SmsConsent className="chat-consent" />
       {error ? (
         <p className="chat-lead-error" role="alert">
           {error}
@@ -89,7 +91,7 @@ export function LeadForm({
       <button type="submit" className="btn btn-solid chat-lead-submit" disabled={sending}>
         {sending ? 'One moment…' : 'Start chat'}
       </button>
-      <p className="chat-consent">We’ll only use these to help with your stay. Our team may follow up about this chat by phone, text or email.</p>
+      <p className="chat-consent">We’ll only use these to help with your stay. Our team may also follow up about this chat by phone or email.</p>
     </form>
   );
 }
