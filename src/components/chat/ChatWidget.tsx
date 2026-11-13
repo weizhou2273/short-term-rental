@@ -247,6 +247,18 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
     }
   }
 
+  // ?chat=open opens the chat as the page loads, so a link can show the
+  // sign-in form (and its text-message consent) without anyone clicking.
+  const openChatRef = useRef(openChat);
+  useEffect(() => {
+    openChatRef.current = openChat;
+  });
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('chat') !== 'open') return;
+    const timer = setTimeout(() => openChatRef.current(), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
   function onLead(next: Guest) {
     setGuest(next);
     store.set(local, GUEST_KEY, next);

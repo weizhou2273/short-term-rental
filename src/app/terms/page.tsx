@@ -113,14 +113,14 @@ export default function TermsPage() {
             again.
           </li>
           <li>
-            <strong>For help:</strong> reply <strong>HELP</strong>, email <Email /> or call <Phone />.
+            <strong>For help:</strong> reply <strong>HELP</strong>, or contact support at <Email /> or <Phone />.
           </li>
           <li>
             <strong>Not required:</strong> agreeing to receive texts is not a condition of booking a stay or buying anything.
           </li>
           <li>
-            <strong>Your privacy:</strong> we don’t sell or share your mobile number, or your agreement to receive texts, with anyone else
-            for their own marketing. See our <Link href="/privacy">Privacy Policy</Link>.
+            <strong>Your privacy:</strong> we do not sell or share mobile numbers or text message consent with third parties or
+            affiliates for their marketing. See our <Link href="/privacy">Privacy Policy</Link>.
           </li>
           <li>Mobile carriers are not responsible for delayed or undelivered messages.</li>
         </ul>
