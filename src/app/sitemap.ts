@@ -24,5 +24,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     { url: absoluteUrl('/search'), lastModified: now, changeFrequency: 'daily', priority: 0.7 },
     { url: absoluteUrl('/privacy'), lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    { url: absoluteUrl('/terms'), lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ];
 }
