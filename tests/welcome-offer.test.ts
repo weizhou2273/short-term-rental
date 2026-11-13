@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { POST } from '@/app/api/subscribe/route';
+import { GET, POST } from '@/app/api/subscribe/route';
 import { toE164, WELCOME_TAG } from '@/lib/crm/highlevel';
 import { addContact, withDisplayName } from '@/lib/email/send';
 import { welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
@@ -224,6 +224,16 @@ describe('POST /api/subscribe with Go High Level', () => {
     expect(toE164('1 929.555.0101')).toBe('+19295550101');
     expect(toE164('+44 20 7946 0958')).toBe('+442079460958');
     expect(toE164('020 7946 0958 22')).toBe('020 7946 0958 22');
+  });
+
+  it('says where sign-ups go, without giving the settings away', async () => {
+    const withCrm = await GET();
+    expect(await withCrm.json()).toEqual({ offer: true, signUpsGoTo: 'Go High Level' });
+    expect(withCrm.headers.get('cache-control')).toBe('no-store');
+    vi.stubEnv('GHL_API_TOKEN', '');
+    expect(await (await GET()).json()).toEqual({ offer: true, signUpsGoTo: 'email' });
+    vi.stubEnv('RESEND_API_KEY', '');
+    expect(await (await GET()).json()).toEqual({ offer: false, signUpsGoTo: null });
   });
 
   it('shows the offer with Go High Level alone, no Resend needed', () => {

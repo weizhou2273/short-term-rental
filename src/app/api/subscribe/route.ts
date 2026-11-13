@@ -27,9 +27,23 @@ import { clientIp, createRateLimiter } from '@/lib/rate-limit';
  * without it.
  */
 
+// Read from the settings on each request, never fixed at build time.
+export const dynamic = 'force-dynamic';
+
 const reason = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 const limiter = createRateLimiter({ limit: 5, windowMs: 60 * 60_000 });
+
+/**
+ * GET /api/subscribe → { offer, signUpsGoTo }
+ *
+ * Whether the offer is on and where sign-ups go ("Go High Level", "email" or
+ * null), so a deploy's settings can be checked without signing anyone up.
+ * It says only that the settings exist, never what they are.
+ */
+export function GET(): Response {
+  return json({ offer: Boolean(welcomeOffer()), signUpsGoTo: crmConfig() ? 'Go High Level' : process.env.RESEND_API_KEY ? 'email' : null });
+}
 
 export async function POST(request: NextRequest): Promise<Response> {
   const offer = welcomeOffer();
