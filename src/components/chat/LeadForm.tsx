@@ -10,16 +10,22 @@ export type Guest = { name: string; email: string; phone: string; token: string 
  * Name, email and phone, asked before the first question, with the two
  * optional text-message boxes under the phone field. /api/chat/lead emails
  * them to the host, adds the lead to Go High Level and returns the token the
- * chat sends with every message.
+ * chat sends with every message. The same form, sent to the same place, is
+ * the body of /text-signup.
  */
 export function LeadForm({
   initial,
   nameRef,
   onDone,
+  idPrefix = 'chat',
+  submitLabel = 'Start chat',
 }: {
   initial: Guest | null;
-  nameRef: RefObject<HTMLInputElement | null>;
+  nameRef?: RefObject<HTMLInputElement | null>;
   onDone: (guest: Guest) => void;
+  /** Keeps the checkbox ids unique when this form is on a page twice. */
+  idPrefix?: string;
+  submitLabel?: string;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [email, setEmail] = useState(initial?.email ?? '');
@@ -44,7 +50,7 @@ export function LeadForm({
       });
       const body = (await res.json().catch(() => ({}))) as { token?: string; error?: string };
       if (!res.ok || !body.token) {
-        setError(body.error || 'Couldn’t start the chat. Please try again, or contact us directly.');
+        setError(body.error || 'That didn’t go through. Please try again, or contact us directly.');
         return;
       }
       onDone({ ...details, token: body.token });
@@ -85,14 +91,14 @@ export function LeadForm({
           maxLength={LEAD_LIMITS.phone}
         />
       </label>
-      <SmsConsentBoxes value={consent} onChange={setConsent} />
+      <SmsConsentBoxes idPrefix={idPrefix} value={consent} onChange={setConsent} />
       {error ? (
         <p className="chat-lead-error" role="alert">
           {error}
         </p>
       ) : null}
       <button type="submit" className="btn btn-solid chat-lead-submit" disabled={sending}>
-        {sending ? 'One moment…' : 'Start chat'}
+        {sending ? 'One moment…' : submitLabel}
       </button>
     </form>
   );

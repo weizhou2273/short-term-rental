@@ -91,7 +91,8 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
   const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const returnTo = useRef<HTMLElement | null>(null);
-  const onStayPage = usePathname().startsWith('/stays/');
+  const pathname = usePathname();
+  const onStayPage = pathname.startsWith('/stays/');
 
   useEffect(() => {
     // ?offer opens it straight away, even after signing up or "No thanks": for the owner to preview it.
@@ -207,7 +208,8 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
     }
   }
 
-  if (phase === 'hidden') return null;
+  // /text-signup is a plain page with one form on it; no pop-up over it.
+  if (phase === 'hidden' || pathname === '/text-signup') return null;
 
   return (
     <div className="offer-backdrop" onMouseDown={(e) => e.target === e.currentTarget && close()}>
@@ -270,7 +272,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                   value={details.email}
                   onChange={set('email')}
                 />
-                <SmsConsentBoxes className="offer-wide" value={consent} onChange={setConsent} />
+                <SmsConsentBoxes idPrefix="offer" className="offer-wide" value={consent} onChange={setConsent} />
                 <button type="submit" className="btn btn-solid offer-wide" disabled={sending}>
                   {sending ? 'One moment…' : `Get my ${percent}% code`}
                 </button>
