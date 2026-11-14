@@ -28,6 +28,8 @@ export const WELCOME_TAG = 'wkreserve-5-off';
 export const CHAT_TAG = 'wkreserve-chat';
 export const WELCOME_SOURCE = 'wkreserve.com 5% welcome offer';
 export const CHAT_SOURCE = 'wkreserve.com website chat';
+export const SIGNUP_TAG = 'wkreserve-text-signup';
+export const SIGNUP_SOURCE = 'wkreserve.com text sign-up page';
 
 /** Which texts the lead ticked the box for. No tag means they did not agree on this form. */
 export const SMS_TAGS = { nonMarketing: 'sms-consent-non-marketing', marketing: 'sms-consent-marketing' } as const;

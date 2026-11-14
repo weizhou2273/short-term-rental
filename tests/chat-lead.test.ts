@@ -257,6 +257,23 @@ describe('POST /api/chat/lead with Go High Level', () => {
     expect((await postLead(post('/api/chat/lead', { ...JANE, smsMarketing: 'yes' }))).status).toBe(400);
   });
 
+  it('labels a lead from the /text-signup page as a sign-up, not a chat', async () => {
+    const calls = mockBoth();
+    const res = await postLead(post('/api/chat/lead', { ...JANE, smsNonMarketing: true, smsMarketing: true, page: '/text-signup' }));
+    expect(res.status).toBe(200);
+    const [upsert, tags] = toCrm(calls);
+    expect(upsert!.body.source).toBe('wkreserve.com text sign-up page');
+    expect(tags!.body.tags).toEqual(['wkreserve-text-signup', 'sms-consent-non-marketing', 'sms-consent-marketing']);
+    const text = String(toResend(calls)[0]!.body.text);
+    expect(text).toContain('Jane Doe left their details on wkreserve.com/text-signup.');
+    expect(text).toContain('Texts agreed to: non-marketing yes, marketing yes');
+    expect(text).not.toContain('Their conversation follows');
+    // Any other page is a chat.
+    const chat = mockBoth();
+    await postLead(post('/api/chat/lead', { ...JANE, page: '/text-signup-offers' }));
+    expect(toCrm(chat)[1]!.body.tags).toEqual(['wkreserve-chat']);
+  });
+
   it('starts the chat and tells the host when Go High Level says no', async () => {
     const calls = mockBoth(401);
     vi.spyOn(console, 'error').mockImplementation(() => {});

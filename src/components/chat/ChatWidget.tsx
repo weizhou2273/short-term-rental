@@ -390,6 +390,9 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
   // Typing dots until the first words arrive; the tool status whenever one is running.
   const waiting = busy && last?.role === 'assistant' && (!last.text || Boolean(status));
 
+  // /text-signup is a plain page with this same form in its body: no chat (and no second copy of the form) there.
+  if (pathname === '/text-signup') return null;
+
   return (
     <>
       <button

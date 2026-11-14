@@ -50,10 +50,14 @@ function contact(lead: Lead, { page, at = new Date(), consent }: Context) {
 
 const wrap = (body: string) => `<div style="font-family:system-ui,-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1c1c1a">${body}</div>`;
 
+/** Whether the lead came from the form on /text-signup, not from the chat. */
+export const isSignupPage = (page?: string) => Boolean(page && /^\/text-signup(?:[/?#]|$)/.test(page));
+
 export function leadEmail(lead: Lead, ctx: Context = {}): Email {
   const c = contact(lead, ctx);
-  const intro = `${lead.name} started a chat on ${SITE.domain}.`;
-  const outro = `Reply to this email to write to ${firstName(lead.name)}. Their conversation follows when they close the chat or leave the site.`;
+  const signup = isSignupPage(ctx.page);
+  const intro = signup ? `${lead.name} left their details on ${SITE.domain}/text-signup.` : `${lead.name} started a chat on ${SITE.domain}.`;
+  const outro = `Reply to this email to write to ${firstName(lead.name)}.${signup ? '' : ' Their conversation follows when they close the chat or leave the site.'}`;
   return {
     subject: subject(lead),
     replyTo: lead.email,
