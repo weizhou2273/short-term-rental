@@ -3,7 +3,8 @@ import type { Site } from './types';
 export const SITE: Site = {
   brand: 'W&K Reserve',
   legalName: 'Wiki Store LLC',
-  mailingAddress: null,
+  // Exactly as on the carrier (text messaging) registration. Don't reformat it: reviewers compare the two.
+  mailingAddress: ['25 Darren Dr, Basking Ridge, NJ 07920'],
   domain: 'wkreserve.com',
   tagline: 'Private estates in the Pocono Mountains',
   subline: 'Pools, saunas and room for everyone. Book direct for the best rate.',
