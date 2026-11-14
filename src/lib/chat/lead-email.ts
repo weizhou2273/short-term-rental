@@ -3,7 +3,7 @@ import { PROPERTY_TIME_ZONE } from '@/lib/dates';
 import { SITE_URL } from '@/lib/seo';
 import type { Email } from '@/lib/email/send';
 import type { Lead } from './request';
-import { firstName } from './shared';
+import { firstName, type SmsConsent } from './shared';
 
 /**
  * The host's emails about a chat: one when a guest leaves their details, then
@@ -12,7 +12,9 @@ import { firstName } from './shared';
  */
 
 type Turn = { role: 'user' | 'assistant'; content: string };
-type Context = { page?: string; at?: Date };
+type Context = { page?: string; at?: Date; consent?: SmsConsent };
+
+const texts = (c: SmsConsent) => `non-marketing ${c.smsNonMarketing ? 'yes' : 'no'}, marketing ${c.smsMarketing ? 'yes' : 'no'}`;
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -21,10 +23,17 @@ const subject = (lead: Lead) => `Website chat: ${lead.name}`;
 const when = (at: Date) =>
   new Intl.DateTimeFormat('en-US', { timeZone: PROPERTY_TIME_ZONE, dateStyle: 'medium', timeStyle: 'short' }).format(at) + ' ET';
 
-function contact(lead: Lead, { page, at = new Date() }: Context) {
+function contact(lead: Lead, { page, at = new Date(), consent }: Context) {
   const tel = lead.phone.replace(/[^\d+]/g, '');
   const url = page ? `${SITE_URL}${page}` : null;
-  const text = [`Name: ${lead.name}`, `Phone: ${lead.phone}`, `Email: ${lead.email}`, url ? `Page: ${url}` : null, `Time: ${when(at)}`]
+  const text = [
+    `Name: ${lead.name}`,
+    `Phone: ${lead.phone}`,
+    `Email: ${lead.email}`,
+    consent ? `Texts agreed to: ${texts(consent)}` : null,
+    url ? `Page: ${url}` : null,
+    `Time: ${when(at)}`,
+  ]
     .filter(Boolean)
     .join('\n');
   const row = (label: string, value: string) => `<tr><td style="padding:2px 12px 2px 0;color:#666">${label}</td><td>${value}</td></tr>`;
@@ -32,6 +41,7 @@ function contact(lead: Lead, { page, at = new Date() }: Context) {
     row('Name', esc(lead.name)),
     row('Phone', `<a href="tel:${esc(tel)}">${esc(lead.phone)}</a>`),
     row('Email', `<a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a>`),
+    consent ? row('Texts agreed to', esc(texts(consent))) : '',
     url ? row('Page', `<a href="${esc(url)}">${esc(page!)}</a>`) : '',
     row('Time', esc(when(at))),
   ].join('')}</table>`;

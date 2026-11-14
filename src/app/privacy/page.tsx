@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { BRAND_OF, BusinessContact } from '@/components/legal/BusinessContact';
 import { SITE } from '@/data/site';
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/privacy' },
 };
 
-const EFFECTIVE = 'November 11, 2026';
+const EFFECTIVE = 'November 14, 2026';
 const PHONE_HREF = `tel:${SITE.contactPhone.replace(/[^\d+]/g, '')}`;
 /** "+1 929-500-4160" as "(929) 500-4160". */
 const PHONE_TEXT = SITE.contactPhone.replace(/^\+1 (\d{3})-/, '($1) ');
@@ -34,7 +35,7 @@ export default function PrivacyPage() {
           <strong>{SITE.brand}</strong> · Effective {EFFECTIVE}
         </p>
         <p>
-          {SITE.brand} (“we”, “us”) rents vacation homes in the Pocono Mountains of Pennsylvania. This policy explains what personal
+          {SITE.brand} (“we”, “us”) rents vacation homes in the Pocono Mountains of Pennsylvania. {BRAND_OF}. This policy explains what personal
           information we collect when you visit {SITE.domain}, contact us, fill in one of our forms, or stay at one of our homes, and how we
           use it. If you have a question, email <Email /> or call or text <Phone />.
         </p>
@@ -114,7 +115,11 @@ export default function PrivacyPage() {
           and open dates. How often depends on your conversation with us. Message and data rates may apply. Reply <strong>STOP</strong> to
           stop texts or <strong>HELP</strong> for help, or contact us at <Email />.
         </p>
-        <p>We do not sell or share your mobile number, or your agreement to receive texts, with anyone else for their own marketing.</p>
+        <p>
+          We do not share mobile phone numbers or text messaging consent with third parties or affiliates for marketing or promotional
+          purposes. We do not sell them either.
+        </p>
+        <p>Our forms have a separate, optional box for each kind of text message, and we keep a record of the boxes you tick.</p>
         <p>
           Our <Link href="/terms#texts">Terms</Link> describe our text messages in full.
         </p>
@@ -152,7 +157,7 @@ export default function PrivacyPage() {
         <h2>Website chat</h2>
         <p>
           Our website chat is answered first by an automated assistant. Your messages are processed by the company that provides that
-          assistant so it can reply. We keep a copy of each conversation, and our team may follow up by phone, text or email.
+          assistant so it can reply. We keep a copy of each conversation, and our team may follow up by phone or email, and by text if you agreed to texts.
         </p>
 
         <h2>How long we keep it</h2>
@@ -205,13 +210,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2>Contact us</h2>
-        <address>
-          {SITE.brand}
-          <br />
-          Email: <Email />
-          <br />
-          Phone or text: <Phone />
-        </address>
+        <BusinessContact />
       </main>
       <Footer />
     </>

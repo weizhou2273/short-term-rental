@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getGuide, guidePath } from '@/data/guides';
 import { PROPERTIES } from '@/data/properties';
+import { BRAND_OF } from '@/components/legal/BusinessContact';
 import { SITE } from '@/data/site';
 import { Logo } from './Header';
 
@@ -60,6 +61,10 @@ export function Footer() {
           <div id="contact" className="footer-contact">
             <h3>Contact</h3>
             <ul>
+              <li>{SITE.legalName}</li>
+              {(SITE.mailingAddress ?? []).map((line) => (
+                <li key={line}>{line}</li>
+              ))}
               <li>
                 <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
               </li>
@@ -76,7 +81,7 @@ export function Footer() {
         </div>
         <div className="footer-bottom">
           <span>
-            © {new Date().getFullYear()} {SITE.brand}
+            © {new Date().getFullYear()} {SITE.brand}. {BRAND_OF}.
           </span>
           <span>
             <Link href="/terms">Terms</Link> &nbsp; <Link href="/privacy">Privacy</Link>

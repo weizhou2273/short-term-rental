@@ -1,19 +1,20 @@
 import type { NextRequest } from 'next/server';
 import { errorResponse, isSameOrigin, json, readJson } from '@/lib/api';
-import { leadSchema } from '@/lib/chat/request';
-import { addOfferContact, crmConfig } from '@/lib/crm/highlevel';
+import { signupRequestSchema } from '@/lib/chat/request';
+import { addCrmContact, consentTags, crmConfig, WELCOME_SOURCE, WELCOME_TAG } from '@/lib/crm/highlevel';
 import { addContact, sendEmail } from '@/lib/email/send';
 import { crmProblemEmail, signupNoticeEmail, welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
- * POST /api/subscribe  { name, email, phone }
+ * POST /api/subscribe  { name, email, phone, smsNonMarketing?, smsMarketing? }
  *   → 200 { code, percent, emailed }
  *
  * The welcome-offer popup. With Go High Level set up (GHL_API_TOKEN and
  * GHL_LOCATION_ID), the guest's name, email and phone go straight there as
- * a tagged contact and nothing goes to Resend; Go High Level takes the
- * follow-up from there. Only if that fails is the host emailed the details
+ * a contact tagged with the offer and with each kind of text message they
+ * ticked the box for (both boxes are optional), and nothing goes to Resend;
+ * Go High Level takes the follow-up from there. Only if that fails is the host emailed the details
  * and the reason, so no sign-up is lost.
  *
  * Without Go High Level it works by email, all within the request:
@@ -53,21 +54,22 @@ export async function POST(request: NextRequest): Promise<Response> {
   if (!rate.allowed) return errorResponse('Too many sign-ups. Please wait a little and try again.', 429, { 'Retry-After': String(rate.retryAfter) });
 
   // The same name, email and phone rules as the chat's sign-in.
-  const parsed = leadSchema.safeParse(await readJson(request));
+  const parsed = signupRequestSchema.safeParse(await readJson(request));
   if (!parsed.success) return errorResponse(parsed.error.issues[0]?.message ?? 'Please check your name, email and phone number.', 400);
-  const lead = parsed.data;
+  const { smsNonMarketing, smsMarketing, ...lead } = parsed.data;
+  const consent = { smsNonMarketing, smsMarketing };
   const { name, email } = lead;
 
   const crm = crmConfig();
   if (crm) {
-    const problem = await addOfferContact(lead, crm).then(
+    const problem = await addCrmContact(lead, { source: WELCOME_SOURCE, tags: [WELCOME_TAG, ...consentTags(consent)] }, crm).then(
       (added) => (added.tagError ? { saved: true, reason: added.tagError } : null),
       (err) => ({ saved: false, reason: reason(err) }),
     );
     if (problem) {
-      console.error(`[subscribe] Go High Level: ${problem.saved ? 'tag not added' : 'contact not saved'}:`, problem.reason);
-      if (!problem.saved) console.error('[subscribe] details (copy from here):', JSON.stringify(lead));
-      await sendEmail(crmProblemEmail(lead, problem)).catch((err) => console.error('[subscribe] host notice not sent:', reason(err)));
+      console.error(`[subscribe] Go High Level: ${problem.saved ? 'tags not added' : 'contact not saved'}:`, problem.reason);
+      console.error('[subscribe] details (copy from here):', JSON.stringify({ ...lead, ...consent }));
+      await sendEmail(crmProblemEmail(lead, problem, consent)).catch((err) => console.error('[subscribe] host notice not sent:', reason(err)));
     }
     return json({ code: offer.code, percent: offer.percent, emailed: false });
   }
@@ -75,12 +77,12 @@ export async function POST(request: NextRequest): Promise<Response> {
   const [saved, emailed] = await Promise.allSettled([addContact(email, name), sendEmail(welcomeEmail(email, offer, name))]);
   if (saved.status === 'rejected') {
     console.error('[subscribe] contact not saved:', reason(saved.reason));
-    console.error('[subscribe] details (copy from here):', JSON.stringify(lead));
+    console.error('[subscribe] details (copy from here):', JSON.stringify({ ...lead, ...consent }));
   }
   if (emailed.status === 'rejected') console.error('[subscribe] welcome email not sent:', reason(emailed.reason));
   // Tell the host right away, so they can follow up while the guest is still on the site.
   const status = saved.status === 'fulfilled' ? ({ saved: true } as const) : ({ saved: false, reason: reason(saved.reason).slice(0, 200) } as const);
-  await sendEmail(signupNoticeEmail(lead, status, emailed.status === 'fulfilled')).catch((err) =>
+  await sendEmail(signupNoticeEmail(lead, status, emailed.status === 'fulfilled', consent)).catch((err) =>
     console.error('[subscribe] host notice not sent:', reason(err)),
   );
   return json({ code: offer.code, percent: offer.percent, emailed: emailed.status === 'fulfilled' });

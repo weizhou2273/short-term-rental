@@ -1,6 +1,6 @@
 import 'server-only';
 import type { Lead } from '@/lib/chat/request';
-import { firstName } from '@/lib/chat/shared';
+import { firstName, type SmsConsent } from '@/lib/chat/shared';
 import { crmConfig } from '@/lib/crm/highlevel';
 import { SITE } from '@/data/site';
 import type { Email } from '@/lib/email/send';
@@ -78,14 +78,18 @@ export function welcomeEmail(to: string, { code, percent, minNights }: WelcomeOf
   return { to, subject, text, html, replyTo: SITE.contactEmail, fromName: `${host} at ${SITE.brand}` };
 }
 
+/** The two text-message boxes as the host reads them: "Texts agreed to: non-marketing yes, marketing no". */
+export const consentLine = (c: SmsConsent) => `Texts agreed to: non-marketing ${c.smsNonMarketing ? 'yes' : 'no'}, marketing ${c.smsMarketing ? 'yes' : 'no'}`;
+
 /** The guest's details for an email to the host: plain text, and HTML with one-tap call and text links. */
-function detailsFor(lead: Lead) {
+function detailsFor(lead: Lead, consent?: SmsConsent) {
   const tel = lead.phone.replace(/[^\d+]/g, '');
+  const texts = consent ? consentLine(consent) : null;
   return {
-    text: `Name: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone}`,
+    text: `Name: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone}${texts ? `\n${texts}` : ''}`,
     html: `<p>Name: <strong>${esc(lead.name)}</strong><br>
 Email: <a href="mailto:${esc(lead.email)}">${esc(lead.email)}</a><br>
-Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(tel)}">Text</a> · <a href="tel:${esc(tel)}">Call</a></p>`,
+Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(tel)}">Text</a> · <a href="tel:${esc(tel)}">Call</a>${texts ? `<br>\n${esc(texts)}` : ''}</p>`,
   };
 }
 
@@ -94,7 +98,7 @@ Phone: <a href="tel:${esc(tel)}">${esc(lead.phone)}</a> · <a href="sms:${esc(te
  * they can follow up while the guest is still looking: name, email and
  * phone, with one-tap call and text links. Reply goes to the guest.
  */
-export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved: false; reason: string }, welcomed: boolean): Email {
+export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved: false; reason: string }, welcomed: boolean, consent?: SmsConsent): Email {
   const intro = `New welcome-offer sign-up on ${SITE.domain}:`;
   const notes = [
     welcomed
@@ -102,27 +106,34 @@ export function signupNoticeEmail(lead: Lead, status: { saved: true } | { saved:
       : 'Your welcome email could NOT be sent to them (usually because wkreserve.com isn’t verified in Resend yet). Reply to this email to send them their code and say hello yourself.',
     status.saved ? 'Saved to Resend → Contacts.' : `Not saved to Resend Contacts (${status.reason}). Check that the Resend API key has Full access.`,
   ];
-  const details = detailsFor(lead);
+  const details = detailsFor(lead, consent);
   const text = [intro, details.text, ...notes].join('\n\n');
   const html = `<p>${esc(intro)}</p>\n${details.html}\n<p>${notes.map(esc).join('</p><p>')}</p>`;
   return { subject: `New sign-up: ${lead.name}`, text, html, replyTo: lead.email };
 }
 
 /**
- * To the host when a sign-up could not be added to Go High Level (or was
- * added without its tag), so the lead isn't lost: their details, what went
- * wrong and what to check. Reply goes to the guest.
+ * To the host when a lead (a welcome-offer sign-up or a chat sign-in) could
+ * not be added to Go High Level, or was added without its tags, so the lead
+ * isn't lost: their details and text-message choices, what went wrong and
+ * what to check. Reply goes to the guest.
  */
-export function crmProblemEmail(lead: Lead, problem: { saved: boolean; reason: string }): Email {
+export function crmProblemEmail(
+  lead: Lead,
+  problem: { saved: boolean; reason: string },
+  consent?: SmsConsent,
+  what: 'welcome-offer sign-up' | 'website chat lead' = 'welcome-offer sign-up',
+): Email {
   const intro = problem.saved
-    ? `A welcome-offer sign-up on ${SITE.domain} was added to Go High Level, but without its tag, so an automation that starts from the tag won’t run for them:`
-    : `A welcome-offer sign-up on ${SITE.domain} could NOT be added to Go High Level. Please add them by hand:`;
+    ? `A ${what} on ${SITE.domain} was added to Go High Level, but without its tags, so an automation that starts from a tag won’t run for them and their text-message choices aren’t recorded there:`
+    : `A ${what} on ${SITE.domain} could NOT be added to Go High Level. Please add them by hand:`;
   const notes = [
     `What went wrong: ${problem.reason}`,
-    'To fix it, check GHL_API_TOKEN and GHL_LOCATION_ID in Vercel (Settings → Environment Variables), and that the token can View and Edit Contacts. The guest was still shown their code.',
+    `To fix it, check GHL_API_TOKEN and GHL_LOCATION_ID in Vercel (Settings → Environment Variables), and that the token can View and Edit Contacts.${what === 'welcome-offer sign-up' ? ' The guest was still shown their code.' : ''}`,
   ];
-  const details = detailsFor(lead);
+  const details = detailsFor(lead, consent);
   const text = [intro, details.text, ...notes].join('\n\n');
   const html = `<p>${esc(intro)}</p>\n${details.html}\n<p>${notes.map(esc).join('</p><p>')}</p>`;
-  return { subject: `New sign-up: ${lead.name} (${problem.saved ? 'tag not added in' : 'NOT added to'} Go High Level)`, text, html, replyTo: lead.email };
+  const kind = what === 'welcome-offer sign-up' ? 'New sign-up' : 'Website chat';
+  return { subject: `${kind}: ${lead.name} (${problem.saved ? 'tags not added in' : 'NOT added to'} Go High Level)`, text, html, replyTo: lead.email };
 }

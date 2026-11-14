@@ -205,3 +205,69 @@ describe('POST /api/chat/transcript', () => {
     expect(sendRecap).not.toHaveBeenCalled();
   });
 });
+
+describe('POST /api/chat/lead with Go High Level', () => {
+  type Call = { host: string; path: string; body: Record<string, unknown> };
+
+  /** Fakes Go High Level (the upsert answers with `upsert`) and Resend. */
+  function mockBoth(upsert = 201) {
+    const calls: Call[] = [];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+        const { host, pathname: path } = new URL(String(url));
+        calls.push({ host, path, body: JSON.parse(String(init?.body)) });
+        if (host === 'api.resend.com') return new Response('{"id":"e1"}', { status: 200 });
+        if (path === '/contacts/upsert') return upsert < 300 ? Response.json({ new: true, contact: { id: 'c_9' } }, { status: upsert }) : Response.json({ message: 'Invalid token' }, { status: upsert });
+        return Response.json({ tags: [] }, { status: 201 });
+      }),
+    );
+    return calls;
+  }
+  const toCrm = (calls: Call[]) => calls.filter((c) => c.host === 'services.leadconnectorhq.com');
+  const toResend = (calls: Call[]) => calls.filter((c) => c.host === 'api.resend.com');
+
+  beforeEach(() => {
+    vi.stubEnv('GHL_API_TOKEN', 'pit-test-0000');
+    vi.stubEnv('GHL_LOCATION_ID', 'loc_1');
+  });
+
+  it('adds the chat lead to Go High Level with the boxes they ticked, and still emails the host', async () => {
+    const calls = mockBoth();
+    const res = await postLead(post('/api/chat/lead', { ...JANE, smsNonMarketing: true, page: '/stays/the-ridge' }));
+    expect(res.status).toBe(200);
+    expect(verifyLead((await res.json()).token)).toEqual(JANE);
+    const [upsert, tags] = toCrm(calls);
+    expect(upsert).toMatchObject({
+      path: '/contacts/upsert',
+      body: { locationId: 'loc_1', firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com', phone: '+19295550101', source: 'wkreserve.com website chat' },
+    });
+    expect(upsert!.body).not.toHaveProperty('tags');
+    expect(tags).toMatchObject({ path: '/contacts/c_9/tags', body: { tags: ['wkreserve-chat', 'sms-consent-non-marketing'] } });
+    const [email] = toResend(calls);
+    expect(toResend(calls)).toHaveLength(1);
+    expect(String(email!.body.text)).toContain('Texts agreed to: non-marketing yes, marketing no');
+  });
+
+  it('needs neither box: an unticked form adds the lead with no consent tag', async () => {
+    const calls = mockBoth();
+    expect((await postLead(post('/api/chat/lead', JANE))).status).toBe(200);
+    expect(toCrm(calls).find((c) => c.path.endsWith('/tags'))!.body.tags).toEqual(['wkreserve-chat']);
+    expect(String(toResend(calls)[0]!.body.text)).toContain('Texts agreed to: non-marketing no, marketing no');
+    expect((await postLead(post('/api/chat/lead', { ...JANE, smsMarketing: 'yes' }))).status).toBe(400);
+  });
+
+  it('starts the chat and tells the host when Go High Level says no', async () => {
+    const calls = mockBoth(401);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await postLead(post('/api/chat/lead', { ...JANE, smsMarketing: true }));
+    expect(res.status).toBe(200);
+    const subjects = toResend(calls).map((c) => c.body.subject);
+    expect(subjects).toContain('Website chat: Jane Doe');
+    expect(subjects).toContain('Website chat: Jane Doe (NOT added to Go High Level)');
+    const problem = toResend(calls).find((c) => String(c.body.subject).includes('NOT added'))!;
+    expect(String(problem.body.text)).toContain('A website chat lead on wkreserve.com could NOT be added to Go High Level');
+    expect(String(problem.body.text)).toContain('Texts agreed to: non-marketing no, marketing yes');
+    expect(JSON.stringify(toResend(calls))).not.toContain('pit-test-0000');
+  });
+});
