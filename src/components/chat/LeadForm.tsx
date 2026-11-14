@@ -1,15 +1,16 @@
 'use client';
 
 import { type FormEvent, type RefObject, useState } from 'react';
-import { SmsConsent } from '@/components/legal/SmsConsent';
-import { isPhone, LEAD_LIMITS, NAME_PATTERN } from '@/lib/chat/shared';
+import { SmsConsentBoxes } from '@/components/legal/SmsConsent';
+import { isPhone, LEAD_LIMITS, NAME_PATTERN, NO_SMS_CONSENT } from '@/lib/chat/shared';
 
 export type Guest = { name: string; email: string; phone: string; token: string | null };
 
 /**
- * Name, email and phone, asked before the first question. /api/chat/lead
- * emails them to the host and returns the token the chat sends with every
- * message.
+ * Name, email and phone, asked before the first question, with the two
+ * optional text-message boxes under the phone field. /api/chat/lead emails
+ * them to the host, adds the lead to Go High Level and returns the token the
+ * chat sends with every message.
  */
 export function LeadForm({
   initial,
@@ -23,6 +24,8 @@ export function LeadForm({
   const [name, setName] = useState(initial?.name ?? '');
   const [email, setEmail] = useState(initial?.email ?? '');
   const [phone, setPhone] = useState(initial?.phone ?? '');
+  // The text-message boxes always start unticked, even for a returning guest.
+  const [consent, setConsent] = useState(NO_SMS_CONSENT);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -37,7 +40,7 @@ export function LeadForm({
       const res = await fetch('/api/chat/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...details, page: window.location.pathname + window.location.search }),
+        body: JSON.stringify({ ...details, ...consent, page: window.location.pathname + window.location.search }),
       });
       const body = (await res.json().catch(() => ({}))) as { token?: string; error?: string };
       if (!res.ok || !body.token) {
@@ -82,7 +85,7 @@ export function LeadForm({
           maxLength={LEAD_LIMITS.phone}
         />
       </label>
-      <SmsConsent className="chat-consent" />
+      <SmsConsentBoxes value={consent} onChange={setConsent} />
       {error ? (
         <p className="chat-lead-error" role="alert">
           {error}

@@ -2,6 +2,8 @@ import type { Site } from './types';
 
 export const SITE: Site = {
   brand: 'W&K Reserve',
+  legalName: 'Wiki Store LLC',
+  mailingAddress: null,
   domain: 'wkreserve.com',
   tagline: 'Private estates in the Pocono Mountains',
   subline: 'Pools, saunas and room for everyone. Book direct for the best rate.',

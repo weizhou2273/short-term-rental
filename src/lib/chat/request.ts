@@ -53,7 +53,14 @@ export const leadSchema = z.object({
 
 export type Lead = z.infer<typeof leadSchema>;
 
-export const leadRequestSchema = leadSchema.extend({ page });
+/** The two optional text-message boxes; a form that doesn't send them means "no". */
+const smsConsent = { smsNonMarketing: z.boolean().default(false), smsMarketing: z.boolean().default(false) };
+
+/** The chat's sign-in: the guest's details, their text-message choices and the page they were on. */
+export const leadRequestSchema = leadSchema.extend({ page, ...smsConsent });
+
+/** The welcome offer's sign-up: the guest's details and their text-message choices. */
+export const signupRequestSchema = leadSchema.extend(smsConsent);
 
 /** A finished conversation to email to the host: like a chat request, but it may end on either side. */
 export const transcriptRequestSchema = z.object({

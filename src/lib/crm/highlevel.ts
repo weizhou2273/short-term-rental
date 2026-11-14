@@ -1,26 +1,41 @@
 import 'server-only';
 import type { Lead } from '@/lib/chat/request';
+import type { SmsConsent } from '@/lib/chat/shared';
 
 /**
- * Go High Level (HighLevel / LeadConnector API v2): where welcome-offer
- * sign-ups go. Server-only: the token never reaches the browser and is
- * never logged.
+ * Go High Level (HighLevel / LeadConnector API v2): where website leads go
+ * (welcome-offer sign-ups and chat sign-ins). Server-only: the token never
+ * reaches the browser and is never logged.
  *
  *   GHL_API_TOKEN    a Private Integration token that can View and Edit Contacts
  *   GHL_LOCATION_ID  the sub-account (location) the contacts belong to
  *
- * A sign-up is "upserted": created, or matched to an existing contact by
- * the location's duplicate-contact setting and updated. Tags sent with an
- * upsert REPLACE a contact's tags, so the tag is added in a second call,
+ * A lead is "upserted": created, or matched to an existing contact by the
+ * location's duplicate-contact setting and updated. Tags sent with an
+ * upsert REPLACE a contact's tags, so tags are added in a second call,
  * which only adds.
+ *
+ * Tags say where the lead came from and which text messages they agreed to
+ * (the two optional boxes beside each phone field). Only text contacts who
+ * carry the matching consent tag.
  */
 
 const API = 'https://services.leadconnectorhq.com';
 const VERSION = '2021-07-28';
 
-/** Added to every sign-up, for Go High Level automations to start from. */
+/** Where the lead came from. */
 export const WELCOME_TAG = 'wkreserve-5-off';
-const SOURCE = 'wkreserve.com 5% welcome offer';
+export const CHAT_TAG = 'wkreserve-chat';
+export const WELCOME_SOURCE = 'wkreserve.com 5% welcome offer';
+export const CHAT_SOURCE = 'wkreserve.com website chat';
+
+/** Which texts the lead ticked the box for. No tag means they did not agree on this form. */
+export const SMS_TAGS = { nonMarketing: 'sms-consent-non-marketing', marketing: 'sms-consent-marketing' } as const;
+
+export const consentTags = (consent: SmsConsent): string[] => [
+  ...(consent.smsNonMarketing ? [SMS_TAGS.nonMarketing] : []),
+  ...(consent.smsMarketing ? [SMS_TAGS.marketing] : []),
+];
 
 export type CrmConfig = { token: string; locationId: string };
 
@@ -66,11 +81,15 @@ async function post<T>(path: string, body: object, { token }: CrmConfig): Promis
 type Upserted = { new?: boolean; contact?: { id?: string } };
 
 /**
- * Adds (or updates) the guest in Go High Level and tags them. Throws if the
- * contact couldn't be saved; a tag that couldn't be added is reported in
- * `tagError`, since the contact itself is safe.
+ * Adds (or updates) the guest in Go High Level and adds the tags. Throws if
+ * the contact couldn't be saved; tags that couldn't be added are reported
+ * in `tagError`, since the contact itself is safe.
  */
-export async function addOfferContact(lead: Lead, config: CrmConfig): Promise<{ id: string | null; isNew: boolean | null; tagError: string | null }> {
+export async function addCrmContact(
+  lead: Lead,
+  { source, tags }: { source: string; tags: string[] },
+  config: CrmConfig,
+): Promise<{ id: string | null; isNew: boolean | null; tagError: string | null }> {
   const [firstName, ...rest] = lead.name.trim().split(/\s+/);
   const contact = {
     locationId: config.locationId,
@@ -82,7 +101,7 @@ export async function addOfferContact(lead: Lead, config: CrmConfig): Promise<{ 
   };
   let saved: Upserted;
   try {
-    saved = await post<Upserted>('/contacts/upsert', { ...contact, source: SOURCE }, config);
+    saved = await post<Upserted>('/contacts/upsert', { ...contact, source }, config);
   } catch (err) {
     // A field the account's API version refuses must not cost the lead: try again with the essentials only.
     if (!(err instanceof CrmError) || (err.status !== 400 && err.status !== 422)) throw err;
@@ -90,10 +109,10 @@ export async function addOfferContact(lead: Lead, config: CrmConfig): Promise<{ 
   }
   const id = saved.contact?.id ?? null;
   let tagError: string | null = null;
-  if (!id) tagError = 'Go High Level didn’t return the contact’s id, so the tag wasn’t added';
-  else {
+  if (!id) tagError = 'Go High Level didn’t return the contact’s id, so the tags weren’t added';
+  else if (tags.length) {
     try {
-      await post(`/contacts/${encodeURIComponent(id)}/tags`, { tags: [WELCOME_TAG] }, config);
+      await post(`/contacts/${encodeURIComponent(id)}/tags`, { tags }, config);
     } catch (err) {
       tagError = err instanceof Error ? err.message : String(err);
     }

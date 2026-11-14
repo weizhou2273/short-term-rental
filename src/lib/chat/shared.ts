@@ -29,6 +29,14 @@ export function isPhone(value: string): boolean {
 
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';
 
+/**
+ * A visitor's text-message choices: two optional boxes beside every phone
+ * field, both unticked to start. Carriers require the two kinds of texts to
+ * be agreed to separately, and neither may be needed to send the form.
+ */
+export type SmsConsent = { smsNonMarketing: boolean; smsMarketing: boolean };
+export const NO_SMS_CONSENT: SmsConsent = { smsNonMarketing: false, smsMarketing: false };
+
 /** localStorage key for the guest's name, email and phone, so the chat and the welcome offer don't ask twice. */
 export const GUEST_KEY = 'wk-chat-guest-v1';
 

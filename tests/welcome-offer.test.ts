@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GET, POST } from '@/app/api/subscribe/route';
-import { toE164, WELCOME_TAG } from '@/lib/crm/highlevel';
+import { SMS_TAGS, toE164, WELCOME_TAG } from '@/lib/crm/highlevel';
 import { addContact, withDisplayName } from '@/lib/email/send';
 import { welcomeEmail, welcomeOffer } from '@/lib/offer/welcome';
 
@@ -267,6 +267,24 @@ describe('POST /api/subscribe with Go High Level', () => {
     expect(tag).toMatchObject({ path: '/contacts/c_123/tags', body: { tags: [WELCOME_TAG] } });
   });
 
+  it('passes each ticked text-message box to Go High Level as a tag, and neither box is needed', async () => {
+    const tagsFor = async (boxes: object) => {
+      const calls = mockCrm();
+      const res = await POST(subscribe({ ...JANE, ...boxes }));
+      expect(res.status, JSON.stringify(boxes)).toBe(200);
+      expect(toResend(calls)).toHaveLength(0);
+      return toCrm(calls).find((c) => c.path.endsWith('/tags'))!.body.tags;
+    };
+    expect(await tagsFor({})).toEqual([WELCOME_TAG]);
+    expect(await tagsFor({ smsNonMarketing: false, smsMarketing: false })).toEqual([WELCOME_TAG]);
+    expect(await tagsFor({ smsNonMarketing: true })).toEqual([WELCOME_TAG, SMS_TAGS.nonMarketing]);
+    expect(await tagsFor({ smsMarketing: true })).toEqual([WELCOME_TAG, SMS_TAGS.marketing]);
+    expect(await tagsFor({ smsNonMarketing: true, smsMarketing: true })).toEqual([WELCOME_TAG, 'sms-consent-non-marketing', 'sms-consent-marketing']);
+    // Only a real true or false counts: "yes" from a tampered form is refused, not read as consent.
+    mockCrm();
+    expect((await POST(subscribe({ ...JANE, smsMarketing: 'yes' }))).status).toBe(400);
+  });
+
   it('tries again with the essentials if Go High Level refuses a field', async () => {
     const calls = mockCrm({ upsert: [422, 201] });
     const res = await POST(subscribe(JANE));
@@ -299,7 +317,8 @@ describe('POST /api/subscribe with Go High Level', () => {
     const res = await POST(subscribe(JANE));
     expect((await res.json()).code).toBe('WELCOME5');
     const [notice] = toResend(calls);
-    expect(notice!.body.subject).toBe('New sign-up: Jane Doe (tag not added in Go High Level)');
-    expect(String(notice!.body.text)).toContain('was added to Go High Level, but without its tag');
+    expect(notice!.body.subject).toBe('New sign-up: Jane Doe (tags not added in Go High Level)');
+    expect(String(notice!.body.text)).toContain('was added to Go High Level, but without its tags');
+    expect(String(notice!.body.text)).toContain('Texts agreed to: non-marketing no, marketing no');
   });
 });

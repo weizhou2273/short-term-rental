@@ -20,6 +20,10 @@ export type Attraction = {
 
 export type Site = {
   brand: string;
+  /** The company behind the brand, as registered. Shown in the footer, terms and privacy policy, and named in the text-message consent. */
+  legalName: string;
+  /** The business's mailing address, one line per entry, shown with the legal name. null until it is provided. */
+  mailingAddress: string[] | null;
   domain: string;
   tagline: string;
   subline: string;

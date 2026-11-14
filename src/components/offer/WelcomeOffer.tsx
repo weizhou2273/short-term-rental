@@ -3,16 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type FormEvent, type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
-import { SmsConsent } from '@/components/legal/SmsConsent';
+import { SmsConsentBoxes } from '@/components/legal/SmsConsent';
 import { SITE } from '@/data/site';
-import { GUEST_KEY, isPhone, LEAD_LIMITS, NAME_PATTERN } from '@/lib/chat/shared';
+import { GUEST_KEY, isPhone, LEAD_LIMITS, NAME_PATTERN, NO_SMS_CONSENT } from '@/lib/chat/shared';
 import { trackGa } from '@/lib/google-analytics';
 import { trackMeta } from '@/lib/meta-pixel';
 import { savePromo } from '@/lib/offer/promo';
 
 /**
  * "X% off your first stay" popup that collects a name, email and phone
- * number for the list (and for the host to follow up).
+ * number for the list (and for the host to follow up), with the two
+ * optional text-message boxes under the fields.
  *
  * Shown once a visitor has had a moment on the site (4 s, a quarter of a
  * page scrolled, or the mouse heading for the tab bar), never over the chat
@@ -79,6 +80,8 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
   const ofMin = minNights > 1 ? ` of ${minNights} nights or more` : '';
   const [phase, setPhase] = useState<'hidden' | 'form' | 'done'>('hidden');
   const [details, setDetails] = useState<Details>({ name: '', email: '', phone: '' });
+  // The text-message boxes always start unticked.
+  const [consent, setConsent] = useState(NO_SMS_CONSENT);
   const set = (field: keyof Details) => (e: { target: { value: string } }) => setDetails((d) => ({ ...d, [field]: e.target.value }));
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -155,7 +158,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(lead),
+        body: JSON.stringify({ ...lead, ...consent }),
       });
       const body = (await res.json().catch(() => ({}))) as { code?: string; emailed?: boolean; error?: string };
       if (!res.ok || !body.code) {
@@ -267,7 +270,7 @@ export function WelcomeOffer({ percent, minNights }: { percent: number; minNight
                   value={details.email}
                   onChange={set('email')}
                 />
-                <SmsConsent className="offer-consent offer-wide" />
+                <SmsConsentBoxes className="offer-wide" value={consent} onChange={setConsent} />
                 <button type="submit" className="btn btn-solid offer-wide" disabled={sending}>
                   {sending ? 'One moment…' : `Get my ${percent}% code`}
                 </button>

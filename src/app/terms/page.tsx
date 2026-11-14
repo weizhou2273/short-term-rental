@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { BRAND_OF, BusinessContact } from '@/components/legal/BusinessContact';
 import { SITE } from '@/data/site';
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/terms' },
 };
 
-const EFFECTIVE = 'November 13, 2026';
+const EFFECTIVE = 'November 14, 2026';
 const PHONE_HREF = `tel:${SITE.contactPhone.replace(/[^\d+]/g, '')}`;
 /** "+1 929-500-4160" as "(929) 500-4160". */
 const PHONE_TEXT = SITE.contactPhone.replace(/^\+1 (\d{3})-/, '($1) ');
@@ -21,10 +22,11 @@ const Phone = () => <a href={PHONE_HREF}>{PHONE_TEXT}</a>;
 /**
  * /terms: the website's terms, including the text-message program that
  * phone carriers check when they verify the number we text from. The "Text
- * messages" section must keep: the program name, what we send, "frequency
- * varies", "rates may apply", STOP and HELP, the support contact, "not a
- * condition of booking" and the link to /privacy. The consent line beside
- * each phone field (SmsConsent) says the same in short.
+ * messages" section must keep: the program name with the legal name, the
+ * kinds of messages, "frequency varies", "rates may apply", STOP and HELP,
+ * the support contact, "not a condition of booking", the no-sharing sentence
+ * and the link to /privacy. The two consent boxes under each phone field
+ * (SmsConsentBoxes) say the same in short.
  */
 export default function TermsPage() {
   const offer = SITE.welcomeOffer;
@@ -37,7 +39,7 @@ export default function TermsPage() {
           <strong>{SITE.brand}</strong> · Effective {EFFECTIVE}
         </p>
         <p>
-          {SITE.brand} (“we”, “us”) rents vacation homes in the Pocono Mountains of Pennsylvania. These terms cover your use of{' '}
+          {SITE.brand} (“we”, “us”) rents vacation homes in the Pocono Mountains of Pennsylvania. {BRAND_OF}. These terms cover your use of{' '}
           {SITE.domain}, our offers and the messages we send you. By using the website you agree to them. If you have a question, email{' '}
           <Email /> or call or text <Phone />.
         </p>
@@ -85,22 +87,23 @@ export default function TermsPage() {
         <h2>Website chat</h2>
         <p>
           Our website chat is answered first by an automated assistant. It can make mistakes, so treat its answers as a guide: the price
-          and availability shown at checkout, and what our team tells you, are what count. Our team may follow up on your chat by phone,
-          text or email.
+          and availability shown at checkout, and what our team tells you, are what count. Our team may follow up on your chat by phone
+          or email, and by text if you agreed to texts.
         </p>
 
         <h2 id="texts">Text messages</h2>
         <p>
-          <strong>Program:</strong> {SITE.brand} texts.
+          <strong>Program:</strong> {SITE.brand} texts, sent by {SITE.brand} ({SITE.legalName}).
         </p>
         <ul>
           <li>
-            <strong>How you join:</strong> by giving us your phone number in a form on our website, such as the website chat or an offer
-            sign-up, or by texting us first. The form says so beside the phone number field.
+            <strong>How you join:</strong> by ticking a text message box under the phone number field on a form on our website, such as
+            the website chat or an offer sign-up, or by texting us first. The boxes are optional and start unticked, and there is one for
+            each kind of message.
           </li>
           <li>
-            <strong>What we send:</strong> replies to your questions, the quotes and offer codes you asked for, details about your booking
-            and stay, and occasional offers and open dates.
+            <strong>What we send:</strong> non-marketing texts are replies to your questions, the quotes and offer codes you asked for,
+            and details about your inquiry, booking and stay. Marketing texts are occasional offers and open dates.
           </li>
           <li>
             <strong>How often:</strong> message frequency varies with your conversation and booking.
@@ -119,8 +122,8 @@ export default function TermsPage() {
             <strong>Not required:</strong> agreeing to receive texts is not a condition of booking a stay or buying anything.
           </li>
           <li>
-            <strong>Your privacy:</strong> we do not sell or share mobile numbers or text message consent with third parties or
-            affiliates for their marketing. See our <Link href="/privacy">Privacy Policy</Link>.
+            <strong>Your privacy:</strong> we do not share mobile phone numbers or text messaging consent with third parties or affiliates
+            for marketing or promotional purposes. See our <Link href="/privacy">Privacy Policy</Link>.
           </li>
           <li>Mobile carriers are not responsible for delayed or undelivered messages.</li>
         </ul>
@@ -148,13 +151,7 @@ export default function TermsPage() {
         <p>If we change these terms, we’ll post the new version here with a new effective date.</p>
 
         <h2>Contact us</h2>
-        <address>
-          {SITE.brand}
-          <br />
-          Email: <Email />
-          <br />
-          Phone or text: <Phone />
-        </address>
+        <BusinessContact />
       </main>
       <Footer />
     </>
