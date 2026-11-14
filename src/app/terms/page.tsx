@@ -24,7 +24,7 @@ const Phone = () => <a href={PHONE_HREF}>{PHONE_TEXT}</a>;
  * phone carriers check when they verify the number we text from. The "Text
  * messages" section must keep: the program name with the legal name, the
  * kinds of messages, "frequency varies", "rates may apply", STOP and HELP,
- * the support contact, "not a condition of booking", the no-sharing sentence
+ * the 18-or-older line, the support contact, "not a condition of booking", the no-sharing sentence
  * and the link to /privacy. The two consent boxes under each phone field
  * (SmsConsentBoxes) say the same in short.
  */
@@ -100,6 +100,9 @@ export default function TermsPage() {
             <strong>How you join:</strong> by ticking a text message box under the phone number field on a form on our website, such as
             the website chat or an offer sign-up, or by texting us first. The boxes are optional and start unticked, and there is one for
             each kind of message.
+          </li>
+          <li>
+            <strong>Age:</strong> you must be 18 or older to sign up for or receive text messages from {SITE.brand} ({SITE.legalName}).
           </li>
           <li>
             <strong>What we send:</strong> non-marketing texts are replies to your questions, the quotes and offer codes you asked for,

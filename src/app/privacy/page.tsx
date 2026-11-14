@@ -121,6 +121,9 @@ export default function PrivacyPage() {
         </p>
         <p>Our forms have a separate, optional box for each kind of text message, and we keep a record of the boxes you tick.</p>
         <p>
+          <strong>Age:</strong> you must be 18 or older to sign up for or receive text messages from {SITE.brand} ({SITE.legalName}).
+        </p>
+        <p>
           Our <Link href="/terms#texts">Terms</Link> describe our text messages in full.
         </p>
 
