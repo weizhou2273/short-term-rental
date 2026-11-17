@@ -20,7 +20,8 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
 const subject = (lead: Lead) => `Website chat: ${lead.name}`;
 
-const when = (at: Date) =>
+/** "Nov 13, 2026, 10:52 PM ET": a time as the team reads it, in the homes' time zone. */
+export const when = (at: Date) =>
   new Intl.DateTimeFormat('en-US', { timeZone: PROPERTY_TIME_ZONE, dateStyle: 'medium', timeStyle: 'short' }).format(at) + ' ET';
 
 function contact(lead: Lead, { page, at = new Date(), consent }: Context) {

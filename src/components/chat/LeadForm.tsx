@@ -19,6 +19,7 @@ export function LeadForm({
   onDone,
   idPrefix = 'chat',
   submitLabel = 'Start chat',
+  chatId,
 }: {
   initial: Guest | null;
   nameRef?: RefObject<HTMLInputElement | null>;
@@ -26,6 +27,8 @@ export function LeadForm({
   /** Keeps the checkbox ids unique when this form is on a page twice. */
   idPrefix?: string;
   submitLabel?: string;
+  /** The chat's id for this conversation, so its Go High Level note starts now. Not on /text-signup. */
+  chatId?: () => string | undefined;
 }) {
   const [name, setName] = useState(initial?.name ?? '');
   const [email, setEmail] = useState(initial?.email ?? '');
@@ -46,7 +49,7 @@ export function LeadForm({
       const res = await fetch('/api/chat/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...details, ...consent, page: window.location.pathname + window.location.search }),
+        body: JSON.stringify({ ...details, ...consent, page: window.location.pathname + window.location.search, chatId: chatId?.() }),
       });
       const body = (await res.json().catch(() => ({}))) as { token?: string; error?: string };
       if (!res.ok || !body.token) {

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { NextRequest } from 'next/server';
 import { errorResponse, isSameOrigin, readJson } from '@/lib/api';
+import { saveChatNote } from '@/lib/chat/chat-note';
 import { verifyLead } from '@/lib/chat/lead';
 import { transcriptEmail } from '@/lib/chat/lead-email';
 import { sendRecap } from '@/lib/chat/recap';
@@ -11,11 +12,14 @@ import { welcomeOffer } from '@/lib/offer/welcome';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
- * POST /api/chat/transcript  { lead, messages, page? }   → 204
+ * POST /api/chat/transcript  { lead, messages, page?, chatId? }   → 204
  *
  * Sent by the widget (navigator.sendBeacon) when the guest closes the chat or
- * leaves the page with new messages. Emails the conversation to the host,
- * then (once a day at most) the guest's recap from Edward: see lib/chat/recap.ts.
+ * leaves the page with new messages. Saves the conversation as the chat's
+ * note in Go High Level (the server also does that after every reply, so
+ * this is the final word, not the only copy) and emails it to the host as a
+ * backup; either can fail without stopping the other. Then (once a day at
+ * most) the guest's recap from Edward: see lib/chat/recap.ts.
  */
 
 const limiter = createRateLimiter({ limit: 30, windowMs: 60 * 60_000 });
@@ -35,11 +39,15 @@ export async function POST(request: NextRequest): Promise<Response> {
   const lead = process.env.ANTHROPIC_API_KEY ? verifyLead(parsed.data.lead) : null;
   if (!lead) return errorResponse('Unknown guest.', 401);
 
-  try {
-    await sendEmail(transcriptEmail(lead, parsed.data.messages, { page: parsed.data.page }));
-  } catch (err) {
+  const { messages, page, chatId } = parsed.data;
+  const [emailed] = await Promise.allSettled([
+    sendEmail(transcriptEmail(lead, messages, { page })),
+    saveChatNote({ lead, chatId, page, messages }),
+  ]);
+  if (emailed.status === 'rejected') {
+    const err = emailed.reason;
     console.error('[chat] transcript email not sent:', err instanceof Error ? err.message : err);
-    console.error('[chat] transcript (copy from here):', JSON.stringify({ lead, messages: parsed.data.messages }));
+    console.error('[chat] transcript (copy from here):', JSON.stringify({ lead, messages }));
   }
 
   // The guest's follow-up from Edward: their dates, what's open with live prices, and "just reply".

@@ -26,8 +26,20 @@ const page = z
   .optional()
   .catch(undefined);
 
+/**
+ * The browser's id for one conversation, so each chat is one note in Go
+ * High Level. Optional (older pages don't send it); a malformed one is ignored.
+ */
+const chatId = z
+  .string()
+  .regex(/^[A-Za-z0-9-]{8,64}$/)
+  .optional()
+  .catch(undefined);
+
 export const chatRequestSchema = z.object({
   lead: leadToken,
+  chatId,
+  page,
   messages: z
     .array(turn)
     .min(1, 'Type a message.')
@@ -57,7 +69,7 @@ export type Lead = z.infer<typeof leadSchema>;
 const smsConsent = { smsNonMarketing: z.boolean().default(false), smsMarketing: z.boolean().default(false) };
 
 /** The chat's sign-in: the guest's details, their text-message choices and the page they were on. */
-export const leadRequestSchema = leadSchema.extend({ page, ...smsConsent });
+export const leadRequestSchema = leadSchema.extend({ page, chatId, ...smsConsent });
 
 /** The welcome offer's sign-up: the guest's details and their text-message choices. */
 export const signupRequestSchema = leadSchema.extend(smsConsent);
@@ -65,6 +77,7 @@ export const signupRequestSchema = leadSchema.extend(smsConsent);
 /** A finished conversation to email to the host: like a chat request, but it may end on either side. */
 export const transcriptRequestSchema = z.object({
   lead: leadToken,
+  chatId,
   page,
   messages: z
     .array(turn)

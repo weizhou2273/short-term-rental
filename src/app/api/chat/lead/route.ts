@@ -1,5 +1,6 @@
-import type { NextRequest } from 'next/server';
+import { after, type NextRequest } from 'next/server';
 import { errorResponse, isSameOrigin, json, readJson } from '@/lib/api';
+import { saveChatNote } from '@/lib/chat/chat-note';
 import { signLead } from '@/lib/chat/lead';
 import { isSignupPage, leadEmail } from '@/lib/chat/lead-email';
 import { leadRequestSchema } from '@/lib/chat/request';
@@ -10,12 +11,15 @@ import { crmProblemEmail } from '@/lib/offer/welcome';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
- * POST /api/chat/lead  { name, email, phone, smsNonMarketing?, smsMarketing?, page? }
+ * POST /api/chat/lead  { name, email, phone, smsNonMarketing?, smsMarketing?, page?, chatId? }
  *   → 200 { token, firstName }  and an email to the host with the details.
  *
  * The chat asks for these before the first question, and /text-signup has
  * the same form in its page body. The token goes with every chat message. If the email can't be sent the chat still starts, and
  * the details are written to the server log so the lead isn't lost.
+ *
+ * Text-message consent: each tag is added only for the box the guest ticked
+ * in this request, and nothing here ever removes a tag (see consentTags).
  *
  * With Go High Level set up, the lead is also added there as a contact
  * tagged with the chat and with each kind of text message they ticked the
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const parsed = leadRequestSchema.safeParse(await readJson(request));
   if (!parsed.success) return errorResponse(parsed.error.issues[0]?.message ?? 'Please check your details.', 400);
-  const { page, smsNonMarketing, smsMarketing, ...lead } = parsed.data;
+  const { page, chatId, smsNonMarketing, smsMarketing, ...lead } = parsed.data;
   const consent = { smsNonMarketing, smsMarketing };
 
   // The same form is the body of /text-signup; its leads are labelled as sign-ups, not chats.
@@ -59,5 +63,13 @@ export async function POST(request: NextRequest): Promise<Response> {
     console.error(`[chat] Go High Level: ${problem.saved ? 'tags not added' : 'contact not saved'}:`, problem.reason);
     await sendEmail(crmProblemEmail(lead, problem, consent, 'website chat lead')).catch((err) => console.error('[chat] host notice not sent:', reason(err)));
   }
-  return json({ token: signLead(lead), firstName: firstName(lead.name) });
+  const contactId = added.status === 'fulfilled' ? (added.value?.id ?? null) : null;
+
+  // The chat's transcript note starts now ("Started chat, no messages.") and is
+  // filled in by /api/chat after each reply. After the response, so the chat opens at once.
+  if (contactId && !signup) {
+    const at = new Date();
+    after(() => saveChatNote({ lead: { ...lead, contactId }, chatId, page, messages: [], consent, at }));
+  }
+  return json({ token: signLead(lead, Date.now(), contactId), firstName: firstName(lead.name) });
 }
