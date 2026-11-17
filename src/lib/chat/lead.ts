@@ -8,6 +8,9 @@ import { type Lead, leadSchema } from './request';
  * so the chat can't be used without the form, and the transcript email can
  * trust who the guest is without a database.
  *
+ * When the guest was added to Go High Level, the token also carries their
+ * contact id, so later chat notes go on the right contact without a lookup.
+ *
  * The signing key is derived from ANTHROPIC_API_KEY (the chat can't run
  * without it anyway); rotating that key just asks guests for their details again.
  */
@@ -22,23 +25,29 @@ function signingKey(): Buffer {
 
 const sign = (body: string) => createHmac('sha256', signingKey()).update(body).digest('base64url');
 
-export function signLead(lead: Lead, now = Date.now()): string {
-  const body = Buffer.from(JSON.stringify({ ...lead, iat: Math.floor(now / 1000) })).toString('base64url');
+export type SignedLead = Lead & { contactId?: string };
+
+const CONTACT_ID = /^[A-Za-z0-9_-]{1,64}$/;
+
+export function signLead(lead: Lead, now = Date.now(), contactId?: string | null): string {
+  const cid = contactId && CONTACT_ID.test(contactId) ? { cid: contactId } : {};
+  const body = Buffer.from(JSON.stringify({ name: lead.name, email: lead.email, phone: lead.phone, ...cid, iat: Math.floor(now / 1000) })).toString('base64url');
   return `${body}.${sign(body)}`;
 }
 
-/** The guest's details if the token is genuine and current, else null. */
-export function verifyLead(token: string, now = Date.now()): Lead | null {
+/** The guest's details (and Go High Level contact id, if known) if the token is genuine and current, else null. */
+export function verifyLead(token: string, now = Date.now()): SignedLead | null {
   const [body, sig, extra] = token.split('.');
   if (!body || !sig || extra !== undefined) return null;
   const expected = Buffer.from(sign(body));
   const given = Buffer.from(sig);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
   try {
-    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as Lead & { iat?: unknown };
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as Lead & { iat?: unknown; cid?: unknown };
     if (typeof payload.iat !== 'number' || now / 1000 - payload.iat > TTL_SECONDS) return null;
     const lead = leadSchema.safeParse(payload);
-    return lead.success ? lead.data : null;
+    if (!lead.success) return null;
+    return typeof payload.cid === 'string' && CONTACT_ID.test(payload.cid) ? { ...lead.data, contactId: payload.cid } : lead.data;
   } catch {
     return null;
   }

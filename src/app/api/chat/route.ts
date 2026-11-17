@@ -1,16 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { NextRequest } from 'next/server';
+import { after, type NextRequest } from 'next/server';
 import { errorResponse, isSameOrigin, readJson } from '@/lib/api';
 import { type ChatEvent, runChat } from '@/lib/chat/agent';
+import { saveChatNote } from '@/lib/chat/chat-note';
 import { verifyLead } from '@/lib/chat/lead';
 import { chatRequestSchema } from '@/lib/chat/request';
 import { firstName } from '@/lib/chat/shared';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 /**
- * POST /api/chat  { lead, messages: [{ role, content }] }  (text only; the last one is the guest's;
- *   lead = the token from /api/chat/lead)
+ * POST /api/chat  { lead, messages: [{ role, content }], chatId?, page? }  (text only; the last one is the
+ *   guest's; lead = the token from /api/chat/lead)
  *   → 200 application/x-ndjson, one ChatEvent per line, ending in "done" or "error"
+ *
+ * Once the reply has been sent, the conversation so far (with the reply) is
+ * saved as the chat's note in Go High Level (lib/chat/chat-note.ts), so the
+ * team has it even if the guest's browser never reports the chat ending.
  *
  * Needs ANTHROPIC_API_KEY (server only). Without it the route answers 503
  * and the layout doesn't render the chat button.
@@ -60,9 +65,27 @@ export async function POST(request: NextRequest): Promise<Response> {
   client ??= new Anthropic();
   const anthropic = client;
   const encoder = new TextEncoder();
+
+  // The reply as the guest sees it: "turn" marks where a model call starts, "reset" drops its text.
+  let reply = '';
+  let mark = 0;
+  let replied!: () => void;
+  const finished = new Promise<void>((resolve) => (replied = resolve));
+  const { messages, chatId, page } = parsed.data;
+  after(async () => {
+    await finished;
+    // Pages from before chat ids can't say which note is theirs; their transcript is saved when the chat ends.
+    if (!chatId) return;
+    const turns = reply.trim() ? [...messages, { role: 'assistant' as const, content: reply.trim() }] : messages;
+    await saveChatNote({ lead, chatId, page, messages: turns });
+  });
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: ChatEvent) => {
+        if (event.type === 'turn') mark = reply.length;
+        else if (event.type === 'text') reply += event.text;
+        else if (event.type === 'reset') reply = reply.slice(0, mark);
         try {
           controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
         } catch {
@@ -76,6 +99,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         // The guest closed the chat or left the page: nothing to send.
         if (!request.signal.aborted) send({ type: 'error', message: guestMessage(err) });
       } finally {
+        replied();
         try {
           controller.close();
         } catch {

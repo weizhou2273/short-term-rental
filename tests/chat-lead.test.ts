@@ -1,3 +1,4 @@
+import type * as NextServerModule from 'next/server';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { POST as postLead } from '@/app/api/chat/lead/route';
@@ -7,6 +8,17 @@ import { leadEmail, transcriptEmail } from '@/lib/chat/lead-email';
 import { leadSchema } from '@/lib/chat/request';
 import { isPhone } from '@/lib/chat/shared';
 import { EmailNotConfiguredError, sendEmail } from '@/lib/email/send';
+
+type NextServer = typeof NextServerModule;
+
+// Next's after() only runs inside a real request: queue the callbacks for the tests to run.
+const deferred = vi.hoisted(() => ({ queue: [] as (() => unknown)[] }));
+vi.mock('next/server', async (importOriginal) => ({
+  ...(await importOriginal<NextServer>()),
+  after: (fn: () => unknown) => {
+    deferred.queue.push(fn);
+  },
+}));
 
 // The guest's recap (tests/recap.test.ts) is checked here only for being triggered.
 const sendRecap = vi.hoisted(() => vi.fn(async () => 'sent'));
@@ -236,7 +248,8 @@ describe('POST /api/chat/lead with Go High Level', () => {
     const calls = mockBoth();
     const res = await postLead(post('/api/chat/lead', { ...JANE, smsNonMarketing: true, page: '/stays/the-ridge' }));
     expect(res.status).toBe(200);
-    expect(verifyLead((await res.json()).token)).toEqual(JANE);
+    // The token now carries the Go High Level contact id, for the chat's note.
+    expect(verifyLead((await res.json()).token)).toEqual({ ...JANE, contactId: 'c_9' });
     const [upsert, tags] = toCrm(calls);
     expect(upsert).toMatchObject({
       path: '/contacts/upsert',

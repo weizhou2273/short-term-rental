@@ -26,6 +26,8 @@ type Msg = { role: 'user' | 'assistant'; text: string; failed?: boolean };
 const STORAGE_KEY = 'wk-chat-v1';
 /** How many messages have already been emailed, so leaving twice doesn't resend. */
 const SENT_KEY = 'wk-chat-sent-v1';
+/** This conversation's id, so the server keeps it as one note in Go High Level. One per tab session, like the conversation. */
+const CHAT_ID_KEY = 'wk-chat-id-v1';
 const GREETING_ASK =
   'Hi! I can help you choose a home, answer questions and check live prices for your dates. First, how can we reach you? Our team can follow up if you need more help.';
 const greeting = (name: string) =>
@@ -40,6 +42,22 @@ const TEASER_KEY = 'wk-chat-teased';
 const TEASER_BUSY = '.offer-backdrop, .booking-col.open, .modal:not([hidden])';
 
 const tel = SITE.contactPhone.replace(/[^\d+]/g, '');
+
+const here = () => window.location.pathname + window.location.search;
+
+/** This conversation's id, made the first time it's needed. */
+function chatIdOf(): string | undefined {
+  try {
+    let id = sessionStorage.getItem(CHAT_ID_KEY);
+    if (!id) {
+      id = crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+      sessionStorage.setItem(CHAT_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return undefined;
+  }
+}
 
 /** What the API gets: completed exchanges only, trimmed from the start to fit the limits. */
 function historyFor(messages: Msg[], next: string): { role: Msg['role']; content: string }[] {
@@ -198,7 +216,7 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
     const turns = transcriptOf(messages, busy);
     const count = messages.filter((m) => !m.failed && m.text.trim()).length;
     if (!turns.some((t) => t.role === 'user') || count <= sent) return;
-    const body = JSON.stringify({ lead: guest.token, page: window.location.pathname + window.location.search, messages: turns });
+    const body = JSON.stringify({ lead: guest.token, chatId: chatIdOf(), page: here(), messages: turns });
     // sendBeacon survives the page closing; fall back to a keepalive fetch.
     const queued = navigator.sendBeacon?.('/api/chat/transcript', new Blob([body], { type: 'application/json' }));
     if (!queued) {
@@ -309,7 +327,7 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lead: token, messages: history }),
+        body: JSON.stringify({ lead: token, chatId: chatIdOf(), page: here(), messages: history }),
         signal: controller.signal,
       });
       if (res.status === 401) {
@@ -465,7 +483,7 @@ export function ChatWidget({ stays }: { stays: Record<string, string> }) {
           <div className="chat-msg assistant">
             <p>{guest && hasToken ? greeting(guest.name) : GREETING_ASK}</p>
           </div>
-          {!hasToken ? <LeadForm key={guest?.email ?? 'new'} initial={guest} nameRef={nameRef} onDone={onLead} /> : null}
+          {!hasToken ? <LeadForm key={guest?.email ?? 'new'} initial={guest} nameRef={nameRef} onDone={onLead} chatId={chatIdOf} /> : null}
           {hasToken && messages.length === 0 ? (
             <div className="chat-suggest">
               {(stayName ? stayQuestions(stayName) : SUGGESTIONS).map((s) => (

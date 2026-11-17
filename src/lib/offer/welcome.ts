@@ -26,11 +26,17 @@ const WELCOME_CODE = 'WELCOME5';
 
 export type WelcomeOffer = { code: string; percent: number; minNights: number };
 
-export function welcomeOffer(): WelcomeOffer | null {
-  if (!SITE.welcomeOffer || !(crmConfig() || process.env.RESEND_API_KEY)) return null;
+/** The welcome code and its terms, whether or not the popup can take sign-ups (the chat assistant mentions it). */
+export function welcomeCode(): WelcomeOffer | null {
+  if (!SITE.welcomeOffer) return null;
   const code = process.env.WELCOME_PROMO_CODE?.trim() || WELCOME_CODE;
   if (!PROMO_PATTERN.test(code)) return null;
   return { code, ...SITE.welcomeOffer };
+}
+
+export function welcomeOffer(): WelcomeOffer | null {
+  if (!(crmConfig() || process.env.RESEND_API_KEY)) return null;
+  return welcomeCode();
 }
 
 /** " of 2 nights or more", or nothing for a 1-night minimum. */

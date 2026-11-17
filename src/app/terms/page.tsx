@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 const EFFECTIVE = 'November 14, 2026';
 const PHONE_HREF = `tel:${SITE.contactPhone.replace(/[^\d+]/g, '')}`;
-/** "+1 929-500-4160" as "(929) 500-4160". */
+/** "+1 908-738-9378" as "(908) 738-9378". */
 const PHONE_TEXT = SITE.contactPhone.replace(/^\+1 (\d{3})-/, '($1) ');
 
 const Email = () => <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>;

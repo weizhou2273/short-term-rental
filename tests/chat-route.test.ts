@@ -1,5 +1,17 @@
+import type * as NextServerModule from 'next/server';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+type NextServer = typeof NextServerModule;
+
+// Next's after() only runs inside a real request: queue the callbacks for the tests to run.
+const deferred = vi.hoisted(() => ({ queue: [] as (() => unknown)[] }));
+vi.mock('next/server', async (importOriginal) => ({
+  ...(await importOriginal<NextServer>()),
+  after: (fn: () => unknown) => {
+    deferred.queue.push(fn);
+  },
+}));
 
 const runChat = vi.fn();
 vi.mock('@/lib/chat/agent', () => ({ runChat: (...args: unknown[]) => runChat(...args) }));

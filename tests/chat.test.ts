@@ -32,6 +32,20 @@ describe('what the assistant knows', () => {
     }
   });
 
+  it('gives the business number, never the old one', () => {
+    expect(SITE.contactPhone).toBe('+1 908-738-9378');
+    expect(SYSTEM_TEXT).toContain('+1 908-738-9378');
+    expect(SYSTEM_TEXT).not.toContain('929-500-4160');
+    expect(HANDOFF_TEXT).toContain('+1 908-738-9378');
+  });
+
+  it('mentions the welcome code when asked about discounts, and keeps the other pricing rules', () => {
+    expect(SYSTEM_TEXT).toContain('tell them about the code WELCOME5: 5% off the nightly rate of their first direct stay of 2 or more nights');
+    expect(SYSTEM_TEXT).toContain('Don\'t offer any other discount or say there are no promotions.');
+    expect(SYSTEM_TEXT).toContain('Never make up or estimate prices.');
+    expect(SYSTEM_TEXT).toContain('Prices from check_availability are totals before taxes.');
+  });
+
   it('dates "today" in the Poconos', () => {
     expect(dateContext(new Date('2026-11-11T03:00:00Z'))).toContain('Tuesday, November 10, 2026 (2026-11-10)');
   });

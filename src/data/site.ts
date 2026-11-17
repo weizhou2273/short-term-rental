@@ -10,7 +10,9 @@ export const SITE: Site = {
   subline: 'Pools, saunas and room for everyone. Book direct for the best rate.',
   contactEmail: 'stay@wkreserve.com',
   hostName: 'Edward',
-  contactPhone: '+1 929-500-4160',
+  // The business number for calls and texts. Everything on the site reads it from here (footer, terms,
+  // privacy, the chat assistant, emails, search engines).
+  contactPhone: '+1 908-738-9378',
   instagram: 'wk.reserve',
   // Hospitable Direct site ID sent with every quote. This one gives the generic
   // booking.hospitable.com/book/external/... checkout, which takes payment.
