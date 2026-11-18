@@ -6,6 +6,10 @@ import type { Property } from '@/data/types';
  * link previews), the first HERO_GRID_COUNT fill the stay page's photo grid,
  * and all of them appear in the photo tour, grouped by room.
  * next/image resizes them on request.
+ *
+ * Lifestyle photos (AI-generated scenes of people enjoying a room) go last in
+ * their room, never first in it and never in the grid, so each room opens on
+ * a real photo; their alt text describes the scene.
  */
 
 /** A filename in the property's folder, optionally with alt text and the room it shows. */
