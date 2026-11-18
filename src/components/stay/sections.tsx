@@ -116,14 +116,14 @@ export function Description({ property: p }: { property: Property }) {
   );
 }
 
-/** Each room shows its first photo from the photo tour (photos with the same `room` name). */
+/** Each room shows its first real photo (photos with the same `room` name), as in the photo tour. */
 export function SleepingArrangements({ property: p, photos }: { property: Property; photos: PropertyPhoto[] }) {
   return (
     <section className="section">
       <h2>Where you&apos;ll sleep</h2>
       <div className="rooms">
         {p.sleeping.map((r) => {
-          const photo = photos.find((ph) => ph.room === r.room);
+          const photo = photos.find((ph) => ph.room === r.room && !ph.lifestyle) ?? photos.find((ph) => ph.room === r.room);
           return (
             <div className="room" key={r.room}>
               {photo ? (

@@ -15,12 +15,16 @@ export const absoluteUrl = (path: string) => `${SITE_URL}${path.startsWith('/') 
 /** Ways people type the brand, so "WK Reserve" finds "W&K Reserve". */
 export const BRAND_ALIASES = ['WK Reserve', 'W and K Reserve', 'W & K Reserve', 'wkreserve'];
 
-/** Photos listed per stay in the sitemap and structured data: the curated first few. */
+/** Photos listed per stay in the sitemap and structured data: the curated first few real ones (no lifestyle photos). */
 const SEO_PHOTO_COUNT = 10;
 
 export const stayPath = (p: Property) => `/stays/${p.slug}`;
 
-export const stayPhotoUrls = (p: Property) => propertyPhotos(p).slice(0, SEO_PHOTO_COUNT).map((photo) => absoluteUrl(photo.src));
+export const stayPhotoUrls = (p: Property) =>
+  propertyPhotos(p)
+    .filter((photo) => !photo.lifestyle)
+    .slice(0, SEO_PHOTO_COUNT)
+    .map((photo) => absoluteUrl(photo.src));
 
 export const stayTitle = (p: Property) => `${p.name} — ${p.bedrooms}-Bedroom Poconos Vacation Rental`;
 
