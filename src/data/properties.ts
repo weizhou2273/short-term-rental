@@ -886,25 +886,26 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: 41.1398, lng: -75.3884 },
     neighborhood: 'A quiet neighborhood close to nature, about 10 minutes from Camelback Mountain and Kalahari Resort, with a supermarket 7 minutes away.',
     // Files in public/photos/<slug>/, in display order: the owner's c1 pick (the
-    // cover), then the lifestyle photos, whose first four (the home's most
-    // distinctive amenities) complete the photo grid, then the real photos, led by
-    // the c2–c5 picks. `room` groups them in the photo tour, in order of each
-    // room's first real photo; bedroom names match `sleeping` below.
+    // cover), then the lifestyle photos in the order of the W&K Reserve Airbnb
+    // listing (1815348173115614225, Nov 2026; the basketball photo isn't there, so
+    // it's last), whose first four complete the photo grid, then the real photos,
+    // led by the c2–c5 picks. `room` groups them in the photo tour, in order of
+    // each room's first real photo; bedroom names match `sleeping` below.
     photos: [
       { file: '05-living-room-01-c1.jpg', room: 'Living room', alt: 'Living room with a stone fireplace and a leather sofa' },
-      { file: '04-spa-movie-room-04.jpg', room: 'Spa & movie room', alt: 'Friends in the indoor hot tub watching the big screen at The Clearview', lifestyle: true },
       { file: '04-spa-movie-room-05.jpg', room: 'Spa & movie room', alt: 'Kids on the climbing wall and putting green while a couple relaxes in the hot tub at The Clearview', lifestyle: true },
-      { file: '08-game-room-10.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the basement game room at The Clearview', lifestyle: true },
+      { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Friends playing pickleball in the backyard at sunset at The Clearview', lifestyle: true },
+      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Kids on the swings and slide while their parents sit at the picnic table at The Clearview', lifestyle: true },
+      { file: '01-exterior-05.jpg', room: 'Exterior', alt: 'A boy batting in the backyard batting cage at The Clearview', lifestyle: true },
       { file: '08-game-room-11.jpg', room: 'Game room', alt: 'Friends playing poker in the game room at The Clearview', lifestyle: true },
       { file: '03-fire-pit-03.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows around the fire pit at The Clearview', lifestyle: true },
-      { file: '07-dining-room-05.jpg', room: 'Dining room', alt: 'Family dinner around the dining table at The Clearview', lifestyle: true },
-      { file: '05-living-room-04.jpg', room: 'Living room', alt: 'Family relaxing by the fireplace in the living room at The Clearview', lifestyle: true },
       { file: '08-game-room-12.jpg', room: 'Game room', alt: 'Teens playing foosball in the game room at The Clearview', lifestyle: true },
+      { file: '07-dining-room-05.jpg', room: 'Dining room', alt: 'Family dinner around the dining table at The Clearview', lifestyle: true },
+      { file: '08-game-room-10.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the basement game room at The Clearview', lifestyle: true },
       { file: '08-game-room-09.jpg', room: 'Game room', alt: 'Friends playing pool in the basement game room at The Clearview', lifestyle: true },
-      { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Friends playing pickleball in the backyard at sunset at The Clearview', lifestyle: true },
+      { file: '05-living-room-04.jpg', room: 'Living room', alt: 'Family relaxing by the fireplace in the living room at The Clearview', lifestyle: true },
+      { file: '04-spa-movie-room-04.jpg', room: 'Spa & movie room', alt: 'Friends in the indoor hot tub watching the big screen at The Clearview', lifestyle: true },
       { file: '01-exterior-04.jpg', room: 'Exterior', alt: 'Dad and kids shooting hoops in the backyard at The Clearview', lifestyle: true },
-      { file: '01-exterior-05.jpg', room: 'Exterior', alt: 'A boy batting in the backyard batting cage at The Clearview', lifestyle: true },
-      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Kids on the swings and slide while their parents sit at the picnic table at The Clearview', lifestyle: true },
       { file: '04-spa-movie-room-01-c2.jpg', room: 'Spa & movie room', alt: 'Spa and movie room with a hot tub, sauna, climbing wall and putting green' },
       { file: '08-game-room-01-c3.jpg', room: 'Game room', alt: 'Game room with a pool table and a big movie screen' },
       { file: '02-pool-01-c4.jpg', room: 'Pool', alt: 'Pool in the backyard' },
@@ -1123,22 +1124,23 @@ const ALL_PROPERTIES: Property[] = [
     coords: { lat: 41.137, lng: -75.351 },
     neighborhood: 'About 10 minutes from Camelback Mountain and Kalahari Resort, with grocery stores and restaurants a short drive away.',
     // Files in public/photos/<slug>/, in display order: the owner's c1 pick in the
-    // Drive folder (the cover), then the lifestyle photos, whose first four (the
-    // home's most distinctive amenities) complete the photo grid, then the real
-    // photos, led by the c2–c5 picks. `room` groups them in the photo tour, in
-    // order of each room's first real photo; bedroom names match `sleeping` below
-    // so those cards show the room's photo.
+    // Drive folder (the cover), then the lifestyle photos in the order of the W&K
+    // Reserve Airbnb listing (1815344358711050823, Nov 2026), whose first four
+    // complete the photo grid, then the real photos, led by the c2–c5 picks.
+    // `room` groups them in the photo tour, in order of each room's first real
+    // photo; bedroom names match `sleeping` below so those cards show the room's
+    // photo.
     photos: [
       { file: '01-backyard-01-c1.jpg', room: 'Backyard', alt: 'The house at dusk with the pool, hot tub and fire pit lit up' },
+      { file: '01-backyard-07.jpg', room: 'Backyard', alt: 'Friends playing pickleball in the backyard at Clover Lodge', lifestyle: true },
       { file: '04-game-room-03.jpg', room: 'Game room', alt: 'Teens playing foosball as a guest steps out of the sauna at Clover Lodge', lifestyle: true },
+      { file: '01-backyard-08.jpg', room: 'Backyard', alt: 'Kids on the playset under the fall leaves at Clover Lodge', lifestyle: true },
+      { file: '07-dinning-room-05.jpg', room: 'Dining area', alt: 'Family passing dishes around the dining table at Clover Lodge', lifestyle: true },
       { file: '02-sun-room-04.jpg', room: 'Sun room', alt: 'Family reading and sipping coffee in the sun room at Clover Lodge', lifestyle: true },
-      { file: '04-game-room-04.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the game room at Clover Lodge', lifestyle: true },
-      { file: '06-living-room-08.jpg', room: 'Living room', alt: 'Friends playing pool by the stone fireplace at Clover Lodge', lifestyle: true },
       { file: '03-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub on a fall evening at Clover Lodge', lifestyle: true },
       { file: '01-backyard-06.jpg', room: 'Backyard', alt: 'Friends roasting marshmallows around the fire pit at dusk at Clover Lodge', lifestyle: true },
-      { file: '07-dinning-room-05.jpg', room: 'Dining area', alt: 'Family passing dishes around the dining table at Clover Lodge', lifestyle: true },
-      { file: '01-backyard-07.jpg', room: 'Backyard', alt: 'Friends playing pickleball in the backyard at Clover Lodge', lifestyle: true },
-      { file: '01-backyard-08.jpg', room: 'Backyard', alt: 'Kids on the playset under the fall leaves at Clover Lodge', lifestyle: true },
+      { file: '04-game-room-04.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the game room at Clover Lodge', lifestyle: true },
+      { file: '06-living-room-08.jpg', room: 'Living room', alt: 'Friends playing pool by the stone fireplace at Clover Lodge', lifestyle: true },
       { file: '02-sun-room-01-c2.jpg', room: 'Sun room', alt: 'Sun room cinema with a projector screen and leather lounge chairs' },
       { file: '04-game-room-01-c3.jpg', room: 'Game room', alt: 'Game room with a sauna, foosball table and movie screen' },
       { file: '03-hot-tub-01-c4.jpg', room: 'Hot tub', alt: 'Hot tub on the fenced patio, surrounded by trees' },
