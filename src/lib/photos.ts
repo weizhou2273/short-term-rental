@@ -7,15 +7,17 @@ import type { Property } from '@/data/types';
  * and all of them appear in the photo tour, grouped by room.
  * next/image resizes them on request.
  *
- * Lifestyle photos (AI-generated scenes of people enjoying a room) go last in
- * their room, never first in it and never in the grid, so each room opens on
- * a real photo; their alt text describes the scene.
+ * Lifestyle photos (AI-generated scenes of people enjoying a room, marked
+ * `lifestyle`) come right after the cover, so the grid, the phone carousel and
+ * the cards show them first. The photo tour is the detail: each room opens on
+ * a real photo, with its lifestyle photos last. The cover stays a real photo,
+ * and search engines get only the real photos. Alt text describes the scene.
  */
 
-/** A filename in the property's folder, optionally with alt text and the room it shows. */
-export type PhotoEntry = string | { file: string; alt?: string; room?: string };
+/** A filename in the property's folder, optionally with alt text, the room it shows, and whether it's a lifestyle photo. */
+export type PhotoEntry = string | { file: string; alt?: string; room?: string; lifestyle?: boolean };
 
-export type PropertyPhoto = { src: string; alt: string; room?: string };
+export type PropertyPhoto = { src: string; alt: string; room?: string; lifestyle?: true };
 
 /** A room in the photo tour. `room` is null for photos not assigned to one. */
 export type TourRoom = { room: string | null; photos: { photo: PropertyPhoto; index: number }[] };
@@ -27,11 +29,12 @@ export const entryFile = (entry: PhotoEntry) => (typeof entry === 'string' ? ent
 
 export function propertyPhotos(property: Property): PropertyPhoto[] {
   return property.photos.map((entry, i) => {
-    const { file, alt, room } = typeof entry === 'string' ? { file: entry } : entry;
+    const { file, alt, room, lifestyle } = typeof entry === 'string' ? { file: entry } : entry;
     return {
       src: `${PHOTO_ROOT}/${property.slug}/${encodeURIComponent(file)}`,
       alt: alt?.trim() || `${property.name}, photo ${i + 1}`,
       ...(room?.trim() ? { room: room.trim() } : {}),
+      ...(lifestyle ? { lifestyle: true as const } : {}),
     };
   });
 }
@@ -39,17 +42,22 @@ export function propertyPhotos(property: Property): PropertyPhoto[] {
 export const coverPhoto = (property: Property): PropertyPhoto | undefined => propertyPhotos(property)[0];
 
 /**
- * Groups photos by room for the photo tour. Rooms come in the order their
- * first photo appears in the list; each room keeps its photos in list order,
- * with `index` pointing back into the full list.
+ * Groups photos by room for the photo tour. Rooms come in the order of their
+ * first real (non-lifestyle) photo, and each room lists its real photos, then
+ * its lifestyle photos, each in list order, so a room always opens on a real
+ * photo. A room with only lifestyle photos comes after the others. `index`
+ * points back into the full list.
  */
 export function photoTour(photos: PropertyPhoto[]): TourRoom[] {
   const rooms = new Map<string | null, TourRoom>();
-  photos.forEach((photo, index) => {
-    const key = photo.room ?? null;
-    let group = rooms.get(key);
-    if (!group) rooms.set(key, (group = { room: key, photos: [] }));
-    group.photos.push({ photo, index });
-  });
+  for (const lifestyle of [false, true]) {
+    photos.forEach((photo, index) => {
+      if (Boolean(photo.lifestyle) !== lifestyle) return;
+      const key = photo.room ?? null;
+      let group = rooms.get(key);
+      if (!group) rooms.set(key, (group = { room: key, photos: [] }));
+      group.photos.push({ photo, index });
+    });
+  }
   return [...rooms.values()];
 }

@@ -36,14 +36,24 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.0354, lng: -75.1001 },
     neighborhood: 'One minute from Shawnee Mountain Ski Area, and about 10 minutes from the Delaware Water Gap and Bushkill Falls.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
-    // chosen as the most striking (Nov 2026): the aerial (the only one: tennis
-    // court, pool, fire pit, stream, playground and house; also the cover on cards
-    // and link previews), the great room, the pool, the theater, the outdoor
+    // Files in public/photos/<slug>/, in display order. First the aerial (the
+    // only one: tennis court, pool, fire pit, stream, playground and house; also
+    // the cover on cards and link previews), then the lifestyle photos (the first
+    // four complete the photo grid), then the real photos, led by the most
+    // striking (Nov 2026): the great room, the pool, the theater, the outdoor
     // kitchen at night. `room` groups them in the photo tour, in order of each
-    // room's first photo; bedroom names match `sleeping` below.
+    // room's first real photo; bedroom names match `sleeping` below.
     photos: [
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the estate: the tennis court, the pool with umbrellas and loungers, the fire pit, the stream, the playground and the house' },
+      { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub at The Shawnee Estate', lifestyle: true },
+      { file: '08-great-room-04.jpg', room: 'Great room', alt: 'Family playing a board game by the fire in the great room at The Shawnee Estate', lifestyle: true },
+      { file: '06-stream-02.jpg', room: 'Stream', alt: 'A boy exploring the stream while his parents relax on a bench at The Shawnee Estate', lifestyle: true },
+      { file: '05-fire-pit-02.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows at the fire pit in the woods at The Shawnee Estate', lifestyle: true },
+      { file: '10-dining-room-07.jpg', room: 'Dining room', alt: 'Big family dinner at the long dining table at The Shawnee Estate', lifestyle: true },
+      { file: '03-outdoor-kitchen-05.jpg', room: 'Outdoor kitchen', alt: 'Friends cooking together at the outdoor kitchen island at The Shawnee Estate', lifestyle: true },
+      { file: '07-playground-02.jpg', room: 'Playground', alt: 'Kids on the playground slides and swing at The Shawnee Estate', lifestyle: true },
+      { file: '11-billiards-lounge-04.jpg', room: 'Billiards lounge', alt: 'Friends playing pool in the billiards lounge at The Shawnee Estate', lifestyle: true },
+      { file: '12-theater-03.jpg', room: 'Movie theater', alt: 'Family movie night with popcorn in the theater at The Shawnee Estate', lifestyle: true },
       { file: '08-great-room-01-c2.jpg', room: 'Great room', alt: 'Great room with a beamed wood ceiling, chandelier and leather sofas' },
       { file: '02-pool-01.jpg', room: 'Pool', alt: 'In-ground pool with loungers and umbrellas beside the house' },
       { file: '12-theater-01-c4.jpg', room: 'Movie theater', alt: 'Movie theater with a big screen and leather seating' },
@@ -53,18 +63,12 @@ const ALL_PROPERTIES: Property[] = [
       { file: '03-outdoor-kitchen-02.jpg', room: 'Outdoor kitchen', alt: 'Outdoor bar with stools, a sink and a TV' },
       { file: '03-outdoor-kitchen-03.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen pavilion with string lights' },
       { file: '03-outdoor-kitchen-04.jpg', room: 'Outdoor kitchen', alt: 'Outdoor kitchen island and dining table' },
-      { file: '03-outdoor-kitchen-05.jpg', room: 'Outdoor kitchen', alt: 'Friends cooking together at the outdoor kitchen island at The Shawnee Estate' },
       { file: '04-hot-tub-01.jpg', room: 'Hot tub', alt: 'Outdoor hot tub among the trees' },
-      { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub at The Shawnee Estate' },
       { file: '05-fire-pit-01.jpg', room: 'Fire pit', alt: 'Fire pit ringed by Adirondack chairs' },
-      { file: '05-fire-pit-02.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows at the fire pit in the woods at The Shawnee Estate' },
       { file: '06-stream-01.jpg', room: 'Stream', alt: 'Stream running along the lawn, with a bench by the water' },
-      { file: '06-stream-02.jpg', room: 'Stream', alt: 'A boy exploring the stream while his parents relax on a bench at The Shawnee Estate' },
       { file: '07-playground-01.jpg', room: 'Playground', alt: 'Wooden playground with slides and swings' },
-      { file: '07-playground-02.jpg', room: 'Playground', alt: 'Kids on the playground slides and swing at The Shawnee Estate' },
       { file: '08-great-room-02.jpg', room: 'Great room', alt: 'Great room with leather sofas and a fireplace' },
       { file: '08-great-room-03.jpg', room: 'Great room', alt: 'Built-in bar with a stone front and stools' },
-      { file: '08-great-room-04.jpg', room: 'Great room', alt: 'Family playing a board game by the fire in the great room at The Shawnee Estate' },
       { file: '09-kitchen-01.jpg', room: 'Kitchen', alt: 'Kitchen with green cabinets and a marble island' },
       { file: '09-kitchen-02.jpg', room: 'Kitchen', alt: 'Kitchen with a professional range' },
       { file: '09-kitchen-03.jpg', room: 'Kitchen', alt: 'Kitchen island with bar stools, open to the dining room' },
@@ -73,13 +77,10 @@ const ALL_PROPERTIES: Property[] = [
       { file: '10-dining-room-04.jpg', room: 'Dining room', alt: 'Dining room open to the kitchen' },
       { file: '10-dining-room-05.jpg', room: 'Dining room', alt: 'Table set with plates and glasses' },
       { file: '10-dining-room-06.jpg', room: 'Dining room', alt: 'Orchid on the dining table' },
-      { file: '10-dining-room-07.jpg', room: 'Dining room', alt: 'Big family dinner at the long dining table at The Shawnee Estate' },
       { file: '11-billiards-lounge-01.jpg', room: 'Billiards lounge', alt: 'Billiards lounge with a pool table, fireplace and TV' },
       { file: '11-billiards-lounge-02.jpg', room: 'Billiards lounge', alt: 'Pool table by the stone fireplace' },
       { file: '11-billiards-lounge-03.jpg', room: 'Billiards lounge', alt: 'Billiards lounge with leather sofas and a staircase' },
-      { file: '11-billiards-lounge-04.jpg', room: 'Billiards lounge', alt: 'Friends playing pool in the billiards lounge at The Shawnee Estate' },
       { file: '12-theater-02.jpg', room: 'Movie theater', alt: 'Air hockey table in front of the theater screen' },
-      { file: '12-theater-03.jpg', room: 'Movie theater', alt: 'Family movie night with popcorn in the theater at The Shawnee Estate' },
       { file: '13-game-room-01.jpg', room: 'Game room', alt: 'Game room with a poker table and a TV' },
       { file: '13-game-room-02.jpg', room: 'Game room', alt: 'Poker table and leather sectional' },
       { file: '13-game-room-03.jpg', room: 'Game room', alt: 'Foosball table in the game room' },
@@ -316,16 +317,24 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.142, lng: -75.352 },
     neighborhood: 'Near Camelback Mountain and Kalahari Resort, in a community with lakes, beaches and an outdoor pool (passes in season).',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
-    // chosen by the owner and as the most striking (Nov 2026): the aerial view
+    // Files in public/photos/<slug>/, in display order. First the aerial view
     // (court, beach, pond and pool in one frame; it is also the cover on cards
-    // and link previews), dusk across the pond, the dining table for the whole
-    // group, the movie room, the hot tub at night (last, as "Show all photos"
-    // covers that tile's corner).
-    // `room` groups them in the photo tour, in order of each room's first
+    // and link previews), then the lifestyle photos (the first four complete the
+    // photo grid; the fifth tile is the hot tub at night, as "Show all photos"
+    // covers that tile's corner), then the real photos, led by the owner's picks
+    // (Nov 2026): dusk across the pond, the dining table for the whole group,
+    // the movie room, the hot tub at night.
+    // `room` groups them in the photo tour, in order of each room's first real
     // photo; bedroom names match `sleeping` below.
     photos: [
       { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Aerial view in fall: the house, pickleball court, pool, fire pit, sand beach and private pond with a dock, and the playground' },
+      { file: '02-pond-beach-02.jpg', room: 'Pond', alt: 'Kids building a sandcastle on the pond’s sand beach while friends gather by the fire at Minsi Pond', lifestyle: true },
+      { file: '11-theater-10.jpg', room: 'Movie & game room', alt: 'Family movie night while a teen practices on the putting green at Minsi Pond', lifestyle: true },
+      { file: '07-living-room-05.jpg', room: 'Living room', alt: 'Family relaxing in the open living room while dinner is set at the long table at Minsi Pond', lifestyle: true },
+      { file: '04-hot-tub-04.jpg', room: 'Hot tub', alt: 'Friends in the hot tub at night under string lights at Minsi Pond', lifestyle: true },
+      { file: '13-sauna-03.jpg', room: 'Sauna', alt: 'Two friends in robes relaxing after the sauna at Minsi Pond', lifestyle: true },
+      { file: '06-playground-02.jpg', room: 'Playground', alt: 'Kids on the playset slides in the woods at Minsi Pond', lifestyle: true },
+      { file: '05-pickleball-court-03.jpg', room: 'Pickleball court', alt: 'Friends playing pickleball while kids play ping-pong at Minsi Pond', lifestyle: true },
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'The house at dusk across the pond, with the pool and patio lit up' },
       { file: '09-dining-room-01.jpg', room: 'Dining room', alt: 'Long dining table for the whole group, with the fireplace, sofas and kitchen beyond' },
       { file: '11-theater-04.jpg', room: 'Movie & game room', alt: 'Movie room with a big screen, a putting green and a leather sectional' },
@@ -342,19 +351,14 @@ const ALL_PROPERTIES: Property[] = [
       { file: '01-exterior-07.jpg', room: 'Exterior', alt: 'Covered front porch with rocking chairs' },
       { file: '01-exterior-08.jpg', room: 'Exterior', alt: 'Wooded driveway to the house' },
       { file: '02-pond-beach-01.jpg', room: 'Pond', alt: 'Private pond with a dock' },
-      { file: '02-pond-beach-02.jpg', room: 'Pond', alt: 'Kids building a sandcastle on the pond’s sand beach while friends gather by the fire at Minsi Pond' },
       { file: '03-pool-03.jpg', room: 'Pool', alt: 'Pool, fire pit seating and the hot tub deck' },
       { file: '04-hot-tub-01.jpg', room: 'Hot tub', alt: 'Hot tub on the deck at night' },
       { file: '04-hot-tub-03.jpg', room: 'Hot tub', alt: 'Hot tub on the deck beside an outdoor bar' },
-      { file: '04-hot-tub-04.jpg', room: 'Hot tub', alt: 'Friends in the hot tub at night under string lights at Minsi Pond' },
       { file: '05-pickleball-court-02.jpg', room: 'Pickleball court', alt: 'Pickleball court with a basketball hoop' },
-      { file: '05-pickleball-court-03.jpg', room: 'Pickleball court', alt: 'Friends playing pickleball while kids play ping-pong at Minsi Pond' },
       { file: '06-playground-01.jpg', room: 'Playground', alt: 'Playground with yellow slides' },
-      { file: '06-playground-02.jpg', room: 'Playground', alt: 'Kids on the playset slides in the woods at Minsi Pond' },
       { file: '07-living-room-02.jpg', room: 'Living room', alt: 'Living room seating by the wood stove' },
       { file: '07-living-room-03.jpg', room: 'Living room', alt: 'Living room, dining table and kitchen in one open space' },
       { file: '07-living-room-04.jpg', room: 'Living room', alt: 'Reading nook with lounge chairs' },
-      { file: '07-living-room-05.jpg', room: 'Living room', alt: 'Family relaxing in the open living room while dinner is set at the long table at Minsi Pond' },
       { file: '08-kitchen-01.jpg', room: 'Full kitchen', alt: 'Kitchen with a large island' },
       { file: '08-kitchen-02.jpg', room: 'Full kitchen', alt: 'Kitchen island and living room' },
       { file: '08-kitchen-03.jpg', room: 'Full kitchen', alt: 'Open kitchen and dining area' },
@@ -373,13 +377,11 @@ const ALL_PROPERTIES: Property[] = [
       { file: '11-theater-07.jpg', room: 'Movie & game room', alt: 'Game room lounge' },
       { file: '11-theater-08.jpg', room: 'Movie & game room', alt: 'Foosball table and movie screen' },
       { file: '11-theater-09.jpg', room: 'Movie & game room', alt: 'Foosball table and the big screen' },
-      { file: '11-theater-10.jpg', room: 'Movie & game room', alt: 'Family movie night while a teen practices on the putting green at Minsi Pond' },
       { file: '12-sunroom-01.jpg', room: 'Sunroom', alt: 'Sunroom with yellow cushions' },
       { file: '12-sunroom-02.jpg', room: 'Sunroom', alt: 'Sunroom seating and the sauna door' },
       { file: '12-sunroom-03.jpg', room: 'Sunroom', alt: 'Sunroom looking into the house' },
       { file: '13-sauna-01.jpg', room: 'Sauna', alt: 'Wood sauna' },
       { file: '13-sauna-02.jpg', room: 'Sauna', alt: 'Sauna in the sunroom' },
-      { file: '13-sauna-03.jpg', room: 'Sauna', alt: 'Two friends in robes relaxing after the sauna at Minsi Pond' },
       { file: '14-entryway-01.jpg', room: 'Entryway', alt: 'Entryway with a mirror and bench' },
       { file: '15-laundry-01.jpg', room: 'Laundry room', alt: 'Laundry room with washers and dryers' },
       { file: '16-bedroom-1-01.jpg', room: 'Bedroom 1', alt: 'Bedroom with two beds and an orange accent wall' },
@@ -584,14 +586,25 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.058, lng: -75.098 },
     neighborhood: 'A quiet, wooded setting in the heart of the Poconos, with grocery stores about 10 minutes away.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid,
-    // chosen by the owner and as the most striking (Nov 2026): a tighter crop of
+    // Files in public/photos/<slug>/, in display order. First a tighter crop of
     // the top-down aerial (house, pool, pickleball court and hot tub in one frame;
-    // also the cover on cards and link previews), the dusk aerial, the great room,
-    // the theater, the pool. `room` groups them in the photo tour, in order of
-    // each room's first photo; bedroom names match `sleeping` below.
+    // also the cover on cards and link previews), then the lifestyle photos (the
+    // first four complete the photo grid), then the real photos, led by the
+    // owner's picks (Nov 2026): the dusk aerial, the great room, the theater, the
+    // pool. `room` groups them in the photo tour, in order of each room's first
+    // real photo; bedroom names match `sleeping` below.
     photos: [
       { file: '01-exterior-02-crop.jpg', room: 'Exterior', alt: 'Aerial view in fall: the house, the pool with its slide and deck, the pickleball court and the hot tub, ringed by the driveway and woods' },
+      { file: '03-hot-tub-03.jpg', room: 'Hot tub', alt: 'Friends in the hot tub under the covered pergola at The Ridge', lifestyle: true },
+      { file: '15-theater-03.jpg', room: 'Movie theater', alt: 'Two couples with popcorn in the movie theater at The Ridge', lifestyle: true },
+      { file: '06-outdoor-bar-03.jpg', room: 'Outdoor bar', alt: 'Friends watching the game at the outdoor bar while one grills at The Ridge', lifestyle: true },
+      { file: '04-pickleball-court-04.jpg', room: 'Pickleball court', alt: 'Friends playing doubles on the pickleball court at The Ridge', lifestyle: true },
+      { file: '07-fire-pit-02.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows around the fire pit at The Ridge', lifestyle: true },
+      { file: '11-dining-room-08.jpg', room: 'Dining room', alt: 'Family raising a toast over dinner in the dining room at The Ridge', lifestyle: true },
+      { file: '12-bar-room-07.jpg', room: 'Bar room', alt: 'Friends playing poker in the bar room at The Ridge', lifestyle: true },
+      { file: '05-playground-03.jpg', room: 'Playground', alt: 'Kids on the swing, climbing wall and slide at the playground at The Ridge', lifestyle: true },
+      { file: '08-screened-porch-03.jpg', room: 'Screened porch', alt: 'Ping-pong game on the screened porch at The Ridge', lifestyle: true },
+      { file: '09-living-room-07.jpg', room: 'Living room', alt: 'Kids playing cards by the stone fireplace while the family relaxes at The Ridge', lifestyle: true },
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the house, pool, hot tub and pickleball court at dusk' },
       { file: '09-living-room-01-c3.jpg', room: 'Living room', alt: 'Living room with a stone fireplace, leather sofas and a vaulted ceiling' },
       { file: '15-theater-01-c5.jpg', room: 'Movie theater', alt: 'Movie theater with a big screen and leather recliners' },
@@ -609,27 +622,20 @@ const ALL_PROPERTIES: Property[] = [
       { file: '02-pool-03.jpg', room: 'Pool', alt: 'Pool deck from above' },
       { file: '03-hot-tub-01.jpg', room: 'Hot tub', alt: 'Hot tub under a covered pergola with a TV' },
       { file: '03-hot-tub-02.jpg', room: 'Hot tub', alt: 'Hot tub pergola by the house' },
-      { file: '03-hot-tub-03.jpg', room: 'Hot tub', alt: 'Friends in the hot tub under the covered pergola at The Ridge' },
       { file: '04-pickleball-court-02.jpg', room: 'Pickleball court', alt: 'Pickleball court with a basketball hoop' },
       { file: '04-pickleball-court-03.jpg', room: 'Pickleball court', alt: 'Pickleball net and court' },
-      { file: '04-pickleball-court-04.jpg', room: 'Pickleball court', alt: 'Friends playing doubles on the pickleball court at The Ridge' },
       { file: '05-playground-01.jpg', room: 'Playground', alt: 'Playground with a slide and swings' },
       { file: '05-playground-02.jpg', room: 'Playground', alt: 'Wooden play set on the lawn' },
-      { file: '05-playground-03.jpg', room: 'Playground', alt: 'Kids on the swing, climbing wall and slide at the playground at The Ridge' },
       { file: '06-outdoor-bar-01.jpg', room: 'Outdoor bar', alt: 'Outdoor bar with stools, a TV and a grill' },
       { file: '06-outdoor-bar-02.jpg', room: 'Outdoor bar', alt: 'Outdoor dining table by the bar' },
-      { file: '06-outdoor-bar-03.jpg', room: 'Outdoor bar', alt: 'Friends watching the game at the outdoor bar while one grills at The Ridge' },
       { file: '07-fire-pit-01.jpg', room: 'Fire pit', alt: 'Fire pit with Adirondack chairs' },
-      { file: '07-fire-pit-02.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows around the fire pit at The Ridge' },
       { file: '08-screened-porch-01.jpg', room: 'Screened porch', alt: 'Screened porch with a ping pong table' },
       { file: '08-screened-porch-02.jpg', room: 'Screened porch', alt: 'Ping pong on the screened porch' },
-      { file: '08-screened-porch-03.jpg', room: 'Screened porch', alt: 'Ping-pong game on the screened porch at The Ridge' },
       { file: '09-living-room-02.jpg', room: 'Living room', alt: 'Living room with a fireplace and armchairs' },
       { file: '09-living-room-03.jpg', room: 'Living room', alt: 'Stone fireplace with a TV above' },
       { file: '09-living-room-04.jpg', room: 'Living room', alt: 'Living room seating and coffee tables' },
       { file: '09-living-room-05.jpg', room: 'Living room', alt: 'Living room looking toward the billiards room' },
       { file: '09-living-room-06.jpg', room: 'Living room', alt: 'Leather sectional by the fireplace' },
-      { file: '09-living-room-07.jpg', room: 'Living room', alt: 'Kids playing cards by the stone fireplace while the family relaxes at The Ridge' },
       { file: '10-kitchen-01.jpg', room: 'Full kitchen', alt: 'Kitchen island beside a stone fireplace' },
       { file: '10-kitchen-02.jpg', room: 'Full kitchen', alt: 'Kitchen island with bar stools' },
       { file: '10-kitchen-03.jpg', room: 'Full kitchen', alt: 'Kitchen island and range' },
@@ -643,14 +649,12 @@ const ALL_PROPERTIES: Property[] = [
       { file: '11-dining-room-05.jpg', room: 'Dining room', alt: 'Dining room with a stone fireplace' },
       { file: '11-dining-room-06.jpg', room: 'Dining room', alt: 'Dining table by the gas fireplace' },
       { file: '11-dining-room-07.jpg', room: 'Dining room', alt: 'Dining table looking toward the living room' },
-      { file: '11-dining-room-08.jpg', room: 'Dining room', alt: 'Family raising a toast over dinner in the dining room at The Ridge' },
       { file: '12-bar-room-01.jpg', room: 'Bar room', alt: 'Bar room with a poker table and bar stools' },
       { file: '12-bar-room-02.jpg', room: 'Bar room', alt: 'Poker table in the bar room' },
       { file: '12-bar-room-03.jpg', room: 'Bar room', alt: 'Black quartz bar with stools and a TV' },
       { file: '12-bar-room-04.jpg', room: 'Bar room', alt: 'Bar with a sink and refrigerator' },
       { file: '12-bar-room-05.jpg', room: 'Bar room', alt: 'Bar room with tropical wallpaper' },
       { file: '12-bar-room-06.jpg', room: 'Bar room', alt: 'Poker table' },
-      { file: '12-bar-room-07.jpg', room: 'Bar room', alt: 'Friends playing poker in the bar room at The Ridge' },
       { file: '13-billiards-room-01.jpg', room: 'Billiards room', alt: 'Billiards room with a full-size pool table' },
       { file: '13-billiards-room-02.jpg', room: 'Billiards room', alt: 'Pool table and cue rack' },
       { file: '14-game-room-01.jpg', room: 'Game room', alt: 'Arcade machines in the game room' },
@@ -658,7 +662,6 @@ const ALL_PROPERTIES: Property[] = [
       { file: '14-game-room-03.jpg', room: 'Game room', alt: 'Foosball and air hockey tables' },
       { file: '14-game-room-04.jpg', room: 'Game room', alt: 'Air hockey table and TV' },
       { file: '15-theater-02.jpg', room: 'Movie theater', alt: 'Theater seating with leather recliners' },
-      { file: '15-theater-03.jpg', room: 'Movie theater', alt: 'Two couples with popcorn in the movie theater at The Ridge' },
       { file: '16-sauna-01.jpg', room: 'Sauna', alt: 'Cedar sauna' },
       { file: '16-sauna-02.jpg', room: 'Sauna', alt: 'Sauna bench and heater' },
       { file: '16-sauna-03.jpg', room: 'Sauna', alt: 'Sauna heater stones' },
@@ -880,36 +883,42 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.1398, lng: -75.3884 },
     neighborhood: 'A quiet neighborhood close to nature, about 10 minutes from Camelback Mountain and Kalahari Resort, with a supermarket 7 minutes away.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid
-    // (the owner's c1–c5 picks). `room` groups them in the photo tour, in
-    // order of each room's first photo; bedroom names match `sleeping` below.
+    // Files in public/photos/<slug>/, in display order: the owner's c1 pick (the
+    // cover), then the lifestyle photos (the first four complete the photo
+    // grid), then the real photos, led by the c2–c5 picks. `room` groups them in
+    // the photo tour, in order of each room's first real photo; bedroom names
+    // match `sleeping` below.
     photos: [
       { file: '05-living-room-01-c1.jpg', room: 'Living room', alt: 'Living room with a stone fireplace and a leather sofa' },
+      { file: '04-spa-movie-room-04.jpg', room: 'Spa & movie room', alt: 'Friends in the indoor hot tub watching the big screen at The Clearview', lifestyle: true },
+      { file: '03-fire-pit-03.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows around the fire pit at The Clearview', lifestyle: true },
+      { file: '08-game-room-10.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the basement game room at The Clearview', lifestyle: true },
+      { file: '04-spa-movie-room-05.jpg', room: 'Spa & movie room', alt: 'Kids on the climbing wall and putting green while a couple relaxes in the hot tub at The Clearview', lifestyle: true },
+      { file: '08-game-room-11.jpg', room: 'Game room', alt: 'Friends playing poker in the game room at The Clearview', lifestyle: true },
+      { file: '07-dining-room-05.jpg', room: 'Dining room', alt: 'Family dinner around the dining table at The Clearview', lifestyle: true },
+      { file: '05-living-room-04.jpg', room: 'Living room', alt: 'Family relaxing by the fireplace in the living room at The Clearview', lifestyle: true },
+      { file: '08-game-room-12.jpg', room: 'Game room', alt: 'Teens playing foosball in the game room at The Clearview', lifestyle: true },
+      { file: '08-game-room-09.jpg', room: 'Game room', alt: 'Friends playing pool in the basement game room at The Clearview', lifestyle: true },
+      { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Friends playing pickleball in the backyard at sunset at The Clearview', lifestyle: true },
+      { file: '01-exterior-04.jpg', room: 'Exterior', alt: 'Dad and kids shooting hoops in the backyard at The Clearview', lifestyle: true },
+      { file: '01-exterior-05.jpg', room: 'Exterior', alt: 'A boy batting in the backyard batting cage at The Clearview', lifestyle: true },
+      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Kids on the swings and slide while their parents sit at the picnic table at The Clearview', lifestyle: true },
       { file: '04-spa-movie-room-01-c2.jpg', room: 'Spa & movie room', alt: 'Spa and movie room with a hot tub, sauna, climbing wall and putting green' },
       { file: '08-game-room-01-c3.jpg', room: 'Game room', alt: 'Game room with a pool table and a big movie screen' },
       { file: '02-pool-01-c4.jpg', room: 'Pool', alt: 'Pool in the backyard' },
       { file: '03-fire-pit-01-c5.jpg', room: 'Fire pit', alt: 'Friends around the fire pit in the backyard' },
       { file: '01-exterior-01.jpg', room: 'Exterior', alt: 'Aerial view of the house, backyard and pool' },
       { file: '01-exterior-02.jpg', room: 'Exterior', alt: 'Back deck with a grill and seating' },
-      { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Friends playing pickleball in the backyard at sunset at The Clearview' },
-      { file: '01-exterior-04.jpg', room: 'Exterior', alt: 'Dad and kids shooting hoops in the backyard at The Clearview' },
-      { file: '01-exterior-05.jpg', room: 'Exterior', alt: 'A boy batting in the backyard batting cage at The Clearview' },
-      { file: '01-exterior-06.jpg', room: 'Exterior', alt: 'Kids on the swings and slide while their parents sit at the picnic table at The Clearview' },
       { file: '03-fire-pit-02.jpg', room: 'Fire pit', alt: 'Fire pit ringed by lounge chairs' },
-      { file: '03-fire-pit-03.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows around the fire pit at The Clearview' },
       { file: '04-spa-movie-room-02.jpg', room: 'Spa & movie room', alt: 'Movie screen above the putting green, next to the hot tub' },
       { file: '04-spa-movie-room-03.jpg', room: 'Spa & movie room', alt: 'Hot tub in front of the movie screen' },
-      { file: '04-spa-movie-room-04.jpg', room: 'Spa & movie room', alt: 'Friends in the indoor hot tub watching the big screen at The Clearview' },
-      { file: '04-spa-movie-room-05.jpg', room: 'Spa & movie room', alt: 'Kids on the climbing wall and putting green while a couple relaxes in the hot tub at The Clearview' },
       { file: '05-living-room-02.jpg', room: 'Living room', alt: 'Living room with a TV and a fireplace' },
       { file: '05-living-room-03.jpg', room: 'Living room', alt: 'Living room open to the kitchen and dining area' },
-      { file: '05-living-room-04.jpg', room: 'Living room', alt: 'Family relaxing by the fireplace in the living room at The Clearview' },
       { file: '06-kitchen-01.jpg', room: 'Kitchen', alt: 'Kitchen with stainless steel appliances and a breakfast bar' },
       { file: '07-dining-room-01.jpg', room: 'Dining room', alt: 'Long dining table' },
       { file: '07-dining-room-02.jpg', room: 'Dining room', alt: 'Dining table next to the kitchen' },
       { file: '07-dining-room-03.jpg', room: 'Dining room', alt: 'Dining area open to the living room' },
       { file: '07-dining-room-04.jpg', room: 'Dining room', alt: 'Dining area and living room' },
-      { file: '07-dining-room-05.jpg', room: 'Dining room', alt: 'Family dinner around the dining table at The Clearview' },
       { file: '08-game-room-02.jpg', room: 'Game room', alt: 'Pool table and an arcade machine' },
       { file: '08-game-room-03.jpg', room: 'Game room', alt: 'Game room with a pool table' },
       { file: '08-game-room-04.jpg', room: 'Game room', alt: 'Wall-size movie screen in the game room' },
@@ -917,10 +926,6 @@ const ALL_PROPERTIES: Property[] = [
       { file: '08-game-room-06.jpg', room: 'Game room', alt: 'Poker table and movie screen' },
       { file: '08-game-room-07.jpg', room: 'Game room', alt: 'Foosball table' },
       { file: '08-game-room-08.jpg', room: 'Game room', alt: 'Pac-Man arcade machine' },
-      { file: '08-game-room-09.jpg', room: 'Game room', alt: 'Friends playing pool in the basement game room at The Clearview' },
-      { file: '08-game-room-10.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the basement game room at The Clearview' },
-      { file: '08-game-room-11.jpg', room: 'Game room', alt: 'Friends playing poker in the game room at The Clearview' },
-      { file: '08-game-room-12.jpg', room: 'Game room', alt: 'Teens playing foosball in the game room at The Clearview' },
       { file: '09-entryway-01.jpg', room: 'Entryway', alt: 'Entryway with a bench and a coat rack' },
       { file: '09-entryway-02.jpg', room: 'Entryway', alt: 'Entryway looking into the living room' },
       { file: '09-entryway-03.jpg', room: 'Entryway', alt: 'Stairs down to the basement' },
@@ -1115,12 +1120,23 @@ const ALL_PROPERTIES: Property[] = [
     // About 500 m from the house, so the map circle covers the area, not the address.
     coords: { lat: 41.137, lng: -75.351 },
     neighborhood: 'About 10 minutes from Camelback Mountain and Kalahari Resort, with grocery stores and restaurants a short drive away.',
-    // Files in public/photos/<slug>/, in display order. First 5 = photo grid
-    // (the owner's c1–c5 picks in the Drive folder). `room` groups them in the
-    // photo tour, in order of each room's first photo; bedroom names match
-    // `sleeping` below so those cards show the room's photo.
+    // Files in public/photos/<slug>/, in display order: the owner's c1 pick in
+    // the Drive folder (the cover), then the lifestyle photos (the first four
+    // complete the photo grid), then the real photos, led by the c2–c5 picks.
+    // `room` groups them in the photo tour, in order of each room's first real
+    // photo; bedroom names match `sleeping` below so those cards show the
+    // room's photo.
     photos: [
       { file: '01-backyard-01-c1.jpg', room: 'Backyard', alt: 'The house at dusk with the pool, hot tub and fire pit lit up' },
+      { file: '03-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub on a fall evening at Clover Lodge', lifestyle: true },
+      { file: '04-game-room-03.jpg', room: 'Game room', alt: 'Teens playing foosball as a guest steps out of the sauna at Clover Lodge', lifestyle: true },
+      { file: '06-living-room-08.jpg', room: 'Living room', alt: 'Friends playing pool by the stone fireplace at Clover Lodge', lifestyle: true },
+      { file: '01-backyard-06.jpg', room: 'Backyard', alt: 'Friends roasting marshmallows around the fire pit at dusk at Clover Lodge', lifestyle: true },
+      { file: '04-game-room-04.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the game room at Clover Lodge', lifestyle: true },
+      { file: '02-sun-room-04.jpg', room: 'Sun room', alt: 'Family reading and sipping coffee in the sun room at Clover Lodge', lifestyle: true },
+      { file: '07-dinning-room-05.jpg', room: 'Dining area', alt: 'Family passing dishes around the dining table at Clover Lodge', lifestyle: true },
+      { file: '01-backyard-07.jpg', room: 'Backyard', alt: 'Friends playing pickleball in the backyard at Clover Lodge', lifestyle: true },
+      { file: '01-backyard-08.jpg', room: 'Backyard', alt: 'Kids on the playset under the fall leaves at Clover Lodge', lifestyle: true },
       { file: '02-sun-room-01-c2.jpg', room: 'Sun room', alt: 'Sun room cinema with a projector screen and leather lounge chairs' },
       { file: '04-game-room-01-c3.jpg', room: 'Game room', alt: 'Game room with a sauna, foosball table and movie screen' },
       { file: '03-hot-tub-01-c4.jpg', room: 'Hot tub', alt: 'Hot tub on the fenced patio, surrounded by trees' },
@@ -1129,16 +1145,9 @@ const ALL_PROPERTIES: Property[] = [
       { file: '01-backyard-03.jpg', room: 'Backyard', alt: 'Fire pit seating and hammock in the backyard' },
       { file: '01-backyard-04.jpg', room: 'Backyard', alt: 'Patio with a grill, hot tub and outdoor lounge set' },
       { file: '01-backyard-05.jpg', room: 'Backyard', alt: 'Backyard with the pool and fire pit, house behind' },
-      { file: '01-backyard-06.jpg', room: 'Backyard', alt: 'Friends roasting marshmallows around the fire pit at dusk at Clover Lodge' },
-      { file: '01-backyard-07.jpg', room: 'Backyard', alt: 'Friends playing pickleball in the backyard at Clover Lodge' },
-      { file: '01-backyard-08.jpg', room: 'Backyard', alt: 'Kids on the playset under the fall leaves at Clover Lodge' },
       { file: '02-sun-room-02.jpg', room: 'Sun room', alt: 'Sun room lounge chairs looking out to the yard' },
       { file: '02-sun-room-03.jpg', room: 'Sun room', alt: 'Movie night in the sun room cinema' },
-      { file: '02-sun-room-04.jpg', room: 'Sun room', alt: 'Family reading and sipping coffee in the sun room at Clover Lodge' },
-      { file: '03-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub on a fall evening at Clover Lodge' },
       { file: '04-game-room-02.jpg', room: 'Game room', alt: 'Theater room with a large screen and sofas' },
-      { file: '04-game-room-03.jpg', room: 'Game room', alt: 'Teens playing foosball as a guest steps out of the sauna at Clover Lodge' },
-      { file: '04-game-room-04.jpg', room: 'Game room', alt: 'Family movie night with popcorn in the game room at Clover Lodge' },
       { file: '06-living-room-01.jpg', room: 'Living room', alt: 'Living room with a pool table, fireplace and sofa' },
       { file: '06-living-room-02.jpg', room: 'Living room', alt: 'Pool table in front of the stone fireplace' },
       { file: '06-living-room-03.jpg', room: 'Living room', alt: 'Pool table at the foot of the stairs' },
@@ -1146,11 +1155,9 @@ const ALL_PROPERTIES: Property[] = [
       { file: '06-living-room-05.jpg', room: 'Living room', alt: 'Leather sofas around the stone fireplace' },
       { file: '06-living-room-06.jpg', room: 'Living room', alt: 'Living room seating facing the fireplace and TV' },
       { file: '06-living-room-07.jpg', room: 'Living room', alt: 'Sectional sofa and coffee table in the living room' },
-      { file: '06-living-room-08.jpg', room: 'Living room', alt: 'Friends playing pool by the stone fireplace at Clover Lodge' },
       { file: '07-dinning-room-01.jpg', room: 'Dining area', alt: 'Dining table with the kitchen and pool table beyond' },
       { file: '07-dinning-room-03.jpg', room: 'Dining area', alt: 'Dining table beside the kitchen' },
       { file: '07-dinning-room-04.jpg', room: 'Dining area', alt: 'Dining area open to the kitchen and living room' },
-      { file: '07-dinning-room-05.jpg', room: 'Dining area', alt: 'Family passing dishes around the dining table at Clover Lodge' },
       { file: '08-kitchen-01.jpg', room: 'Full kitchen', alt: 'Kitchen with an island and stainless steel appliances' },
       { file: '08-kitchen-02.jpg', room: 'Full kitchen', alt: 'Kitchen island with bar stools' },
       { file: '08-kitchen-03.jpg', room: 'Full kitchen', alt: 'Kitchen island looking toward the dining table' },

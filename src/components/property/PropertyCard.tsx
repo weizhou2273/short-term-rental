@@ -23,7 +23,7 @@ type Props = {
 
 /** Cards are 300–400px wide in a 1–3 column grid. */
 const CARD_SIZES = '(max-width: 760px) 100vw, (max-width: 1240px) 50vw, 400px';
-/** Photos a card can step through: the first few, which lead each property's curated order. */
+/** Photos a card can step through: the first few, which lead each property's curated order (the cover, then lifestyle photos). */
 const CARD_PHOTO_COUNT = 8;
 
 export function PropertyCard({ property: p, query = '', nearName, result, nights, suggested, onHover }: Props) {

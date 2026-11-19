@@ -29,6 +29,11 @@ describe('propertyPhotos', () => {
     expect(coverPhoto(withPhotos([]))).toBeUndefined();
   });
 
+  it('marks lifestyle photos', () => {
+    const photos = propertyPhotos(withPhotos([{ file: 'a.jpg', lifestyle: true }, { file: 'b.jpg', lifestyle: false }, 'c.jpg']));
+    expect(photos.map((p) => p.lifestyle)).toEqual([true, undefined, undefined]);
+  });
+
   it('carries the room through, trimmed, and drops blank ones', () => {
     const photos = propertyPhotos(withPhotos([{ file: 'a.jpg', room: ' Bedroom 1 ' }, { file: 'b.jpg', room: '  ' }, 'c.jpg']));
     expect(photos.map((p) => p.room)).toEqual(['Bedroom 1', undefined, undefined]);
@@ -52,6 +57,24 @@ describe('photoTour', () => {
       ['Backyard', [0, 2]],
       ['Kitchen', [1, 4]],
       ['Bedroom 1', [3]],
+    ]);
+  });
+
+  it('opens each room on a real photo: rooms follow their first real photo, lifestyle photos go last', () => {
+    expect(
+      tourOf([
+        { file: 'aerial.jpg', room: 'Exterior' },
+        { file: 'tub-life.jpg', room: 'Hot tub', lifestyle: true },
+        { file: 'yard-life.jpg', room: 'Exterior', lifestyle: true },
+        { file: 'kitchen-1.jpg', room: 'Kitchen' },
+        { file: 'tub-1.jpg', room: 'Hot tub' },
+        { file: 'porch-life.jpg', room: 'Porch', lifestyle: true },
+      ]),
+    ).toEqual([
+      ['Exterior', [0, 2]],
+      ['Kitchen', [3]],
+      ['Hot tub', [4, 1]],
+      ['Porch', [5]],
     ]);
   });
 
@@ -81,6 +104,17 @@ describe.each(ALL_PROPERTY_ENTRIES.map((p) => [p.slug, p] as const))('photos lis
     // A photo left out by mistake would otherwise show up as a stray "More photos" room.
     const withRoom = propertyPhotos(property).filter((p) => p.room).length;
     expect([0, files.length], `${slug}: ${files.length - withRoom} photo(s) have no room`).toContain(withRoom);
+  });
+
+  it('start with a real cover, then the lifestyle photos, and open every tour room on a real photo', () => {
+    const photos = propertyPhotos(property);
+    if (!photos.length) return;
+    expect(photos[0]!.lifestyle, `${slug}: the cover must be a real photo`).toBeUndefined();
+    const lifestyle = photos.flatMap((p, i) => (p.lifestyle ? [i] : []));
+    expect(lifestyle, `${slug}: lifestyle photos go right after the cover`).toEqual(lifestyle.map((_, k) => k + 1));
+    for (const room of photoTour(photos)) {
+      expect(room.photos[0]!.photo.lifestyle, `${slug}: ${room.room} opens on a lifestyle photo`).toBeUndefined();
+    }
   });
 
   it(`exist in public/photos/${slug}/`, () => {

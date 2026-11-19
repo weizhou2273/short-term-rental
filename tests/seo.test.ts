@@ -33,6 +33,15 @@ describe('sitemap.xml', () => {
     expect(stay.images?.length).toBeGreaterThan(0);
     expect(stay.images!.every((src) => src.startsWith('https://wkreserve.com/photos/minsi-pond/'))).toBe(true);
   });
+
+  it('lists only real photos, never the lifestyle ones', () => {
+    for (const p of PROPERTIES) {
+      const lifestyle = p.photos.flatMap((e) => (typeof e !== 'string' && e.lifestyle ? [`/photos/${p.slug}/${encodeURIComponent(e.file)}`] : []));
+      const images = entries.find((e) => e.url.endsWith(`/stays/${p.slug}`))!.images ?? [];
+      expect(images.filter((src) => lifestyle.some((l) => src.endsWith(l))), p.slug).toEqual([]);
+      if (p.photos.length) expect(images[0], p.slug).toMatch(/^https:\/\/wkreserve\.com\/photos\//);
+    }
+  });
 });
 
 describe('robots.txt', () => {
