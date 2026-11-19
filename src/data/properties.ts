@@ -39,17 +39,19 @@ const ALL_PROPERTIES: Property[] = [
     // Files in public/photos/<slug>/, in display order. First the aerial (the only
     // one: tennis court, pool, fire pit, stream, playground and house; also the
     // cover on cards and link previews), then the lifestyle photos, whose first
-    // four (the home's most distinctive amenities) complete the photo grid, then
-    // the real photos, led by the most striking (Nov 2026): the great room, the
-    // pool, the theater, the outdoor kitchen at night. `room` groups them in the
-    // photo tour, in order of each room's first real photo; bedroom names match
+    // four (the home's most distinctive amenities; the tennis court one is the
+    // owner's own image, Nov 2026) complete the photo grid, then the
+    // real photos, led by the most striking (Nov 2026): the great room, the pool,
+    // the theater, the outdoor kitchen at night. `room` groups them in the photo
+    // tour, in order of each room's first real photo; bedroom names match
     // `sleeping` below.
     photos: [
       { file: '01-exterior-01-c1.jpg', room: 'Exterior', alt: 'Aerial view of the estate: the tennis court, the pool with umbrellas and loungers, the fire pit, the stream, the playground and the house' },
-      { file: '06-stream-02.jpg', room: 'Stream', alt: 'A boy exploring the stream while his parents relax on a bench at The Shawnee Estate', lifestyle: true },
+      { file: '01-exterior-03.jpg', room: 'Exterior', alt: 'Friends playing doubles on the pink tennis court, with the house and pool behind, at The Shawnee Estate', lifestyle: true },
       { file: '08-great-room-04.jpg', room: 'Great room', alt: 'Family playing a board game by the fire in the great room at The Shawnee Estate', lifestyle: true },
       { file: '03-outdoor-kitchen-05.jpg', room: 'Outdoor kitchen', alt: 'Friends cooking together at the outdoor kitchen island at The Shawnee Estate', lifestyle: true },
       { file: '11-billiards-lounge-04.jpg', room: 'Billiards lounge', alt: 'Friends playing pool in the billiards lounge at The Shawnee Estate', lifestyle: true },
+      { file: '06-stream-02.jpg', room: 'Stream', alt: 'A boy exploring the stream while his parents relax on a bench at The Shawnee Estate', lifestyle: true },
       { file: '04-hot-tub-02.jpg', room: 'Hot tub', alt: 'Friends relaxing in the hot tub at The Shawnee Estate', lifestyle: true },
       { file: '05-fire-pit-02.jpg', room: 'Fire pit', alt: 'Family roasting marshmallows at the fire pit in the woods at The Shawnee Estate', lifestyle: true },
       { file: '10-dining-room-07.jpg', room: 'Dining room', alt: 'Big family dinner at the long dining table at The Shawnee Estate', lifestyle: true },
